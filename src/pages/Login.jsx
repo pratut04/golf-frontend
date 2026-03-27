@@ -6,22 +6,45 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const login = async () => {
-    const res = await API.post("/login", { email, password });
+    if (!email || !password) {
+      alert("Enter email and password");
+      return;
+    }
 
-    localStorage.setItem("userId", res.data.user.id);
+    try {
+      const res = await API.post("/login", { email, password });
 
-    if (email === "secure@gmail.com") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/dashboard";
+      localStorage.setItem("userId", res.data.user.id);
+
+      if (email === "secure@gmail.com") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/dashboard";
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Login failed ❌");
     }
   };
 
   return (
     <div className="login-box">
       <h2>Login</h2>
-      <input onChange={(e)=>setEmail(e.target.value)} placeholder="Email"/>
-      <input type="password" onChange={(e)=>setPassword(e.target.value)} placeholder="Password"/>
+
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
       <button onClick={login}>Login</button>
     </div>
   );
