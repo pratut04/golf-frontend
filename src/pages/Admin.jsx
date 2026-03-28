@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-
-const API = "https://golf-backend-new.onrender.com";
-
+import API from "../api/api"; 
 function Admin() {
   const [users, setUsers] = useState([]);
   const [scores, setScores] = useState([]);
@@ -10,29 +7,34 @@ function Admin() {
   const [drawResult, setDrawResult] = useState(null);
 
   useEffect(() => {
+    console.log("Admin loaded ✅"); //  debug
     fetchAll();
   }, []);
 
   const fetchAll = async () => {
     try {
-      const usersRes = await axios.get(`${API}/users`);
-      const scoresRes = await axios.get(`${API}/scores`);
-      const leaderRes = await axios.get(`${API}/leaderboard`);
+      const usersRes = await API.get("/users");
+      const scoresRes = await API.get("/scores");
+      const leaderRes = await API.get("/leaderboard");
 
       setUsers(usersRes.data);
       setScores(scoresRes.data);
       setLeaderboard(leaderRes.data);
 
     } catch (err) {
-      console.log(err);
+      console.error("FETCH ERROR:", err);
     }
   };
 
   // 🎲 Run Draw
   const runDraw = async () => {
-    const res = await axios.post(`${API}/draw`);
-    setDrawResult(res.data);
-    alert(`Draw Number: ${res.data.numbers}`);
+    try {
+      const res = await API.post("/draw");
+      setDrawResult(res.data);
+      alert(`Draw Number: ${res.data.numbers}`);
+    } catch (err) {
+      console.error("DRAW ERROR:", err);
+    }
   };
 
   // 📊 Stats
