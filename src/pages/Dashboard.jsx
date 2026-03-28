@@ -36,36 +36,38 @@ function Dashboard() {
     }
   };
 
-  // SCORE (UPDATED WITH DATE)
- const addScore = async (score, date) => {
-  try {
-    const newScore = {
-      id: Date.now(),
-      score: Number(score),
-      date: new Date(date)
-    };
+  // SCORE (FIXED)
+  const addScore = async (score, date) => {
+    try {
+      const newScore = {
+        id: Date.now(),
+        score: Number(score),
+        created_at: date // 
+      };
 
-    // ✅ update UI instantly
-    setData(prev => ({
-      ...prev,
-      scores: [newScore, ...(prev.scores || [])].slice(0, 5)
-    }));
+      // instant UI update
+      setData(prev => ({
+        ...prev,
+        scores: [newScore, ...(prev.scores || [])].slice(0, 5)
+      }));
 
-    await API.post("/scores", {
-      user_id: userId,
-      score: Number(score),
-      created_at: date
-    });
+      await API.post("/scores", {
+        user_id: userId,
+        score: Number(score),
+        created_at: date
+      });
 
-    alert("✅ Score added");
+      alert("✅ Score added");
 
-  } catch (err) {
-    console.error(err);
-    alert("❌ Error adding score");
-  }
-};
+      await loadData(); // 
 
-  //  CHARITY
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error adding score");
+    }
+  };
+
+  
   const selectCharity = async (id) => {
     try {
       await API.post("/select-charity", {
@@ -90,6 +92,11 @@ function Dashboard() {
       console.error("DRAW ERROR:", err);
     }
   };
+
+  // LOADING
+  if (!data.user) {
+    return <p style={{ color: "white", textAlign: "center" }}>Loading...</p>;
+  }
 
   return (
     <div style={container}>
@@ -118,7 +125,10 @@ function Dashboard() {
           {data.scores?.length > 0 ? (
             data.scores.slice(0, 5).map((s) => (
               <div key={s.id} style={item}>
-                 {s.score} |  {new Date(s.created_at).toLocaleDateString()}
+                {s.score} |{" "}
+                {s.created_at
+                  ? new Date(s.created_at).toLocaleDateString()
+                  : "Invalid Date"}
               </div>
             ))
           ) : (
@@ -128,7 +138,7 @@ function Dashboard() {
 
         {/* CHARITY */}
         <div style={card}>
-          <h3> Charity Selection</h3>
+          <h3>❤️ Charity Selection</h3>
 
           <p>
             Selected:{" "}
@@ -138,11 +148,11 @@ function Dashboard() {
           <CharityList
             charities={charities}
             selectCharity={selectCharity}
-            selectedId={data.user?.charity_id}  
+            selectedId={data.user?.charity_id}
           />
         </div>
 
-        {/* PARTICIPATION (PRD REQUIRED) */}
+        {/* PARTICIPATION */}
         <div style={card}>
           <h3>📊 Participation</h3>
           <p>Total Scores Entered: {data.scores?.length || 0}</p>
