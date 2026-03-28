@@ -5,21 +5,31 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 
-// 🔐 Protected Route
+// Protected Route
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
+
   return token ? children : <Navigate to="/" />;
 };
 
-// 🔐 Admin Route
+// Admin Route
 const AdminRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   const email = localStorage.getItem("email");
 
   if (!token) return <Navigate to="/" />;
-  if (email !== "secure@gmail.com") return <Navigate to="/dashboard" />;
+  if (!email || email !== "secure@gmail.com") {
+    return <Navigate to="/dashboard" />;
+  }
 
   return children;
+};
+
+// Prevent login access if already logged in
+const PublicRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+
+  return token ? <Navigate to="/dashboard" /> : children;
 };
 
 function App() {
@@ -28,7 +38,14 @@ function App() {
       <Routes>
 
         {/* PUBLIC */}
-        <Route path="/" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
 
         {/* USER */}
         <Route
