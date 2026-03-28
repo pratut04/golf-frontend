@@ -1,145 +1,71 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/api";
-import "../App.css";
-
 import Navbar from "../components/Navbar";
-import ScoreForm from "../components/ScoreForm";
-import CharityList from "../components/CharityList";
-import Winnings from "../components/Winnings";
 
 function Dashboard() {
   const userId = localStorage.getItem("userId");
 
   const [data, setData] = useState({});
-  const [charities, setCharities] = useState([]);
-  const [result, setResult] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
 
   useEffect(() => {
-    if (!userId) {
-      alert("User not logged in ❌");
+    // 🔐 protect route
+    if (!localStorage.getItem("token")) {
       window.location.href = "/";
-      return;
     }
-
     loadData();
   }, []);
 
   const loadData = async () => {
     try {
-      console.log("Loading dashboard...");
-
       const d = await API.get(`/dashboard/${userId}`);
-      const c = await API.get("/charities");
       const l = await API.get("/leaderboard");
 
       setData(d.data);
-      setCharities(c.data);
       setLeaderboard(l.data);
-
     } catch (err) {
-      console.error("DASHBOARD ERROR:", err);
-    }
-  };
-
-  const subscribe = async () => {
-    try {
-      await API.post("/subscribe", { user_id: userId });
-      loadData();
-    } catch (err) {
-      console.error("SUBSCRIBE ERROR:", err);
-    }
-  };
-
-  const addScore = async (score) => {
-    try {
-      await API.post("/scores", {
-        user_id: userId,
-        score: Number(score)
-      });
-
-      loadData();
-    } catch (err) {
-      console.error("ADD SCORE ERROR:", err);
-    }
-  };
-
-  const selectCharity = async (id) => {
-    try {
-      await API.post("/select-charity", {
-        user_id: userId,
-        charity_id: id
-      });
-
-      loadData();
-    } catch (err) {
-      console.error("CHARITY ERROR:", err);
-    }
-  };
-
-  const checkResult = async () => {
-    try {
-      const res = await API.post("/check-result", { user_id: userId });
-      setResult(res.data);
-    } catch (err) {
-      console.error("RESULT ERROR:", err);
+      console.log(err);
     }
   };
 
   return (
-    <div className="container">
-
-      {/* 🔝 Navbar */}
+    <div style={{ color: "white" }}>
       <Navbar />
 
-      <h1>🎯 Dashboard</h1>
+      <div style={{ padding: "20px" }}>
+        <h1>🎯 Dashboard</h1>
 
-      {/* 👤 USER INFO */}
-      <div className="card">
-        <p>Email: {data.user?.email}</p>
-        <p>Status: {data.user?.subscription_status}</p>
+        <div style={card}>
+          <p>Email: {data.user?.email}</p>
+          <p>Status: {data.user?.subscription_status}</p>
+        </div>
 
-        {data.user?.subscription_status !== "active" && (
-          <button onClick={subscribe}>Subscribe</button>
-        )}
+        <h3>🏆 Leaderboard</h3>
+        <div style={section}>
+          {leaderboard.map((l, i) => (
+            <div key={i} style={card}>
+              #{i + 1} {l.email} → {l.best_score}
+            </div>
+          ))}
+        </div>
       </div>
-
-      {/* 🎯 SCORE FORM */}
-      <ScoreForm addScore={addScore} />
-
-      {/* 🎲 RESULT */}
-      <div className="card">
-        <button onClick={checkResult}>Check Result</button>
-
-        {result && (
-          <p className={result.result.includes("WIN") ? "win" : "lose"}>
-            {result.result} (Number: {result.number})
-          </p>
-        )}
-      </div>
-
-      {/* ❤️ CHARITIES */}
-      <CharityList
-        charities={charities}
-        selectCharity={selectCharity}
-      />
-
-      {/* 🏆 LEADERBOARD */}
-      <div className="card">
-        <h3>Leaderboard</h3>
-
-        {leaderboard.map((l, i) => (
-          <div className="item" key={i}>
-            #{i + 1} {l.email} - {l.best_score}
-          </div>
-        ))}
-      </div>
-
-      {/* 🎁 WINNINGS */}
-      <Winnings />
-
     </div>
   );
 }
 
 export default Dashboard;
+
+// styles
+const section = {
+  background: "#111",
+  padding: "10px",
+  borderRadius: "8px"
+};
+
+const card = {
+  padding: "10px",
+  margin: "10px 0",
+  background: "#1e1e1e",
+  borderRadius: "6px",
+  color: "white"
+};
