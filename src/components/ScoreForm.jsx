@@ -5,7 +5,7 @@ function ScoreForm({ addScore }) {
   const [date, setDate] = useState("");
 
   const handleSubmit = () => {
-    // validation
+    //  validation
     if (!score || isNaN(score)) {
       alert("Enter valid number");
       return;
