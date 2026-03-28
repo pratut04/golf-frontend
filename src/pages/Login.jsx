@@ -4,6 +4,7 @@ import API from "../api/api";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const login = async () => {
     console.log("LOGIN CLICKED");
@@ -14,6 +15,9 @@ function Login() {
     }
 
     try {
+      setLoading(true);
+      console.log("Sending request...");
+
       const res = await API.post("/login", { email, password });
 
       console.log("RESPONSE:", res.data);
@@ -32,8 +36,12 @@ function Login() {
       }
 
     } catch (err) {
-      console.error(err);
-      alert("Login failed ❌");
+      console.error("LOGIN ERROR:", err);
+
+      alert("⏳ Server is waking up...\nTry again in 10–20 seconds");
+
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,7 +63,9 @@ function Login() {
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <button onClick={login}>Login</button>
+      <button onClick={login} disabled={loading}>
+        {loading ? "Loading..." : "Login"}
+      </button>
     </div>
   );
 }
