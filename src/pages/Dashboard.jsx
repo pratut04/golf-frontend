@@ -16,7 +16,6 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    //  protect route
     if (!localStorage.getItem("token")) {
       window.location.href = "/";
     }
@@ -42,47 +41,44 @@ function Dashboard() {
     }
   };
 
-  //  subscribe
   const subscribe = async () => {
     await API.post("/subscribe", { user_id: userId });
     loadData();
   };
 
-  //  add score
   const addScore = async (score) => {
     await API.post("/scores", {
       user_id: userId,
       score: Number(score)
     });
-    loadData();
+
+    loadData(); 
   };
 
-  // select charity
   const selectCharity = async (id) => {
     await API.post("/select-charity", {
       user_id: userId,
       charity_id: id
     });
+
     loadData();
   };
 
-  //  check result
   const checkResult = async () => {
     const res = await API.post("/check-result", { user_id: userId });
     setResult(res.data);
   };
 
-  // loading screen
   if (loading) {
     return <h2 style={{ color: "white", padding: "20px" }}>Loading...</h2>;
   }
 
-return (
-  <div style={{ background: "#0f172a", minHeight: "100vh", color: "white" }}>
+  return (
+    <div style={{ background: "#0f172a", minHeight: "100vh", color: "white" }}>
       <Navbar />
 
       <div style={{ padding: "20px" }}>
-        <h1>🎯 Dashboard</h1>
+        <h1>🎯Dashboard</h1>
 
         {/* USER INFO */}
         <div style={card}>
@@ -96,8 +92,22 @@ return (
           )}
         </div>
 
-        {/* 🎯 SCORE FORM */}
+       
         <ScoreForm addScore={addScore} />
+
+        <div style={card}>
+          <h3>🏆Your Scores</h3>
+
+          {data.scores && data.scores.length > 0 ? (
+            data.scores.map((s) => (
+              <div key={s.id}>
+                Score: {s.score}
+              </div>
+            ))
+          ) : (
+            <p>No scores yet</p>
+          )}
+        </div>
 
         {/* 🎲 RESULT */}
         <div style={card}>
@@ -112,7 +122,7 @@ return (
           )}
         </div>
 
-        {/* ❤️ CHARITIES */}
+        {/* ❤️CHARITIES */}
         <CharityList
           charities={charities}
           selectCharity={selectCharity}
@@ -133,7 +143,7 @@ return (
           )}
         </div>
 
-        {/*  WINNINGS */}
+        {/* 🎁 WINNINGS */}
         <Winnings />
 
       </div>
@@ -143,7 +153,7 @@ return (
 
 export default Dashboard;
 
-// 🎨 styles
+// styles
 const card = {
   background: "#1e1e1e",
   padding: "15px",
