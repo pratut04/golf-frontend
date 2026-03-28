@@ -1,6 +1,11 @@
 import React from "react";
 
 function Winnings({ winnings }) {
+  const totalEarnings = winnings?.reduce(
+    (acc, w) => acc + Number(w.amount || 0), // ✅ safe
+    0
+  );
+
   return (
     <div style={card}>
       <h3>🏆 Winnings</h3>
@@ -13,10 +18,7 @@ function Winnings({ winnings }) {
 
           <div style={box}>
             💰 Total Earnings:{" "}
-            <b>
-              ₹
-              {winnings.reduce((acc, w) => acc + Number(w.amount), 0)}
-            </b>
+            <b>₹{totalEarnings.toLocaleString()}</b> {/* ✅ formatted */}
           </div>
 
           <div style={{ marginTop: "10px" }}>
@@ -24,7 +26,7 @@ function Winnings({ winnings }) {
 
             {winnings.map((w, i) => (
               <div key={i} style={item}>
-                {w.match_type} | ₹{w.amount} | {w.status}
+                {w.match_type} | ₹{Number(w.amount || 0)} | {w.status}
               </div>
             ))}
           </div>
