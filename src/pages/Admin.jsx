@@ -2,32 +2,26 @@ import React, { useEffect, useState } from "react";
 import API from "../api/api";
 import Navbar from "../components/Navbar";
 
+// ✅ NEW COMPONENTS
+import AdminUsers from "../components/AdminUsers";
+import AdminScores from "../components/AdminScores";
+import AdminCharities from "../components/AdminCharities";
+
 function Admin() {
-  const [users, setUsers] = useState([]);
-  const [scores, setScores] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [charities, setCharities] = useState([]);
   const [drawResult, setDrawResult] = useState(null);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       window.location.href = "/";
     }
-    fetchAll();
+    loadLeaderboard();
   }, []);
 
-  const fetchAll = async () => {
+  const loadLeaderboard = async () => {
     try {
-      const usersRes = await API.get("/users");
-      const scoresRes = await API.get("/scores");
-      const leaderRes = await API.get("/leaderboard");
-      const charityRes = await API.get("/charities");
-
-      setUsers(usersRes.data);
-      setScores(scoresRes.data);
-      setLeaderboard(leaderRes.data);
-      setCharities(charityRes.data);
-
+      const res = await API.get("/leaderboard");
+      setLeaderboard(res.data);
     } catch (err) {
       console.error("ADMIN LOAD ERROR:", err);
     }
@@ -49,46 +43,6 @@ function Admin() {
       <div style={content}>
         <h1>⚙️ ADMIN DASHBOARD</h1>
 
-        {/* REPORTS */}
-        <div style={card}>
-          <h3>📊 Reports & Analytics</h3>
-          <p>Total Users: {users.length}</p>
-          <p>Total Scores: {scores.length}</p>
-          <p>Total Charities: {charities.length}</p>
-          <p>Top Score: {leaderboard[0]?.best_score || 0}</p>
-        </div>
-
-        {/* USER MANAGEMENT */}
-        <div style={card}>
-          <h3>👥 User Management</h3>
-          {users.length > 0 ? (
-            users.map((u) => (
-              <div key={u.id} style={item}>
-                {u.email}
-              </div>
-            ))
-          ) : (
-            <p>No users</p>
-          )}
-        </div>
-
-        {/* SCORE MANAGEMENT */}
-        <div style={card}>
-          <h3>🏆 Score Management</h3>
-          {scores.length > 0 ? (
-            scores.slice(0, 10).map((s) => {
-              const user = users.find((u) => u.id === s.user_id);
-              return (
-                <div key={s.id} style={item}>
-                  {user?.email || "Unknown"} → {s.score}
-                </div>
-              );
-            })
-          ) : (
-            <p>No scores</p>
-          )}
-        </div>
-
         {/* DRAW MANAGEMENT */}
         <div style={card}>
           <h3>🎲 Draw Management</h3>
@@ -99,25 +53,15 @@ function Admin() {
 
           {drawResult && (
             <div style={{ marginTop: "10px" }}>
-              <p>Latest Draw: {drawResult.numbers}</p>
+              <p>Latest Draw: {JSON.stringify(drawResult.numbers)}</p>
             </div>
           )}
         </div>
 
-        {/* CHARITY MANAGEMENT */}
-        <div style={card}>
-          <h3> Charity Management</h3>
-
-          {charities.length > 0 ? (
-            charities.map((c) => (
-              <div key={c.id} style={item}>
-                {c.name}
-              </div>
-            ))
-          ) : (
-            <p>No charities</p>
-          )}
-        </div>
+        {/* ✅ NEW COMPONENTS */}
+        <AdminUsers />
+        <AdminScores />
+        <AdminCharities />
 
         {/* WINNERS */}
         <div style={card}>
