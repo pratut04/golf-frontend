@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import API from "../api/api";
 import Navbar from "../components/Navbar";
 
-// ✅ NEW COMPONENTS
+// ✅ COMPONENTS
 import AdminUsers from "../components/AdminUsers";
 import AdminScores from "../components/AdminScores";
 import AdminCharities from "../components/AdminCharities";
@@ -12,9 +12,19 @@ function Admin() {
   const [drawResult, setDrawResult] = useState(null);
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    const token = localStorage.getItem("token");
+    const email = localStorage.getItem("email");
+
+    // 🔐 protect route
+    if (!token) {
       window.location.href = "/";
     }
+
+    // 🔐 restrict admin access
+    if (email !== "secure@gmail.com") {
+      window.location.href = "/dashboard";
+    }
+
     loadLeaderboard();
   }, []);
 
@@ -31,6 +41,10 @@ function Admin() {
     try {
       const res = await API.post("/draw");
       setDrawResult(res.data);
+
+      // 🔥 refresh leaderboard
+      loadLeaderboard();
+
     } catch (err) {
       console.error("DRAW ERROR:", err);
     }
@@ -43,7 +57,7 @@ function Admin() {
       <div style={content}>
         <h1>⚙️ ADMIN DASHBOARD</h1>
 
-        {/* DRAW MANAGEMENT */}
+        {/* 🎲 DRAW */}
         <div style={card}>
           <h3>🎲 Draw Management</h3>
 
@@ -53,17 +67,19 @@ function Admin() {
 
           {drawResult && (
             <div style={{ marginTop: "10px" }}>
-              <p>Latest Draw: {JSON.stringify(drawResult.numbers)}</p>
+              <p>Latest Draw: {drawResult.numbers}</p>
             </div>
           )}
         </div>
 
-        {/* ✅ NEW COMPONENTS */}
+        {/* 📊 MANAGEMENT */}
+        <h2 style={{ marginTop: "20px" }}>📊 Management</h2>
+
         <AdminUsers />
         <AdminScores />
         <AdminCharities />
 
-        {/* WINNERS */}
+        {/* 🏆 WINNERS */}
         <div style={card}>
           <h3>🏆 Winners</h3>
 
@@ -85,7 +101,7 @@ function Admin() {
 
 export default Admin;
 
-// styles
+// 🎨 styles
 const container = {
   background: "#0f172a",
   minHeight: "100vh",
