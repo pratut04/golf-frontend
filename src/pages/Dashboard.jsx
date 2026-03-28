@@ -36,17 +36,13 @@ function Dashboard() {
     }
   };
 
-  // SCORE 
-  const addScore = async (score) => {
-    if (!score || isNaN(score) || score < 1 || score > 45) {
-      alert("Score must be between 1 and 45");
-      return;
-    }
-
+  // SCORE (UPDATED WITH DATE)
+  const addScore = async (score, date) => {
     try {
       await API.post("/scores", {
         user_id: userId,
-        score: Number(score)
+        score: Number(score),
+        created_at: date
       });
 
       loadData();
@@ -72,7 +68,7 @@ function Dashboard() {
     }
   };
 
-  //  DRAW
+  // DRAW
   const checkResult = async () => {
     try {
       const res = await API.post("/check-result", { user_id: userId });
@@ -91,7 +87,7 @@ function Dashboard() {
 
         {/* SUBSCRIPTION */}
         <div style={card}>
-          <h3> Subscription</h3>
+          <h3>📌 Subscription</h3>
           <p>Status: {data.user?.subscription_status || "N/A"}</p>
           <p>Email: {data.user?.email || "N/A"}</p>
         </div>
@@ -107,14 +103,11 @@ function Dashboard() {
           <h3>📊 Last 5 Scores</h3>
 
           {data.scores?.length > 0 ? (
-            [...data.scores]
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-              .slice(0, 5)
-              .map((s) => (
-                <div key={s.id} style={item}>
-                   {s.score} |  {new Date(s.created_at).toLocaleDateString()}
-                </div>
-              ))
+            data.scores.slice(0, 5).map((s) => (
+              <div key={s.id} style={item}>
+                 {s.score} |  {new Date(s.created_at).toLocaleDateString()}
+              </div>
+            ))
           ) : (
             <p>No scores yet</p>
           )}
@@ -132,7 +125,14 @@ function Dashboard() {
           <CharityList
             charities={charities}
             selectCharity={selectCharity}
+            selectedId={data.user?.charity_id}  
           />
+        </div>
+
+        {/* PARTICIPATION (PRD REQUIRED) */}
+        <div style={card}>
+          <h3>📊 Participation</h3>
+          <p>Total Scores Entered: {data.scores?.length || 0}</p>
         </div>
 
         {/* DRAW */}
@@ -152,10 +152,7 @@ function Dashboard() {
         </div>
 
         {/* WINNINGS */}
-        <div style={card}>
-          <h3>🏆 Winnings</h3>
-          <Winnings />
-        </div>
+        <Winnings winnings={data.winnings || []} />
 
         {/* LEADERBOARD */}
         <div style={card}>
