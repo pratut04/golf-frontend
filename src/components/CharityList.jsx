@@ -6,36 +6,39 @@ function CharityList({ charities, selectCharity, selectedId }) {
       <h3>❤️ Charity Selection</h3>
 
       {charities.length === 0 ? (
-        <p>No charities available</p>
+        <p style={{ opacity: 0.7 }}>No charities available 😢</p>
       ) : (
-        charities.map((c, index) => (
-          <div
-            key={c.id}
-            style={{
-              ...item,
-              background:
-                selectedId === c.id ? "#2e7d32" : "transparent"
-            }}
-          >
-            <p>
-              #{index + 1} {c.name}
-            </p>
+        charities.map((c, index) => {
+          const isSelected = selectedId === c.id;
 
-            <button
+          return (
+            <div
+              key={c.id}
               style={{
-                ...btn,
-                background:
-                  selectedId === c.id ? "#888" : "#4caf50",
-                cursor:
-                  selectedId === c.id ? "not-allowed" : "pointer"
+                ...item,
+                background: isSelected ? "#2e7d32" : "transparent"
               }}
-              disabled={selectedId === c.id}
-              onClick={() => selectCharity(c.id)}
             >
-              {selectedId === c.id ? "Selected ✅" : "Select"}
-            </button>
-          </div>
-        ))
+              <p>
+                #{index + 1} {c.name}
+              </p>
+
+              <button
+                style={{
+                  ...btn,
+                  background: isSelected ? "#888" : "#4caf50",
+                  cursor: isSelected ? "not-allowed" : "pointer"
+                }}
+                disabled={isSelected}
+                onClick={() => {
+                  if (!isSelected) selectCharity(c.id); // ✅ safety
+                }}
+              >
+                {isSelected ? "Selected ✅" : "Select"}
+              </button>
+            </div>
+          );
+        })
       )}
     </div>
   );
