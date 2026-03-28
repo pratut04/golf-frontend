@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/api";
+import Navbar from "../components/Navbar";
 
 function Admin() {
   const [users, setUsers] = useState([]);
@@ -8,7 +9,10 @@ function Admin() {
   const [drawResult, setDrawResult] = useState(null);
 
   useEffect(() => {
-    console.log("Admin loaded ✅");
+    //  protect route
+    if (!localStorage.getItem("token")) {
+      window.location.href = "/";
+    }
     fetchAll();
   }, []);
 
@@ -21,82 +25,74 @@ function Admin() {
       setUsers(usersRes.data);
       setScores(scoresRes.data);
       setLeaderboard(leaderRes.data);
-
     } catch (err) {
-      console.error("FETCH ERROR:", err);
+      console.error(err);
     }
   };
 
   const runDraw = async () => {
-    try {
-      const res = await API.post("/draw");
-      setDrawResult(res.data);
-      alert(`Draw Number: ${res.data.numbers}`);
-    } catch (err) {
-      console.error("DRAW ERROR:", err);
-    }
+    const res = await API.post("/draw");
+    setDrawResult(res.data);
   };
 
-  const totalUsers = users.length;
-  const totalScores = scores.length;
-
   return (
-    <div style={{ padding: "20px", color: "white" }}>
-      <h1>🔥 Admin Dashboard</h1>
+    <div style={{ color: "white" }}>
+      <Navbar />
 
-      {/* STATS */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-        <div style={box}>Total Users: {totalUsers}</div>
-        <div style={box}>Total Scores: {totalScores}</div>
-      </div>
+      <div style={{ padding: "20px" }}>
+        <h1>Admin Dashboard</h1>
 
-      {/* DRAW */}
-      <div style={{ marginBottom: "20px" }}>
-        <h2>🎲 Draw Control</h2>
+        {/* STATS */}
+        <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
+          <div style={box}>Users: {users.length}</div>
+          <div style={box}>Scores: {scores.length}</div>
+        </div>
+
+        {/* DRAW */}
         <button onClick={runDraw}>Run Draw 🎲</button>
         {drawResult && <p>Number: {drawResult.numbers}</p>}
-      </div>
 
-      {/* GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+        {/* GRID */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "20px" }}>
 
-        {/* USERS */}
-        <div>
-          <h3>👥 Users</h3>
-          <div style={section}>
-            {users.map((u) => (
-              <div key={u.id} style={card}>{u.email}</div>
-            ))}
+          {/* USERS */}
+          <div>
+            <h3>👥 Users</h3>
+            <div style={section}>
+              {users.map((u) => (
+                <div key={u.id} style={card}>{u.email}</div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* SCORES */}
-        <div>
-          <h3>🏆 Scores</h3>
-          <div style={section}>
-            {scores.slice(0, 10).map((s) => {
-              const user = users.find((u) => u.id === s.user_id);
-              return (
-                <div key={s.id} style={card}>
-                  {user ? user.email : "Unknown"} → {s.score}
+          {/* SCORES */}
+          <div>
+            <h3>🏆 Scores</h3>
+            <div style={section}>
+              {scores.slice(0, 10).map((s) => {
+                const user = users.find((u) => u.id === s.user_id);
+                return (
+                  <div key={s.id} style={card}>
+                    {user?.email} → {s.score}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* LEADERBOARD */}
+          <div style={{ gridColumn: "span 2" }}>
+            <h3>🥇 Leaderboard</h3>
+            <div style={section}>
+              {leaderboard.map((l, i) => (
+                <div key={i} style={card}>
+                  #{i + 1} {l.email} → {l.best_score}
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* LEADERBOARD */}
-        <div style={{ gridColumn: "span 2" }}>
-          <h3>🥇 Leaderboard</h3>
-          <div style={section}>
-            {leaderboard.map((l, i) => (
-              <div key={i} style={card}>
-                #{i + 1} {l.email} → {l.best_score}
-              </div>
-            ))}
-          </div>
         </div>
-
       </div>
     </div>
   );
@@ -104,7 +100,7 @@ function Admin() {
 
 export default Admin;
 
-
+// styles
 const section = {
   background: "#111",
   padding: "10px",
