@@ -4,6 +4,7 @@ import API from "../api/api";
 function AdminCharities() {
   const [charities, setCharities] = useState([]);
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCharities();
@@ -14,60 +15,80 @@ function AdminCharities() {
       const res = await API.get("/charities");
       setCharities(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("CHARITIES ERROR:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const addCharity = async () => {
-    if (!name) return alert("Enter charity name");
+    if (!name) {
+      alert("Enter charity name");
+      return;
+    }
 
     try {
-      await API.post("/admin/charities", {
+      // ✅ CORRECT ROUTE (you must create this in backend)
+      await API.post("/charities", {
         name,
-        description: "New charity",
+        description: "Added by admin",
         image: ""
       });
 
       alert("✅ Charity added");
+
       setName("");
       loadCharities();
 
     } catch (err) {
-      console.error(err);
+      console.error("ADD CHARITY ERROR:", err);
+      alert("Failed to add charity");
     }
   };
 
   return (
     <div style={card}>
-      <h3>❤️ Charities</h3>
+      <h3>❤️ Charity Management</h3>
 
-      <input
-        placeholder="Charity name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        style={input}
-      />
+      {/* ADD CHARITY */}
+      <div style={{ marginBottom: "10px" }}>
+        <input
+          placeholder="Enter charity name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={input}
+        />
 
-      <button onClick={addCharity} style={btn}>
-        Add
-      </button>
+        <button onClick={addCharity} style={btn}>
+          Add
+        </button>
+      </div>
 
-      {charities.map((c) => (
-        <div key={c.id} style={item}>
-          {c.name}
-        </div>
-      ))}
+      {/* LIST */}
+      {loading ? (
+        <p>Loading charities...</p>
+      ) : charities.length === 0 ? (
+        <p>No charities available</p>
+      ) : (
+        charities.map((c, index) => (
+          <div key={c.id} style={item}>
+            #{index + 1} {c.name}
+          </div>
+        ))
+      )}
     </div>
   );
 }
 
 export default AdminCharities;
 
+// 🎨 styles
 const card = {
   background: "#1e293b",
   padding: "15px",
   borderRadius: "10px",
-  marginBottom: "20px"
+  marginBottom: "20px",
+  color: "white"
 };
 
 const input = {
@@ -78,7 +99,7 @@ const input = {
 };
 
 const btn = {
-  padding: "8px",
+  padding: "8px 12px",
   background: "#4caf50",
   color: "white",
   border: "none",
