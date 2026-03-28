@@ -77,7 +77,7 @@ function Admin() {
         <div style={section}>
           {scores.slice(0, 10).map((s) => {
             const user = users.find((u) => u.id === s.user_id);
-            return (
+    return (
               <div key={s.id} style={card}>
                 {user ? user.email : "Unknown"} → {s.score}
               </div>
