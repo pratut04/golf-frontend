@@ -1,13 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
   const email = localStorage.getItem("email");
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
-    localStorage.removeItem("email"); // 🔥 IMPORTANT
-    window.location.href = "/";
+    localStorage.removeItem("email");
+
+    navigate("/"); // ✅ better than reload
   };
 
   return (
@@ -17,16 +20,16 @@ function Navbar() {
       <div style={links}>
         <button
           style={btn}
-          onClick={() => (window.location.href = "/dashboard")}
+          onClick={() => navigate("/dashboard")}
         >
           Dashboard
         </button>
 
-        {/* 🔐 SHOW ADMIN ONLY FOR ADMIN */}
+        {/* 🔐 ADMIN ONLY */}
         {email === "secure@gmail.com" && (
           <button
             style={btn}
-            onClick={() => (window.location.href = "/admin")}
+            onClick={() => navigate("/admin")}
           >
             Admin
           </button>
