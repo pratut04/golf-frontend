@@ -16,11 +16,19 @@ function Dashboard() {
   const [leaderboard, setLeaderboard] = useState([]);
 
   useEffect(() => {
+    if (!userId) {
+      alert("User not logged in ❌");
+      window.location.href = "/";
+      return;
+    }
+
     loadData();
   }, []);
 
   const loadData = async () => {
     try {
+      console.log("Loading dashboard...");
+
       const d = await API.get(`/dashboard/${userId}`);
       const c = await API.get("/charities");
       const l = await API.get("/leaderboard");
@@ -30,36 +38,52 @@ function Dashboard() {
       setLeaderboard(l.data);
 
     } catch (err) {
-      console.log(err);
+      console.error("DASHBOARD ERROR:", err);
     }
   };
 
   const subscribe = async () => {
-    await API.post("/subscribe", { user_id: userId });
-    loadData();
+    try {
+      await API.post("/subscribe", { user_id: userId });
+      loadData();
+    } catch (err) {
+      console.error("SUBSCRIBE ERROR:", err);
+    }
   };
 
   const addScore = async (score) => {
-    await API.post("/scores", {
-      user_id: userId,
-      score: Number(score)
-    });
+    try {
+      await API.post("/scores", {
+        user_id: userId,
+        score: Number(score)
+      });
 
-    loadData();
+      loadData();
+    } catch (err) {
+      console.error("ADD SCORE ERROR:", err);
+    }
   };
 
   const selectCharity = async (id) => {
-    await API.post("/select-charity", {
-      user_id: userId,
-      charity_id: id
-    });
+    try {
+      await API.post("/select-charity", {
+        user_id: userId,
+        charity_id: id
+      });
 
-    loadData();
+      loadData();
+    } catch (err) {
+      console.error("CHARITY ERROR:", err);
+    }
   };
 
   const checkResult = async () => {
-    const res = await API.post("/check-result", { user_id: userId });
-    setResult(res.data);
+    try {
+      const res = await API.post("/check-result", { user_id: userId });
+      setResult(res.data);
+    } catch (err) {
+      console.error("RESULT ERROR:", err);
+    }
   };
 
   return (
