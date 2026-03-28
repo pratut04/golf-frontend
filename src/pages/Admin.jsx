@@ -7,10 +7,8 @@ function Admin() {
   const [scores, setScores] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [drawResult, setDrawResult] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // protect route
     if (!localStorage.getItem("token")) {
       window.location.href = "/";
     }
@@ -18,122 +16,81 @@ function Admin() {
   }, []);
 
   const fetchAll = async () => {
-    try {
-      setLoading(true);
+    const usersRes = await API.get("/users");
+    const scoresRes = await API.get("/scores");
+    const leaderRes = await API.get("/leaderboard");
 
-      const usersRes = await API.get("/users");
-      const scoresRes = await API.get("/scores");
-      const leaderRes = await API.get("/leaderboard");
-
-      setUsers(usersRes.data);
-      setScores(scoresRes.data);
-      setLeaderboard(leaderRes.data);
-
-    } catch (err) {
-      console.error("FETCH ERROR:", err);
-    } finally {
-      setLoading(false);
-    }
+    setUsers(usersRes.data);
+    setScores(scoresRes.data);
+    setLeaderboard(leaderRes.data);
   };
 
   const runDraw = async () => {
-    try {
-      const res = await API.post("/draw");
-      setDrawResult(res.data);
-    } catch (err) {
-      console.error("DRAW ERROR:", err);
-    }
+    const res = await API.post("/draw");
+    setDrawResult(res.data);
   };
 
-  
-  if (loading) {
-    return <h2 style={{ color: "white", padding: "20px" }}>Loading...</h2>;
-  }
-
- return (
-  <div style={{ background: "#0f172a", minHeight: "100vh", color: "white" }}>
+  return (
+    <div style={container}>
       <Navbar />
 
-      <div style={{ padding: "20px" }}>
-        <h1>Admin Dashboard</h1>
+      <div style={content}>
+        <h1>⚙️ ADMIN DASHBOARD</h1>
 
-        {/* STATS */}
-        <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-          <div style={box}>Users: {users.length}</div>
-          <div style={box}>Scores: {scores.length}</div>
+        {/* REPORTS */}
+        <div style={card}>
+          <h3>📊 Reports & Analytics</h3>
+          <p>Total Users: {users.length}</p>
+          <p>Total Scores: {scores.length}</p>
+          <p>Top Score: {leaderboard[0]?.best_score || 0}</p>
         </div>
 
-        {/* DRAW */}
-        <button style={btn} onClick={runDraw}>
-          Run Draw 🎲
-        </button>
-
-        {drawResult && (
-          <div style={box}>
-            🎯 Latest Draw: <b>{drawResult.numbers}</b>
-          </div>
-        )}
-
-        {/* GRID */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "20px",
-            marginTop: "20px"
-          }}
-        >
-
-          {/* USERS */}
-          <div>
-            <h3>👥 Users</h3>
-            <div style={section}>
-              {users.length === 0 ? (
-                <p>No users</p>
-              ) : (
-                users.map((u) => (
-                  <div key={u.id} style={card}>{u.email}</div>
-                ))
-              )}
+        {/* USER MANAGEMENT */}
+        <div style={card}>
+          <h3>👥 User Management</h3>
+          {users.map((u) => (
+            <div key={u.id} style={item}>
+              {u.email}
             </div>
-          </div>
-
-          {/* SCORES */}
-          <div>
-            <h3>🏆 Scores</h3>
-            <div style={section}>
-              {scores.length === 0 ? (
-                <p>No scores</p>
-              ) : (
-                scores.slice(0, 10).map((s) => {
-                  const user = users.find((u) => u.id === s.user_id);
-                  return (
-                    <div key={s.id} style={card}>
-                      {user?.email || "Unknown"} → {s.score}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* LEADERBOARD */}
-          <div style={{ gridColumn: "span 2" }}>
-            <h3>🥇 Leaderboard</h3>
-            <div style={section}>
-              {leaderboard.length === 0 ? (
-                <p>No leaderboard data</p>
-              ) : (
-                leaderboard.map((l, i) => (
-                  <div key={i} style={card}>
-                    #{i + 1} {l.email} → {l.best_score}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
+          ))}
         </div>
+
+        {/*  SCORE MANAGEMENT */}
+        <div style={card}>
+          <h3>🏆 Score Management</h3>
+          {scores.slice(0, 10).map((s) => {
+            const user = users.find((u) => u.id === s.user_id);
+            return (
+              <div key={s.id} style={item}>
+                {user?.email} → {s.score}
+              </div>
+            );
+          })}
+        </div>
+
+        {/*  DRAW MANAGEMENT */}
+        <div style={card}>
+          <h3>🎲 Draw Management</h3>
+
+          <button style={btn} onClick={runDraw}>
+            Run Draw
+          </button>
+
+          {drawResult && (
+            <p>Latest Draw: {drawResult.numbers}</p>
+          )}
+        </div>
+
+        {/* WINNERS */}
+        <div style={card}>
+          <h3>🏆 Winners</h3>
+          {leaderboard.map((l, i) => (
+            <div key={i} style={item}>
+              #{i + 1} {l.email} → {l.best_score}
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   );
@@ -141,36 +98,36 @@ function Admin() {
 
 export default Admin;
 
-const section = {
-  background: "#111",
-  padding: "10px",
-  borderRadius: "8px",
-  maxHeight: "300px",
-  overflowY: "auto"
+// styles
+const container = {
+  background: "#0f172a",
+  minHeight: "100vh",
+  color: "white"
+};
+
+const content = {
+  padding: "20px",
+  maxWidth: "900px",
+  margin: "auto"
 };
 
 const card = {
-  padding: "8px",
-  margin: "5px 0",
-  background: "#1e1e1e",
-  color: "white",
-  borderRadius: "6px",
-  border: "1px solid #333"
+  background: "#1e293b",
+  padding: "15px",
+  borderRadius: "10px",
+  marginBottom: "20px"
 };
 
-const box = {
-  background: "#222",
-  color: "white",
-  padding: "15px",
-  borderRadius: "8px"
+const item = {
+  padding: "6px 0",
+  borderBottom: "1px solid #333"
 };
 
 const btn = {
-  padding: "10px 15px",
+  padding: "8px 12px",
   background: "#4caf50",
   color: "white",
   border: "none",
   borderRadius: "6px",
-  cursor: "pointer",
-  marginTop: "10px"
+  cursor: "pointer"
 };
