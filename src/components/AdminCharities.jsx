@@ -5,6 +5,7 @@ function AdminCharities() {
   const [charities, setCharities] = useState([]);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false); // ✅ NEW
 
   useEffect(() => {
     loadCharities();
@@ -22,15 +23,18 @@ function AdminCharities() {
   };
 
   const addCharity = async () => {
-    if (!name) {
+    if (adding) return; // ✅ prevent double click
+
+    if (!name.trim()) {
       alert("Enter charity name");
       return;
     }
 
     try {
-      // ✅ CORRECT ROUTE (you must create this in backend)
+      setAdding(true);
+
       await API.post("/charities", {
-        name,
+        name: name.trim(), // ✅ trim fix
         description: "Added by admin",
         image: ""
       });
@@ -43,6 +47,8 @@ function AdminCharities() {
     } catch (err) {
       console.error("ADD CHARITY ERROR:", err);
       alert("Failed to add charity");
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -59,8 +65,8 @@ function AdminCharities() {
           style={input}
         />
 
-        <button onClick={addCharity} style={btn}>
-          Add
+        <button onClick={addCharity} style={btn} disabled={adding}>
+          {adding ? "Adding..." : "Add"}
         </button>
       </div>
 
