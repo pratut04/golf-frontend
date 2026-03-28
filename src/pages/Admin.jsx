@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "https://golf-backend-i5s7.onrender.com";
+const API = "https://golf-backend-new.onrender.com";
 
 function Admin() {
   const [users, setUsers] = useState([]);
