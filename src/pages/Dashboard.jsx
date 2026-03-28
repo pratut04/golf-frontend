@@ -42,7 +42,7 @@ function Dashboard() {
     const newScore = {
       id: Date.now(),
       score: Number(score),
-      date: date
+      date: new Date(date)
     };
 
     // ✅ update UI instantly
