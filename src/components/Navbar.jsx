@@ -1,9 +1,12 @@
 import React from "react";
 
 function Navbar() {
+  const email = localStorage.getItem("email");
+
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
+    localStorage.removeItem("email"); // 🔥 IMPORTANT
     window.location.href = "/";
   };
 
@@ -12,13 +15,22 @@ function Navbar() {
       <h2>🏌️ Golf App</h2>
 
       <div style={links}>
-        <button style={btn} onClick={() => window.location.href="/dashboard"}>
+        <button
+          style={btn}
+          onClick={() => (window.location.href = "/dashboard")}
+        >
           Dashboard
         </button>
 
-        <button style={btn} onClick={() => window.location.href="/admin"}>
-          Admin
-        </button>
+        {/* 🔐 SHOW ADMIN ONLY FOR ADMIN */}
+        {email === "secure@gmail.com" && (
+          <button
+            style={btn}
+            onClick={() => (window.location.href = "/admin")}
+          >
+            Admin
+          </button>
+        )}
 
         <button style={logoutBtn} onClick={logout}>
           Logout
@@ -30,13 +42,14 @@ function Navbar() {
 
 export default Navbar;
 
-// styles
+// 🎨 styles
 const nav = {
   display: "flex",
   justifyContent: "space-between",
   background: "#111",
   padding: "15px 20px",
-  borderBottom: "1px solid #333"
+  borderBottom: "1px solid #333",
+  color: "white"
 };
 
 const links = {
