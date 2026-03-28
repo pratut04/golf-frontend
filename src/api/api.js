@@ -1,10 +1,11 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://golf-backend-new.onrender.com"
+  baseURL: "https://golf-backend-new.onrender.com",
+  timeout: 15000 // ✅ 15 sec timeout (important)
 });
 
-// Attach token automatically
+// ✅ Attach token automatically
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
 
@@ -15,14 +16,19 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-// Handle errors globally (optional but pro)
+// ✅ Global error handling
 API.interceptors.response.use(
   (res) => res,
   (err) => {
+    // 🔐 Unauthorized
     if (err.response?.status === 401) {
-      // token expired / invalid
       localStorage.clear();
       window.location.href = "/";
+    }
+
+    // Network / server down
+    if (!err.response) {
+      alert("⚠️ Server is not responding. Please try again.");
     }
 
     return Promise.reject(err);
