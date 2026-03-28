@@ -3,26 +3,29 @@ import React from "react";
 function CharityList({ charities, selectCharity, selectedId }) {
   return (
     <div style={card}>
-      <h3>Charities</h3>
+      <h3>❤️ Charity Selection</h3>
 
       {charities.length === 0 ? (
         <p>No charities available</p>
       ) : (
-        charities.map((c) => (
+        charities.map((c, index) => (
           <div
             key={c.id}
             style={{
               ...item,
-              background: selectedId === c.id ? "#2e7d32" : "transparent"
+              background:
+                selectedId === c.id ? "#2e7d32" : "transparent"
             }}
           >
-            <p>{c.name}</p>
+            <p>
+              #{index + 1} {c.name}
+            </p>
 
             <button
               style={{
                 ...btn,
                 background:
-                  selectedId === c.id ? "#aaa" : "#4caf50",
+                  selectedId === c.id ? "#888" : "#4caf50",
                 cursor:
                   selectedId === c.id ? "not-allowed" : "pointer"
               }}
@@ -40,7 +43,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
 
 export default CharityList;
 
-// styles
+// 🎨 styles
 const card = {
   background: "#1e1e1e",
   padding: "15px",
@@ -52,7 +55,8 @@ const card = {
 const item = {
   borderBottom: "1px solid #333",
   padding: "10px",
-  borderRadius: "6px"
+  borderRadius: "6px",
+  marginBottom: "8px"
 };
 
 const btn = {
