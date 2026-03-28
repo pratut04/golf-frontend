@@ -1,0 +1,45 @@
+import React, { useEffect, useState } from "react";
+import API from "../api/api";
+
+function AdminScores() {
+  const [scores, setScores] = useState([]);
+
+  useEffect(() => {
+    loadScores();
+  }, []);
+
+  const loadScores = async () => {
+    try {
+      const res = await API.get("/scores");
+      setScores(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div style={card}>
+      <h3>📊 Scores</h3>
+
+      {scores.map((s) => (
+        <div key={s.id} style={item}>
+          {s.user_id} → {s.score}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default AdminScores;
+
+const card = {
+  background: "#1e293b",
+  padding: "15px",
+  borderRadius: "10px",
+  marginBottom: "20px"
+};
+
+const item = {
+  padding: "6px 0",
+  borderBottom: "1px solid #333"
+};
