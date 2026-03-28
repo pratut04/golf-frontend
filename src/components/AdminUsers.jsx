@@ -24,16 +24,26 @@ function AdminUsers() {
     <div style={card}>
       <h3>👥 User Management</h3>
 
+      {/* ✅ TOTAL USERS */}
+      {!loading && (
+        <p style={{ marginBottom: "10px" }}>
+          Total Users: <b>{users.length}</b>
+        </p>
+      )}
+
       {loading ? (
         <p>Loading users...</p>
       ) : users.length === 0 ? (
         <p>No users found</p>
       ) : (
-        users.map((u, index) => (
-          <div key={u.id} style={item}>
-            #{index + 1} {u.email}
-          </div>
-        ))
+        users
+          .slice() // avoid mutating state
+          .reverse() // ✅ latest first
+          .map((u, index) => (
+            <div key={u.id} style={item}>
+              #{index + 1} {u.email}
+            </div>
+          ))
       )}
     </div>
   );
