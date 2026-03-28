@@ -101,8 +101,10 @@ const box = {
 const card = {
   padding: "10px",
   margin: "5px 0",
-  background: "#f4f4f4",
-  borderRadius: "6px"
+  background: "#1e1e1e",   
+  color: "white",         
+  borderRadius: "6px",
+  border: "1px solid #333" 
 };
 
 export default Admin;
