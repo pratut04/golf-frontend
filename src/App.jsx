@@ -4,11 +4,11 @@ import React from "react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import Subscription from "./pages/Subscription"; // ✅ NEW
 
 // Protected Route
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-
   return token ? children : <Navigate to="/" />;
 };
 
@@ -28,7 +28,6 @@ const AdminRoute = ({ children }) => {
 // Prevent login access if already logged in
 const PublicRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-
   return token ? <Navigate to="/dashboard" /> : children;
 };
 
@@ -64,6 +63,16 @@ function App() {
             <AdminRoute>
               <Admin />
             </AdminRoute>
+          }
+        />
+
+        {/* ✅ SUBSCRIPTION */}
+        <Route
+          path="/subscription"
+          element={
+            <PrivateRoute>
+              <Subscription />
+            </PrivateRoute>
           }
         />
 
