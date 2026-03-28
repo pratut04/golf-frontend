@@ -8,23 +8,23 @@ function Winnings({ winnings }) {
       {winnings?.length > 0 ? (
         <>
           <div style={box}>
-             Total Wins: <b>{winnings.length}</b>
+            🎯 Total Wins: <b>{winnings.length}</b>
           </div>
 
           <div style={box}>
-             Total Earnings:{" "}
+            💰 Total Earnings:{" "}
             <b>
               ₹
-              {winnings.reduce((acc, w) => acc + w.amount, 0)}
+              {winnings.reduce((acc, w) => acc + Number(w.amount), 0)}
             </b>
           </div>
 
           <div style={{ marginTop: "10px" }}>
-            <h4>History</h4>
+            <h4>📜 History</h4>
 
             {winnings.map((w, i) => (
               <div key={i} style={item}>
-                 {w.type} | ₹{w.amount} | {w.status}
+                {w.match_type} | ₹{w.amount} | {w.status}
               </div>
             ))}
           </div>
@@ -40,7 +40,7 @@ function Winnings({ winnings }) {
 
 export default Winnings;
 
-// styles
+// 🎨 styles
 const card = {
   background: "#1e1e1e",
   padding: "15px",
