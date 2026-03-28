@@ -22,7 +22,7 @@ function Winnings() {
 
 export default Winnings;
 
-// 🎨 styles
+
 const card = {
   background: "#1e1e1e",
   padding: "15px",
