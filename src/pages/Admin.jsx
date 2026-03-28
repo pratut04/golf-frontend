@@ -10,17 +10,16 @@ import AdminCharities from "../components/AdminCharities";
 function Admin() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [drawResult, setDrawResult] = useState(null);
+  const [loading, setLoading] = useState(true); // ✅ NEW
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const email = localStorage.getItem("email");
 
-    // 🔐 protect route
     if (!token) {
       window.location.href = "/";
     }
 
-    // 🔐 restrict admin access
     if (email !== "secure@gmail.com") {
       window.location.href = "/dashboard";
     }
@@ -34,6 +33,8 @@ function Admin() {
       setLeaderboard(res.data);
     } catch (err) {
       console.error("ADMIN LOAD ERROR:", err);
+    } finally {
+      setLoading(false); // 
     }
   };
 
@@ -42,13 +43,17 @@ function Admin() {
       const res = await API.post("/draw");
       setDrawResult(res.data);
 
-      // 🔥 refresh leaderboard
-      loadLeaderboard();
+      loadLeaderboard(); // refresh
 
     } catch (err) {
       console.error("DRAW ERROR:", err);
     }
   };
+
+
+  if (loading) {
+    return <p style={{ color: "white", textAlign: "center" }}>Loading...</p>;
+  }
 
   return (
     <div style={container}>
@@ -67,7 +72,12 @@ function Admin() {
 
           {drawResult && (
             <div style={{ marginTop: "10px" }}>
-              <p>Latest Draw: {drawResult.numbers}</p>
+              <p>
+                Latest Draw:{" "}
+                {Array.isArray(drawResult.numbers)
+                  ? drawResult.numbers.join(", ")
+                  : drawResult.numbers}
+              </p>
             </div>
           )}
         </div>
