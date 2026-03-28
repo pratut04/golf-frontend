@@ -5,42 +5,49 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-const login = async () => {
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
 
-  try {
-    setLoading(true);
-
-    // wake server
-    await fetch("https://golf-backend-new.onrender.com");
-
-    const res = await API.post("/login", { email, password });
-
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("userId", res.data.user.id);
-
-    if (email === "secure@gmail.com") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/dashboard";
+  const login = async () => {
+    if (!email || !password) {
+      alert("Enter email and password");
+      return;
     }
 
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
+    try {
+      setLoading(true);
 
-    if (err.response) {
-      alert(err.response.data.error);
-    } else {
-      alert("⏳ Server is waking up...\nTry again in 10–20 seconds");
+      // 🔥 wake backend (Render sleep fix)
+      await fetch("https://golf-backend-new.onrender.com");
+
+      const res = await API.post("/login", { email, password });
+
+      // ✅ STORE DATA
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userId", res.data.user.id);
+
+      // 🔥 IMPORTANT (ADMIN FIX)
+      localStorage.setItem("email", res.data.user.email);
+
+      // ✅ REDIRECT BASED ON ROLE
+      if (res.data.user.email === "secure@gmail.com") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/dashboard";
+      }
+
+    } catch (err) {
+      console.error("LOGIN ERROR:", err);
+
+      if (err.response) {
+        alert(err.response.data.error);
+      } else {
+        alert("⏳ Server is waking up...\nTry again in 10–20 seconds");
+      }
+
+    } finally {
+      setLoading(false);
     }
+  };
 
-  } finally {
-    setLoading(false);
-  }
-};
   return (
     <div className="login-box">
       <h2>Login</h2>
