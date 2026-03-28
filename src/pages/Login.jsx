@@ -6,14 +6,16 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const login = async () => {
-    if (!email || !password) {
-      alert("Enter email and password");
-      return;
-    }
+  console.log("LOGIN CLICKED"); // 👈 ADD THIS
 
-    try {
-      const res = await API.post("/login", { email, password });
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
 
+  try {
+    const res = await API.post("/login", { email, password });
+    console.log("RESPONSE:", res); 
       localStorage.setItem("userId", res.data.user.id);
 
       if (email === "secure@gmail.com") {
