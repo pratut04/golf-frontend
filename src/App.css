@@ -33,7 +33,7 @@ button {
   border-radius: 6px;
   cursor: pointer;
   margin: 5px 0;
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 
 button:hover {
@@ -49,6 +49,8 @@ input {
   border-radius: 6px;
   border: none;
   outline: none;
+  background: #111827;
+  color: white;
 }
 
 /* LOGIN BOX */
@@ -118,6 +120,14 @@ input {
 .lose {
   color: #ef4444;
   font-weight: bold;
+}
+
+/* LOADING */
+.loading {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+  opacity: 0.7;
 }
 
 /* SMALL SCREENS */
