@@ -36,7 +36,7 @@ function Dashboard() {
     }
   };
 
-  // ✅ SCORE (backend already limits to 5)
+  // SCORE 
   const addScore = async (score) => {
     if (!score || isNaN(score) || score < 1 || score > 45) {
       alert("Score must be between 1 and 45");
@@ -56,7 +56,7 @@ function Dashboard() {
     }
   };
 
-  // ✅ CHARITY
+  //  CHARITY
   const selectCharity = async (id) => {
     try {
       await API.post("/select-charity", {
@@ -72,7 +72,7 @@ function Dashboard() {
     }
   };
 
-  // ✅ DRAW
+  //  DRAW
   const checkResult = async () => {
     try {
       const res = await API.post("/check-result", { user_id: userId });
@@ -91,7 +91,7 @@ function Dashboard() {
 
         {/* SUBSCRIPTION */}
         <div style={card}>
-          <h3>📌 Subscription</h3>
+          <h3> Subscription</h3>
           <p>Status: {data.user?.subscription_status || "N/A"}</p>
           <p>Email: {data.user?.email || "N/A"}</p>
         </div>
@@ -112,7 +112,7 @@ function Dashboard() {
               .slice(0, 5)
               .map((s) => (
                 <div key={s.id} style={item}>
-                  🎯 {s.score} | 📅 {new Date(s.created_at).toLocaleDateString()}
+                   {s.score} |  {new Date(s.created_at).toLocaleDateString()}
                 </div>
               ))
           ) : (
@@ -122,7 +122,7 @@ function Dashboard() {
 
         {/* CHARITY */}
         <div style={card}>
-          <h3>❤️ Charity Selection</h3>
+          <h3> Charity Selection</h3>
 
           <p>
             Selected:{" "}
@@ -179,7 +179,7 @@ function Dashboard() {
 
 export default Dashboard;
 
-// 🎨 styles
+// styles
 const container = {
   background: "#0f172a",
   minHeight: "100vh",
