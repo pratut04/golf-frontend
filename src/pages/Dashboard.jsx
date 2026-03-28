@@ -13,7 +13,6 @@ function Dashboard() {
   const [charities, setCharities] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -23,27 +22,13 @@ function Dashboard() {
   }, []);
 
   const loadData = async () => {
-    try {
-      setLoading(true);
+    const d = await API.get(`/dashboard/${userId}`);
+    const c = await API.get("/charities");
+    const l = await API.get("/leaderboard");
 
-      const d = await API.get(`/dashboard/${userId}`);
-      const c = await API.get("/charities");
-      const l = await API.get("/leaderboard");
-
-      setData(d.data);
-      setCharities(c.data);
-      setLeaderboard(l.data);
-
-    } catch (err) {
-      console.error("LOAD ERROR:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const subscribe = async () => {
-    await API.post("/subscribe", { user_id: userId });
-    loadData();
+    setData(d.data);
+    setCharities(c.data);
+    setLeaderboard(l.data);
   };
 
   const addScore = async (score) => {
@@ -51,8 +36,7 @@ function Dashboard() {
       user_id: userId,
       score: Number(score)
     });
-
-    loadData(); 
+    loadData();
   };
 
   const selectCharity = async (id) => {
@@ -60,7 +44,6 @@ function Dashboard() {
       user_id: userId,
       charity_id: id
     });
-
     loadData();
   };
 
@@ -69,82 +52,76 @@ function Dashboard() {
     setResult(res.data);
   };
 
-  if (loading) {
-    return <h2 style={{ color: "white", padding: "20px" }}>Loading...</h2>;
-  }
-
   return (
-    <div style={{ background: "#0f172a", minHeight: "100vh", color: "white" }}>
+    <div style={container}>
       <Navbar />
 
-      <div style={{ padding: "20px" }}>
-        <h1>🎯Dashboard</h1>
+      <div style={content}>
+        <h1>🎯 USER DASHBOARD</h1>
 
-        {/* USER INFO */}
+        {/*  SUBSCRIPTION */}
         <div style={card}>
-          <p><b>Email:</b> {data.user?.email}</p>
-          <p><b>Status:</b> {data.user?.subscription_status}</p>
-
-          {data.user?.subscription_status !== "active" && (
-            <button style={btn} onClick={subscribe}>
-              Subscribe
-            </button>
-          )}
+          <h3>📌 Subscription</h3>
+          <p>Status: {data.user?.subscription_status}</p>
+          <p>Email: {data.user?.email}</p>
         </div>
 
-       
-        <ScoreForm addScore={addScore} />
-
+        {/* SCORE ENTRY */}
         <div style={card}>
-          <h3>🏆Your Scores</h3>
+          <h3>🏌️ Score Entry</h3>
+          <ScoreForm addScore={addScore} />
+        </div>
 
-          {data.scores && data.scores.length > 0 ? (
+        {/* SCORES LIST */}
+        <div style={card}>
+          <h3>Your Scores</h3>
+          {data.scores?.length > 0 ? (
             data.scores.map((s) => (
-              <div key={s.id}>
-                Score: {s.score}
-              </div>
+              <div key={s.id}>Score: {s.score}</div>
             ))
           ) : (
             <p>No scores yet</p>
           )}
         </div>
 
-        {/* 🎲 RESULT */}
+        {/* 4️ CHARITY */}
         <div style={card}>
+          <h3>❤️ Charity Selection</h3>
+          <CharityList
+            charities={charities}
+            selectCharity={selectCharity}
+          />
+        </div>
+
+        {/* 5️ PARTICIPATION */}
+        <div style={card}>
+          <h3>🎲 Participation</h3>
           <button style={btn} onClick={checkResult}>
             Check Result
           </button>
 
           {result && (
-            <p style={{ marginTop: "10px" }}>
+            <p>
               {result.result} (Number: {result.number})
             </p>
           )}
         </div>
 
-        {/* ❤️CHARITIES */}
-        <CharityList
-          charities={charities}
-          selectCharity={selectCharity}
-        />
-
-        {/* 🏆 LEADERBOARD */}
+        {/* 6️ WINNINGS */}
         <div style={card}>
-          <h3>🏆 Leaderboard</h3>
-
-          {leaderboard.length === 0 ? (
-            <p>No data</p>
-          ) : (
-            leaderboard.map((l, i) => (
-              <div key={i}>
-                #{i + 1} {l.email} → {l.best_score}
-              </div>
-            ))
-          )}
+          <h3>🏆 Winnings</h3>
+          <Winnings />
         </div>
 
-        {/* 🎁 WINNINGS */}
-        <Winnings />
+        {/* 7️ LEADERBOARD */}
+        <div style={card}>
+          <h3>🥇 Leaderboard</h3>
+          {leaderboard.map((l, i) => (
+            <div key={i}>
+              #{i + 1} {l.email} → {l.best_score}
+            </div>
+          ))}
+        </div>
 
       </div>
     </div>
@@ -154,12 +131,23 @@ function Dashboard() {
 export default Dashboard;
 
 // styles
-const card = {
-  background: "#1e1e1e",
-  padding: "15px",
-  borderRadius: "8px",
-  marginBottom: "15px",
+const container = {
+  background: "#0f172a",
+  minHeight: "100vh",
   color: "white"
+};
+
+const content = {
+  padding: "20px",
+  maxWidth: "800px",
+  margin: "auto"
+};
+
+const card = {
+  background: "#1e293b",
+  padding: "15px",
+  borderRadius: "10px",
+  marginBottom: "20px"
 };
 
 const btn = {
