@@ -9,7 +9,7 @@ function Navbar() {
 
   return (
     <div style={nav}>
-      <h2 style={{ margin: 0 }}>🏌️ Golf App</h2>
+      <h2>🏌️ Golf App</h2>
 
       <div style={links}>
         <button style={btn} onClick={() => window.location.href="/dashboard"}>
@@ -30,15 +30,13 @@ function Navbar() {
 
 export default Navbar;
 
-//  styles
+// styles
 const nav = {
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "center",
   background: "#111",
   padding: "15px 20px",
-  borderBottom: "1px solid #333",
-  marginBottom: "20px"
+  borderBottom: "1px solid #333"
 };
 
 const links = {
@@ -47,19 +45,19 @@ const links = {
 };
 
 const btn = {
-  padding: "8px 12px",
   background: "#222",
   color: "white",
   border: "none",
+  padding: "8px 12px",
   borderRadius: "6px",
   cursor: "pointer"
 };
 
 const logoutBtn = {
-  padding: "8px 12px",
   background: "#ff4d4d",
   color: "white",
   border: "none",
+  padding: "8px 12px",
   borderRadius: "6px",
   cursor: "pointer"
 };
