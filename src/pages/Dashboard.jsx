@@ -37,20 +37,33 @@ function Dashboard() {
   };
 
   // SCORE (UPDATED WITH DATE)
-  const addScore = async (score, date) => {
-    try {
-      await API.post("/scores", {
-        user_id: userId,
-        score: Number(score),
-        created_at: date
-      });
+ const addScore = async (score, date) => {
+  try {
+    const newScore = {
+      id: Date.now(),
+      score: Number(score),
+      date: date
+    };
 
-      loadData();
+    // ✅ update UI instantly
+    setData(prev => ({
+      ...prev,
+      scores: [newScore, ...(prev.scores || [])].slice(0, 5)
+    }));
 
-    } catch (err) {
-      console.error("SCORE ERROR:", err);
-    }
-  };
+    await API.post("/scores", {
+      user_id: userId,
+      score: Number(score),
+      created_at: date
+    });
+
+    alert("✅ Score added");
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error adding score");
+  }
+};
 
   //  CHARITY
   const selectCharity = async (id) => {
