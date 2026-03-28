@@ -31,22 +31,30 @@ function Dashboard() {
     setLeaderboard(l.data);
   };
 
+  // SCORE MANAGEMENT (LAST 5 ONLY)
   const addScore = async (score) => {
     await API.post("/scores", {
       user_id: userId,
       score: Number(score)
     });
+
+    await API.post("/limit-scores", { user_id: userId }); // backend logic
+
     loadData();
   };
 
+  // CHARITY
   const selectCharity = async (id) => {
     await API.post("/select-charity", {
       user_id: userId,
       charity_id: id
     });
+
+    alert("Charity selected");
     loadData();
   };
 
+  //  DRAW RESULT
   const checkResult = async () => {
     const res = await API.post("/check-result", { user_id: userId });
     setResult(res.data);
@@ -61,63 +69,76 @@ function Dashboard() {
 
         {/*  SUBSCRIPTION */}
         <div style={card}>
-          <h3>📌 Subscription</h3>
+          <h3> Subscription</h3>
           <p>Status: {data.user?.subscription_status}</p>
           <p>Email: {data.user?.email}</p>
         </div>
 
-        {/* SCORE ENTRY */}
+        {/*  SCORE ENTRY */}
         <div style={card}>
-          <h3>🏌️ Score Entry</h3>
+          <h3>🏌️ Enter Score</h3>
           <ScoreForm addScore={addScore} />
         </div>
 
-        {/* SCORES LIST */}
+        {/*  LAST 5 SCORES (NEWEST FIRST) */}
         <div style={card}>
-          <h3>Your Scores</h3>
+          <h3>📊 Last 5 Scores</h3>
+
           {data.scores?.length > 0 ? (
-            data.scores.map((s) => (
-              <div key={s.id}>Score: {s.score}</div>
-            ))
+            [...data.scores]
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .slice(0, 5)
+              .map((s) => (
+                <div key={s.id} style={item}>
+                   {s.score} |  {new Date(s.created_at).toLocaleDateString()}
+                </div>
+              ))
           ) : (
             <p>No scores yet</p>
           )}
         </div>
 
-        {/* 4️ CHARITY */}
+        {/*  CHARITY */}
         <div style={card}>
-          <h3>❤️ Charity Selection</h3>
+          <h3> Charity Selection</h3>
+          <p>
+            Selected:{" "}
+            <b>{data.user?.charity_name || "Not selected"}</b>
+          </p>
+
           <CharityList
             charities={charities}
             selectCharity={selectCharity}
           />
         </div>
 
-        {/* 5️ PARTICIPATION */}
+        {/*  DRAW */}
         <div style={card}>
-          <h3>🎲 Participation</h3>
+          <h3>🎲 Draw & Result</h3>
+
           <button style={btn} onClick={checkResult}>
             Check Result
           </button>
 
           {result && (
-            <p>
-              {result.result} (Number: {result.number})
-            </p>
+            <div style={{ marginTop: "10px" }}>
+              <p>Result: {result.result}</p>
+              <p>Number: {result.number}</p>
+            </div>
           )}
         </div>
 
-        {/* 6️ WINNINGS */}
+        {/*  WINNINGS */}
         <div style={card}>
           <h3>🏆 Winnings</h3>
           <Winnings />
         </div>
 
-        {/* 7️ LEADERBOARD */}
+        {/*  LEADERBOARD */}
         <div style={card}>
           <h3>🥇 Leaderboard</h3>
           {leaderboard.map((l, i) => (
-            <div key={i}>
+            <div key={i} style={item}>
               #{i + 1} {l.email} → {l.best_score}
             </div>
           ))}
@@ -148,6 +169,11 @@ const card = {
   padding: "15px",
   borderRadius: "10px",
   marginBottom: "20px"
+};
+
+const item = {
+  padding: "5px 0",
+  borderBottom: "1px solid #333"
 };
 
 const btn = {
