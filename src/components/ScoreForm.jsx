@@ -10,7 +10,7 @@ function ScoreForm({ addScore }) {
     }
 
     addScore(score);
-    setScore(""); // ✅ clear input
+    setScore("");
   };
 
   return (
