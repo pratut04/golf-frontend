@@ -45,17 +45,17 @@ function Admin() {
     }
   };
 
-  // ✅ loading screen
+  
   if (loading) {
     return <h2 style={{ color: "white", padding: "20px" }}>Loading...</h2>;
   }
 
-  return (
-    <div style={{ color: "white" }}>
+ return (
+  <div style={{ background: "#0f172a", minHeight: "100vh", color: "white" }}>
       <Navbar />
 
       <div style={{ padding: "20px" }}>
-        <h1>🔥 Admin Dashboard</h1>
+        <h1>Admin Dashboard</h1>
 
         {/* STATS */}
         <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
