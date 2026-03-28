@@ -6,6 +6,7 @@ function Admin() {
   const [users, setUsers] = useState([]);
   const [scores, setScores] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [charities, setCharities] = useState([]);
   const [drawResult, setDrawResult] = useState(null);
 
   useEffect(() => {
@@ -16,18 +17,29 @@ function Admin() {
   }, []);
 
   const fetchAll = async () => {
-    const usersRes = await API.get("/users");
-    const scoresRes = await API.get("/scores");
-    const leaderRes = await API.get("/leaderboard");
+    try {
+      const usersRes = await API.get("/users");
+      const scoresRes = await API.get("/scores");
+      const leaderRes = await API.get("/leaderboard");
+      const charityRes = await API.get("/charities");
 
-    setUsers(usersRes.data);
-    setScores(scoresRes.data);
-    setLeaderboard(leaderRes.data);
+      setUsers(usersRes.data);
+      setScores(scoresRes.data);
+      setLeaderboard(leaderRes.data);
+      setCharities(charityRes.data);
+
+    } catch (err) {
+      console.error("ADMIN LOAD ERROR:", err);
+    }
   };
 
   const runDraw = async () => {
-    const res = await API.post("/draw");
-    setDrawResult(res.data);
+    try {
+      const res = await API.post("/draw");
+      setDrawResult(res.data);
+    } catch (err) {
+      console.error("DRAW ERROR:", err);
+    }
   };
 
   return (
@@ -42,33 +54,42 @@ function Admin() {
           <h3>📊 Reports & Analytics</h3>
           <p>Total Users: {users.length}</p>
           <p>Total Scores: {scores.length}</p>
+          <p>Total Charities: {charities.length}</p>
           <p>Top Score: {leaderboard[0]?.best_score || 0}</p>
         </div>
 
         {/* USER MANAGEMENT */}
         <div style={card}>
           <h3>👥 User Management</h3>
-          {users.map((u) => (
-            <div key={u.id} style={item}>
-              {u.email}
-            </div>
-          ))}
+          {users.length > 0 ? (
+            users.map((u) => (
+              <div key={u.id} style={item}>
+                {u.email}
+              </div>
+            ))
+          ) : (
+            <p>No users</p>
+          )}
         </div>
 
-        {/*  SCORE MANAGEMENT */}
+        {/* SCORE MANAGEMENT */}
         <div style={card}>
           <h3>🏆 Score Management</h3>
-          {scores.slice(0, 10).map((s) => {
-            const user = users.find((u) => u.id === s.user_id);
-            return (
-              <div key={s.id} style={item}>
-                {user?.email} → {s.score}
-              </div>
-            );
-          })}
+          {scores.length > 0 ? (
+            scores.slice(0, 10).map((s) => {
+              const user = users.find((u) => u.id === s.user_id);
+              return (
+                <div key={s.id} style={item}>
+                  {user?.email || "Unknown"} → {s.score}
+                </div>
+              );
+            })
+          ) : (
+            <p>No scores</p>
+          )}
         </div>
 
-        {/*  DRAW MANAGEMENT */}
+        {/* DRAW MANAGEMENT */}
         <div style={card}>
           <h3>🎲 Draw Management</h3>
 
@@ -77,18 +98,40 @@ function Admin() {
           </button>
 
           {drawResult && (
-            <p>Latest Draw: {drawResult.numbers}</p>
+            <div style={{ marginTop: "10px" }}>
+              <p>Latest Draw: {drawResult.numbers}</p>
+            </div>
+          )}
+        </div>
+
+        {/* CHARITY MANAGEMENT */}
+        <div style={card}>
+          <h3> Charity Management</h3>
+
+          {charities.length > 0 ? (
+            charities.map((c) => (
+              <div key={c.id} style={item}>
+                {c.name}
+              </div>
+            ))
+          ) : (
+            <p>No charities</p>
           )}
         </div>
 
         {/* WINNERS */}
         <div style={card}>
           <h3>🏆 Winners</h3>
-          {leaderboard.map((l, i) => (
-            <div key={i} style={item}>
-              #{i + 1} {l.email} → {l.best_score}
-            </div>
-          ))}
+
+          {leaderboard.length > 0 ? (
+            leaderboard.map((l, i) => (
+              <div key={i} style={item}>
+                #{i + 1} {l.email} → {l.best_score}
+              </div>
+            ))
+          ) : (
+            <p>No winners yet</p>
+          )}
         </div>
 
       </div>
