@@ -33,7 +33,7 @@ function ScoreForm({ addScore }) {
 
 export default ScoreForm;
 
-// 🎨 styles
+
 const card = {
   background: "#1e1e1e",
   padding: "15px",
