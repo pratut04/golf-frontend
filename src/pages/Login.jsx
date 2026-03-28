@@ -4,36 +4,39 @@ import API from "../api/api";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-const login = async () => {
-  console.log("LOGIN CLICKED");
 
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
+  const login = async () => {
+    console.log("LOGIN CLICKED");
 
-  try {
-    const res = await API.post("/login", { email, password });
-
-    console.log("RESPONSE:", res);
-
-    // ✅ store token
-    localStorage.setItem("token", res.data.token);
-
-    // ✅ store user id
-    localStorage.setItem("userId", res.data.user.id);
-
-    if (email === "secure@gmail.com") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/dashboard";
+    if (!email || !password) {
+      alert("Enter email and password");
+      return;
     }
 
-  } catch (err) {
-    console.error(err);
-    alert("Login failed ❌");
-  }
-};
+    try {
+      const res = await API.post("/login", { email, password });
+
+      console.log("RESPONSE:", res.data);
+
+      // ✅ store token
+      localStorage.setItem("token", res.data.token);
+
+      // ✅ store user id
+      localStorage.setItem("userId", res.data.user.id);
+
+      // ✅ redirect
+      if (email === "secure@gmail.com") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/dashboard";
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Login failed ❌");
+    }
+  };
+
   return (
     <div className="login-box">
       <h2>Login</h2>
