@@ -20,7 +20,8 @@ function ScoreForm({ addScore }) {
       return;
     }
 
-    addScore(score, date);
+  
+    addScore(score, new Date(date));
 
     setScore("");
     setDate("");
