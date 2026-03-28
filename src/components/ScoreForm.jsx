@@ -5,6 +5,7 @@ function ScoreForm({ addScore }) {
   const [date, setDate] = useState("");
 
   const handleSubmit = () => {
+    // ✅ validation
     if (!score || isNaN(score)) {
       alert("Enter valid number");
       return;
@@ -20,9 +21,10 @@ function ScoreForm({ addScore }) {
       return;
     }
 
-  
-    addScore(score, new Date(date));
+    // ✅ SEND STRING DATE (IMPORTANT FIX)
+    addScore(score, date);
 
+    // ✅ reset form
     setScore("");
     setDate("");
   };
@@ -55,6 +57,7 @@ function ScoreForm({ addScore }) {
 
 export default ScoreForm;
 
+// 🎨 styles
 const card = {
   background: "#1e1e1e",
   padding: "15px",
