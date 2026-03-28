@@ -7,6 +7,8 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const login = async () => {
+    if (loading) return; 
+
     if (!email || !password) {
       alert("Enter email and password");
       return;
@@ -18,16 +20,17 @@ function Login() {
       // 🔥 wake backend (Render sleep fix)
       await fetch("https://golf-backend-new.onrender.com");
 
-      const res = await API.post("/login", { email, password });
+      const res = await API.post("/login", {
+        email: email.trim(),       // ✅ trim
+        password: password.trim()  // ✅ trim
+      });
 
       // ✅ STORE DATA
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.user.id);
-
-      // 🔥 IMPORTANT (ADMIN FIX)
       localStorage.setItem("email", res.data.user.email);
 
-      // ✅ REDIRECT BASED ON ROLE
+      // ✅ REDIRECT
       if (res.data.user.email === "secure@gmail.com") {
         window.location.href = "/admin";
       } else {
