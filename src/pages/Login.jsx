@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import API from "../api/api";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate(); // ✅ important
+
   const login = async () => {
-    if (loading) return; 
+    if (loading) return;
 
     if (!email || !password) {
       alert("Enter email and password");
@@ -21,8 +24,8 @@ function Login() {
       await fetch("https://golf-backend-new.onrender.com");
 
       const res = await API.post("/login", {
-        email: email.trim(),       // ✅ trim
-        password: password.trim()  // ✅ trim
+        email: email.trim(),
+        password: password.trim()
       });
 
       // ✅ STORE DATA
@@ -30,11 +33,11 @@ function Login() {
       localStorage.setItem("userId", res.data.user.id);
       localStorage.setItem("email", res.data.user.email);
 
-      // ✅ REDIRECT
+      // ✅ REDIRECT (React way - NO reload)
       if (res.data.user.email === "secure@gmail.com") {
-        window.location.href = "/admin";
+        navigate("/admin");
       } else {
-        window.location.href = "/dashboard";
+        navigate("/dashboard");
       }
 
     } catch (err) {
