@@ -2,10 +2,10 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "https://golf-backend-new.onrender.com",
-  timeout: 15000 // ✅ 15 sec timeout (important)
+  timeout: 15000
 });
 
-// ✅ Attach token automatically
+// ✅ Attach token
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
 
@@ -16,19 +16,24 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-// ✅ Global error handling
+// ✅ Global response handler
 API.interceptors.response.use(
   (res) => res,
   (err) => {
-    // 🔐 Unauthorized
+
+    // 🔐 Unauthorized → logout
     if (err.response?.status === 401) {
       localStorage.clear();
-      window.location.href = "/";
+
+      // safer redirect
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 100);
     }
 
-    // Network / server down
+    // ⚠️ Network error (Render sleep)
     if (!err.response) {
-      alert("⚠️ Server is not responding. Please try again.");
+      console.warn("Server not responding");
     }
 
     return Promise.reject(err);
