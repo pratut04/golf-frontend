@@ -1,12 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 
 function Subscription() {
-  const userId = localStorage.getItem("userId");
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    // 🔐 PROTECT PAGE
+    if (!token || !userId) {
+      navigate("/");
+    }
+  }, []);
 
   const subscribe = async (type) => {
     if (loading) return;
+
+    const userId = localStorage.getItem("userId");
 
     try {
       setLoading(true);
@@ -18,7 +32,8 @@ function Subscription() {
 
       alert("✅ Subscribed successfully");
 
-      window.location.href = "/dashboard";
+      // ✅ React navigation (NO reload)
+      navigate("/dashboard");
 
     } catch (err) {
       console.error(err);
@@ -34,14 +49,22 @@ function Subscription() {
 
       <div style={card}>
         <h2>Monthly Plan</h2>
-        <button onClick={() => subscribe("monthly")} style={btn} disabled={loading}>
+        <button
+          onClick={() => subscribe("monthly")}
+          style={btn}
+          disabled={loading}
+        >
           {loading ? "Processing..." : "Subscribe Monthly"}
         </button>
       </div>
 
       <div style={card}>
         <h2>Yearly Plan</h2>
-        <button onClick={() => subscribe("yearly")} style={btn} disabled={loading}>
+        <button
+          onClick={() => subscribe("yearly")}
+          style={btn}
+          disabled={loading}
+        >
           {loading ? "Processing..." : "Subscribe Yearly"}
         </button>
       </div>
@@ -51,7 +74,7 @@ function Subscription() {
 
 export default Subscription;
 
-// styles
+// 🎨 styles
 const container = {
   textAlign: "center",
   padding: "40px",
