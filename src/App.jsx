@@ -4,31 +4,38 @@ import React from "react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
-import Subscription from "./pages/Subscription"; // ✅ NEW
+import Subscription from "./pages/Subscription";
 
-// Protected Route
+//  Protected Route
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/" />;
 };
 
-// Admin Route
+// 🔐 Admin Route
 const AdminRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   const email = localStorage.getItem("email");
 
   if (!token) return <Navigate to="/" />;
-  if (!email || email !== "secure@gmail.com") {
-    return <Navigate to="/dashboard" />;
-  }
+  if (email !== "secure@gmail.com") return <Navigate to="/dashboard" />;
 
   return children;
 };
 
-// Prevent login access if already logged in
+// 🔐 Public Route (FIXED)
 const PublicRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  return token ? <Navigate to="/dashboard" /> : children;
+  const email = localStorage.getItem("email");
+
+  if (!token) return children;
+
+  // 🔥 smarter redirect
+  if (email === "secure@gmail.com") {
+    return <Navigate to="/admin" />;
+  }
+
+  return <Navigate to="/dashboard" />;
 };
 
 function App() {
@@ -66,7 +73,7 @@ function App() {
           }
         />
 
-        {/* ✅ SUBSCRIPTION */}
+        {/* SUBSCRIPTION */}
         <Route
           path="/subscription"
           element={
