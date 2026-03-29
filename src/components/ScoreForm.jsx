@@ -3,10 +3,10 @@ import React, { useState } from "react";
 function ScoreForm({ addScore }) {
   const [score, setScore] = useState("");
   const [date, setDate] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ NEW
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (loading) return; // ✅ prevent double click
+    if (loading) return;
 
     // ✅ validation
     if (!score || isNaN(score)) {
@@ -14,7 +14,9 @@ function ScoreForm({ addScore }) {
       return;
     }
 
-    if (Number(score) < 1 || Number(score) > 45) {
+    const num = Number(score);
+
+    if (num < 1 || num > 45) {
       alert("Score must be between 1 and 45");
       return;
     }
@@ -27,15 +29,15 @@ function ScoreForm({ addScore }) {
     try {
       setLoading(true);
 
-      // ✅ send string date
-      await addScore(score.trim(), date);
+      await addScore(num, date);
 
       // ✅ reset
       setScore("");
       setDate("");
 
     } catch (err) {
-      console.error(err);
+      console.error("Score submit error:", err);
+      alert("❌ Failed to add score");
     } finally {
       setLoading(false);
     }
