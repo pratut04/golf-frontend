@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 import Navbar from "../components/Navbar";
 
@@ -7,7 +8,7 @@ import CharityList from "../components/CharityList";
 import Winnings from "../components/Winnings";
 
 function Dashboard() {
-  const userId = localStorage.getItem("userId");
+  const navigate = useNavigate();
 
   const [data, setData] = useState({});
   const [charities, setCharities] = useState([]);
@@ -15,13 +16,25 @@ function Dashboard() {
   const [result, setResult] = useState(null);
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      window.location.href = "/";
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    // 🔐 PROTECTION
+    if (!token) {
+      navigate("/");
+      return;
     }
-    loadData();
+
+    if (!userId) {
+      console.error("❌ No userId found");
+      navigate("/");
+      return;
+    }
+
+    loadData(userId);
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (userId) => {
     try {
       const d = await API.get(`/dashboard/${userId}`);
       const c = await API.get("/charities");
@@ -36,16 +49,18 @@ function Dashboard() {
     }
   };
 
-  // SCORE (FIXED)
+  // ✅ ADD SCORE
   const addScore = async (score, date) => {
     try {
+      const userId = localStorage.getItem("userId");
+
       const newScore = {
         id: Date.now(),
         score: Number(score),
-        created_at: date // 
+        created_at: date
       };
 
-      // instant UI update
+      // 🔥 instant UI update
       setData(prev => ({
         ...prev,
         scores: [newScore, ...(prev.scores || [])].slice(0, 5)
@@ -59,7 +74,7 @@ function Dashboard() {
 
       alert("✅ Score added");
 
-      await loadData(); // 
+      loadData(userId); // refresh
 
     } catch (err) {
       console.error(err);
@@ -67,35 +82,47 @@ function Dashboard() {
     }
   };
 
-  
+  // ✅ SELECT CHARITY
   const selectCharity = async (id) => {
     try {
+      const userId = localStorage.getItem("userId");
+
       await API.post("/select-charity", {
         user_id: userId,
         charity_id: id
       });
 
       alert("Charity selected ✅");
-      loadData();
+      loadData(userId);
 
     } catch (err) {
       console.error("CHARITY ERROR:", err);
     }
   };
 
-  // DRAW
+  // ✅ DRAW RESULT
   const checkResult = async () => {
     try {
-      const res = await API.post("/check-result", { user_id: userId });
+      const userId = localStorage.getItem("userId");
+
+      const res = await API.post("/check-result", {
+        user_id: userId
+      });
+
       setResult(res.data);
+
     } catch (err) {
       console.error("DRAW ERROR:", err);
     }
   };
 
-  // LOADING
+  // 🔥 LOADING FIX
   if (!data.user) {
-    return <p style={{ color: "white", textAlign: "center" }}>Loading...</p>;
+    return (
+      <p style={{ color: "white", textAlign: "center" }}>
+        Loading...
+      </p>
+    );
   }
 
   return (
@@ -108,8 +135,8 @@ function Dashboard() {
         {/* SUBSCRIPTION */}
         <div style={card}>
           <h3>📌 Subscription</h3>
-          <p>Status: {data.user?.subscription_status || "N/A"}</p>
-          <p>Email: {data.user?.email || "N/A"}</p>
+          <p>Status: {data.user.subscription_status || "N/A"}</p>
+          <p>Email: {data.user.email}</p>
         </div>
 
         {/* SCORE ENTRY */}
@@ -118,12 +145,12 @@ function Dashboard() {
           <ScoreForm addScore={addScore} />
         </div>
 
-        {/* LAST 5 SCORES */}
+        {/* SCORES */}
         <div style={card}>
           <h3>📊 Last 5 Scores</h3>
 
           {data.scores?.length > 0 ? (
-            data.scores.slice(0, 5).map((s) => (
+            data.scores.map((s) => (
               <div key={s.id} style={item}>
                 {s.score} |{" "}
                 {s.created_at
@@ -142,13 +169,13 @@ function Dashboard() {
 
           <p>
             Selected:{" "}
-            <b>{data.user?.charity_name || "Not selected"}</b>
+            <b>{data.user.charity_name || "Not selected"}</b>
           </p>
 
           <CharityList
             charities={charities}
             selectCharity={selectCharity}
-            selectedId={data.user?.charity_id}
+            selectedId={data.user.charity_id}
           />
         </div>
 
@@ -181,7 +208,7 @@ function Dashboard() {
         <div style={card}>
           <h3>🥇 Leaderboard</h3>
 
-          {leaderboard?.length > 0 ? (
+          {leaderboard.length > 0 ? (
             leaderboard.map((l, i) => (
               <div key={i} style={item}>
                 #{i + 1} {l.email} → {l.best_score}
@@ -191,7 +218,6 @@ function Dashboard() {
             <p>No leaderboard data</p>
           )}
         </div>
-
       </div>
     </div>
   );
@@ -199,7 +225,7 @@ function Dashboard() {
 
 export default Dashboard;
 
-// styles
+// 🎨 styles
 const container = {
   background: "#0f172a",
   minHeight: "100vh",
