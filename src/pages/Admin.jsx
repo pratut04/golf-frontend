@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 import Navbar from "../components/Navbar";
 
-// ✅ COMPONENTS
 import AdminUsers from "../components/AdminUsers";
 import AdminScores from "../components/AdminScores";
 import AdminCharities from "../components/AdminCharities";
@@ -10,18 +10,22 @@ import AdminCharities from "../components/AdminCharities";
 function Admin() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [drawResult, setDrawResult] = useState(null);
-  const [loading, setLoading] = useState(true); // ✅ NEW
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const email = localStorage.getItem("email");
 
     if (!token) {
-      window.location.href = "/";
+      navigate("/");
+      return;
     }
 
     if (email !== "secure@gmail.com") {
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
+      return;
     }
 
     loadLeaderboard();
@@ -34,7 +38,7 @@ function Admin() {
     } catch (err) {
       console.error("ADMIN LOAD ERROR:", err);
     } finally {
-      setLoading(false); // 
+      setLoading(false);
     }
   };
 
@@ -42,14 +46,11 @@ function Admin() {
     try {
       const res = await API.post("/draw");
       setDrawResult(res.data);
-
-      loadLeaderboard(); // refresh
-
+      loadLeaderboard();
     } catch (err) {
       console.error("DRAW ERROR:", err);
     }
   };
-
 
   if (loading) {
     return <p style={{ color: "white", textAlign: "center" }}>Loading...</p>;
@@ -62,7 +63,7 @@ function Admin() {
       <div style={content}>
         <h1>⚙️ ADMIN DASHBOARD</h1>
 
-        {/* 🎲 DRAW */}
+        {/* DRAW */}
         <div style={card}>
           <h3>🎲 Draw Management</h3>
 
@@ -71,25 +72,20 @@ function Admin() {
           </button>
 
           {drawResult && (
-            <div style={{ marginTop: "10px" }}>
-              <p>
-                Latest Draw:{" "}
-                {Array.isArray(drawResult.numbers)
-                  ? drawResult.numbers.join(", ")
-                  : drawResult.numbers}
-              </p>
-            </div>
+            <p style={{ marginTop: "10px" }}>
+              Latest Draw: {drawResult.numbers}
+            </p>
           )}
         </div>
 
-        {/* 📊 MANAGEMENT */}
+        {/* MANAGEMENT */}
         <h2 style={{ marginTop: "20px" }}>📊 Management</h2>
 
         <AdminUsers />
         <AdminScores />
         <AdminCharities />
 
-        {/* 🏆 WINNERS */}
+        {/* LEADERBOARD */}
         <div style={card}>
           <h3>🏆 Winners</h3>
 
@@ -103,7 +99,6 @@ function Admin() {
             <p>No winners yet</p>
           )}
         </div>
-
       </div>
     </div>
   );
@@ -111,7 +106,7 @@ function Admin() {
 
 export default Admin;
 
-// 🎨 styles
+// styles
 const container = {
   background: "#0f172a",
   minHeight: "100vh",
