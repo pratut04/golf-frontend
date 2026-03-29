@@ -19,14 +19,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
 
-    // 🔐 PROTECTION
-    if (!token) {
-      navigate("/");
-      return;
-    }
-
-    if (!userId) {
-      console.error("❌ No userId found");
+    if (!token || !userId) {
       navigate("/");
       return;
     }
@@ -49,7 +42,6 @@ function Dashboard() {
     }
   };
 
-  // ✅ ADD SCORE
   const addScore = async (score, date) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -60,7 +52,6 @@ function Dashboard() {
         created_at: date
       };
 
-      // 🔥 instant UI update
       setData(prev => ({
         ...prev,
         scores: [newScore, ...(prev.scores || [])].slice(0, 5)
@@ -73,8 +64,7 @@ function Dashboard() {
       });
 
       alert("✅ Score added");
-
-      loadData(userId); // refresh
+      loadData(userId);
 
     } catch (err) {
       console.error(err);
@@ -82,7 +72,6 @@ function Dashboard() {
     }
   };
 
-  // ✅ SELECT CHARITY
   const selectCharity = async (id) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -100,7 +89,6 @@ function Dashboard() {
     }
   };
 
-  // ✅ DRAW RESULT
   const checkResult = async () => {
     try {
       const userId = localStorage.getItem("userId");
@@ -116,7 +104,6 @@ function Dashboard() {
     }
   };
 
-  // 🔥 LOADING FIX
   if (!data.user) {
     return (
       <p style={{ color: "white", textAlign: "center" }}>
@@ -132,20 +119,17 @@ function Dashboard() {
       <div style={content}>
         <h1>🎯 USER DASHBOARD</h1>
 
-        {/* SUBSCRIPTION */}
         <div style={card}>
           <h3>📌 Subscription</h3>
           <p>Status: {data.user.subscription_status || "N/A"}</p>
           <p>Email: {data.user.email}</p>
         </div>
 
-        {/* SCORE ENTRY */}
         <div style={card}>
           <h3>🏌️ Enter Score</h3>
           <ScoreForm addScore={addScore} />
         </div>
 
-        {/* SCORES */}
         <div style={card}>
           <h3>📊 Last 5 Scores</h3>
 
@@ -163,7 +147,6 @@ function Dashboard() {
           )}
         </div>
 
-        {/* CHARITY */}
         <div style={card}>
           <h3>❤️ Charity Selection</h3>
 
@@ -179,13 +162,11 @@ function Dashboard() {
           />
         </div>
 
-        {/* PARTICIPATION */}
         <div style={card}>
           <h3>📊 Participation</h3>
           <p>Total Scores Entered: {data.scores?.length || 0}</p>
         </div>
 
-        {/* DRAW */}
         <div style={card}>
           <h3>🎲 Draw & Result</h3>
 
@@ -201,10 +182,8 @@ function Dashboard() {
           )}
         </div>
 
-        {/* WINNINGS */}
         <Winnings winnings={data.winnings || []} />
 
-        {/* LEADERBOARD */}
         <div style={card}>
           <h3>🥇 Leaderboard</h3>
 
@@ -225,7 +204,6 @@ function Dashboard() {
 
 export default Dashboard;
 
-// 🎨 styles
 const container = {
   background: "#0f172a",
   minHeight: "100vh",
