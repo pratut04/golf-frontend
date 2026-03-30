@@ -11,6 +11,7 @@ function Admin() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [drawResult, setDrawResult] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [winnings, setWinnings] = useState([]);
 
   const navigate = useNavigate();
 
@@ -36,7 +37,7 @@ function Admin() {
       const res = await API.get("/leaderboard");
       setLeaderboard(res.data);
     } catch (err) {
-      console.error("ADMIN LOAD ERROR:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -48,7 +49,29 @@ function Admin() {
       setDrawResult(res.data);
       loadLeaderboard();
     } catch (err) {
-      console.error("DRAW ERROR:", err);
+      console.error(err);
+    }
+  };
+
+  const loadWinnings = async () => {
+    try {
+      const res = await API.get("/all-winnings");
+      setWinnings(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    loadWinnings();
+  }, []);
+
+  const approveWinning = async (id) => {
+    try {
+      await API.post("/approve-winning", { winning_id: id });
+      loadWinnings();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -57,47 +80,102 @@ function Admin() {
   }
 
   return (
-    <div style={container}>
-      <Navbar />
+    <div style={layout}>
+      {/* SIDEBAR */}
+      <div style={sidebar}>
+        <h2 style={{ marginBottom: "20px" }}>⚙️ Admin</h2>
 
-      <div style={content}>
-        <h1>⚙️ ADMIN DASHBOARD</h1>
+        <p style={navItem}>Dashboard</p>
+        <p style={navItem}>Users</p>
+        <p style={navItem}>Scores</p>
+        <p style={navItem}>Charities</p>
+        <p style={navItem}>Winnings</p>
+      </div>
 
-        {/* DRAW */}
-        <div style={card}>
-          <h3>🎲 Draw Management</h3>
+      {/* MAIN */}
+      <div style={main}>
+        <Navbar />
 
-          <button style={btn} onClick={runDraw}>
-            Run Draw
-          </button>
+        <div style={content}>
+          <h1 style={title}>Admin Dashboard</h1>
 
-          {drawResult && (
-            <p style={{ marginTop: "10px" }}>
-              Latest Draw: {drawResult.numbers}
-            </p>
-          )}
-        </div>
+          {/* DRAW */}
+          <div style={card}>
+            <h3>🎲 Draw Management</h3>
+            <button style={btn} onClick={runDraw}>
+              Run Draw
+            </button>
 
-        {/* MANAGEMENT */}
-        <h2 style={{ marginTop: "20px" }}>📊 Management</h2>
+            {drawResult && (
+              <p style={{ marginTop: "10px" }}>
+                {drawResult.numbers.join(", ")}
+              </p>
+            )}
+          </div>
 
-        <AdminUsers />
-        <AdminScores />
-        <AdminCharities />
+          {/* MANAGEMENT */}
+          <div style={card}>
+            <h3>📊 Management</h3>
+            <AdminUsers />
+            <AdminScores />
+            <AdminCharities />
+          </div>
 
-        {/* LEADERBOARD */}
-        <div style={card}>
-          <h3>🏆 Winners</h3>
+          {/* WINNINGS */}
+          <div style={card}>
+            <h3>💰 Winnings</h3>
 
-          {leaderboard.length > 0 ? (
-            leaderboard.map((l, i) => (
-              <div key={i} style={item}>
-                #{i + 1} {l.email} → {l.best_score}
+            {winnings.map((w) => (
+              <div key={w.id} style={row}>
+                <div>
+                  <div>{w.email}</div>
+                  <small style={{ color: "#9ca3af" }}>
+                    ₹{w.amount}
+                  </small>
+                </div>
+
+                <div>
+                  <span
+                    style={{
+                      color:
+                        w.status === "paid" ? "#22c55e" : "#facc15",
+                      marginRight: "10px",
+                    }}
+                  >
+                    {w.status}
+                  </span>
+
+                  {w.status === "pending" && (
+                    <button
+                      style={btn}
+                      onClick={() => approveWinning(w.id)}
+                    >
+                      Approve
+                    </button>
+                  )}
+                </div>
               </div>
-            ))
-          ) : (
-            <p>No winners yet</p>
-          )}
+            ))}
+          </div>
+
+          {/* LEADERBOARD */}
+          <div style={card}>
+            <h3>🏆 Leaderboard</h3>
+
+            {leaderboard.map((l, i) => (
+              <div key={i} style={row}>
+                <span>
+                  {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
+                </span>
+
+                <span style={{ flex: 1, marginLeft: "10px" }}>
+                  {l.email}
+                </span>
+
+                <span>🎯 {l.best_score}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -106,36 +184,75 @@ function Admin() {
 
 export default Admin;
 
-// styles
-const container = {
-  background: "#0f172a",
+//
+// 🎨 CLEAN LIGHT ADMIN STYLES
+//
+
+const layout = {
+  display: "flex",
   minHeight: "100vh",
-  color: "white"
+  background: "#f8fafc",   // ✅ clean light
+  color: "#0f172a"
+};
+
+const sidebar = {
+  width: "220px",
+  background: "#ffffff",   // ✅ white sidebar
+  padding: "20px",
+  borderRight: "1px solid #e2e8f0"
+};
+
+const navItem = {
+  padding: "10px 12px",
+  color: "#334155",
+  cursor: "pointer",
+  borderRadius: "8px",
+  marginBottom: "6px",
+  transition: "0.2s"
+};
+
+const main = {
+  flex: 1,
 };
 
 const content = {
-  padding: "20px",
-  maxWidth: "900px",
-  margin: "auto"
+  padding: "30px",
+  maxWidth: "1000px",
+  margin: "auto",
+};
+
+const title = {
+  fontSize: "30px",
+  fontWeight: "700",
+  marginBottom: "25px",
+  color: "#0f172a"
 };
 
 const card = {
-  background: "#1e293b",
-  padding: "15px",
-  borderRadius: "10px",
-  marginBottom: "20px"
+  background: "#ffffff",   // ✅ white card
+  padding: "20px",
+  borderRadius: "12px",
+  marginBottom: "20px",
+  border: "1px solid #e2e8f0",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
 };
 
-const item = {
-  padding: "6px 0",
-  borderBottom: "1px solid #333"
+const row = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "10px 0",
+  borderBottom: "1px solid #e2e8f0",
 };
 
 const btn = {
-  padding: "8px 12px",
-  background: "#4caf50",
-  color: "white",
+  padding: "10px 16px",
+  background: "#2563eb",   // ✅ professional blue
   border: "none",
-  borderRadius: "6px",
-  cursor: "pointer"
+  borderRadius: "8px",
+  color: "white",
+  cursor: "pointer",
+  fontWeight: "600",
+  boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
+  transition: "0.2s"
 };

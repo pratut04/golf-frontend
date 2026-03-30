@@ -5,7 +5,7 @@ function AdminCharities() {
   const [charities, setCharities] = useState([]);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [adding, setAdding] = useState(false); // ✅ NEW
+  const [adding, setAdding] = useState(false); 
 
   useEffect(() => {
     loadCharities();

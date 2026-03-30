@@ -10,7 +10,7 @@ function Navbar() {
     localStorage.removeItem("userId");
     localStorage.removeItem("email");
 
-    navigate("/"); // ✅ better than reload
+    navigate("/"); 
   };
 
   return (
@@ -19,16 +19,21 @@ function Navbar() {
 
       <div style={links}>
         <button
-          style={btn}
+          style={navBtn}
           onClick={() => navigate("/dashboard")}
         >
           Dashboard
         </button>
 
-        {/* 🔐 ADMIN ONLY */}
+        {/*  NEW SUBSCRIPTION BUTTON */}
+        <button style={navBtn} onClick={() => navigate("/subscription")}>
+          Subscription
+        </button>
+
+        {/*  ADMIN ONLY */}
         {email === "secure@gmail.com" && (
           <button
-            style={btn}
+            style={navBtn}
             onClick={() => navigate("/admin")}
           >
             Admin
@@ -49,10 +54,12 @@ export default Navbar;
 const nav = {
   display: "flex",
   justifyContent: "space-between",
-  background: "#111",
-  padding: "15px 20px",
-  borderBottom: "1px solid #333",
-  color: "white"
+  alignItems: "center",
+  padding: "14px 24px",
+  background: "rgba(2,6,23,0.8)",
+  backdropFilter: "blur(10px)",
+  borderBottom: "1px solid rgba(255,255,255,0.08)",
+  color: "#e5e7eb"
 };
 
 const links = {
@@ -61,19 +68,31 @@ const links = {
 };
 
 const btn = {
-  background: "#222",
-  color: "white",
-  border: "none",
-  padding: "8px 12px",
-  borderRadius: "6px",
-  cursor: "pointer"
+  background: "transparent",
+  color: "#cbd5e1",
+  border: "1px solid rgba(255,255,255,0.1)",
+  padding: "8px 14px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  transition: "all 0.25s ease"
 };
 
 const logoutBtn = {
-  background: "#ff4d4d",
+  background: "#ef4444",
   color: "white",
   border: "none",
-  padding: "8px 12px",
-  borderRadius: "6px",
-  cursor: "pointer"
+  padding: "8px 14px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontWeight: "600"
+};
+
+const navBtn = {
+  background: "transparent",
+  color: "#cbd5e1",
+  border: "1px solid rgba(255,255,255,0.1)",
+  padding: "8px 14px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  boxShadow: "none" 
 };

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 function ScoreForm({ addScore }) {
   const [score, setScore] = useState("");
-  const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -21,19 +20,16 @@ function ScoreForm({ addScore }) {
       return;
     }
 
-    if (!date) {
-      alert("Select date");
-      return;
-    }
+    
 
     try {
       setLoading(true);
 
-      await addScore(num, date);
+      await addScore(num);
 
       // ✅ reset
       setScore("");
-      setDate("");
+  
 
     } catch (err) {
       console.error("Score submit error:", err);
@@ -55,12 +51,7 @@ function ScoreForm({ addScore }) {
         style={input}
       />
 
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        style={input}
-      />
+      
 
       <button onClick={handleSubmit} style={btn} disabled={loading}>
         {loading ? "Submitting..." : "Submit"}
@@ -71,27 +62,34 @@ function ScoreForm({ addScore }) {
 
 export default ScoreForm;
 
-// 🎨 styles
+// 🎨 LIGHT THEME STYLES
+
 const card = {
-  background: "#1e1e1e",
+  background: "#f8fafc",              // ✅ light background
   padding: "15px",
-  borderRadius: "8px",
+  borderRadius: "10px",
   marginBottom: "15px",
-  color: "white"
+  border: "1px solid #e2e8f0",
+  color: "#0f172a",                  // ✅ dark text
 };
 
 const input = {
-  padding: "8px",
+  padding: "10px",
   marginRight: "10px",
   borderRadius: "6px",
-  border: "none"
+  border: "1px solid #e2e8f0",
+  background: "#ffffff",             // ✅ white input
+  color: "#0f172a",
+  outline: "none"
 };
 
 const btn = {
-  padding: "8px 12px",
-  background: "#4caf50",
+  padding: "10px 14px",
+  background: "#2563eb",             // ✅ professional blue
   color: "white",
   border: "none",
   borderRadius: "6px",
-  cursor: "pointer"
+  cursor: "pointer",
+  fontWeight: "600",
+  boxShadow: "0 4px 10px rgba(37,99,235,0.25)"
 };

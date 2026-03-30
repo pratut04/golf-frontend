@@ -36,7 +36,6 @@ function Dashboard() {
       setData(d.data);
       setCharities(c.data);
       setLeaderboard(l.data);
-
     } catch (err) {
       console.error("LOAD ERROR:", err);
     }
@@ -46,26 +45,13 @@ function Dashboard() {
     try {
       const userId = localStorage.getItem("userId");
 
-      const newScore = {
-        id: Date.now(),
-        score: Number(score),
-        created_at: date
-      };
-
-      setData(prev => ({
-        ...prev,
-        scores: [newScore, ...(prev.scores || [])].slice(0, 5)
-      }));
-
       await API.post("/scores", {
         user_id: userId,
         score: Number(score),
-        created_at: date
       });
 
       alert("✅ Score added");
       loadData(userId);
-
     } catch (err) {
       console.error(err);
       alert("❌ Error adding score");
@@ -83,7 +69,6 @@ function Dashboard() {
 
       alert("Charity selected ✅");
       loadData(userId);
-
     } catch (err) {
       console.error("CHARITY ERROR:", err);
     }
@@ -98,7 +83,7 @@ function Dashboard() {
       });
 
       setResult(res.data);
-
+      loadData(userId);
     } catch (err) {
       console.error("DRAW ERROR:", err);
     }
@@ -117,22 +102,73 @@ function Dashboard() {
       <Navbar />
 
       <div style={content}>
-        <h1>🎯 USER DASHBOARD</h1>
+        <h1 style={title}>🎯 User Dashboard</h1>
 
-        <div style={card}>
-          <h3>📌 Subscription</h3>
-          <p>Status: {data.user.subscription_status || "N/A"}</p>
-          <p>Email: {data.user.email}</p>
+        {/* Subscription */}
+        <div
+          style={card}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-4px)";
+            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.08)";
+          }}
+        >
+          <h3 style={{ marginBottom: "10px" }}>📌 Subscription</h3>
+
+          <div style={{ lineHeight: "1.8" }}>
+            <p style={textSecondary}>
+              Status:{" "}
+              <span
+                style={{
+                  ...textPrimary,
+                  color:
+                    data.user.subscription_status === "active"
+                      ? "#22c55e"
+                      : "#ef4444"
+                }}
+              >
+                {data.user.subscription_status || "Not Subscribed"}
+              </span>
+            </p>
+
+            <p style={textSecondary}>
+              Plan:{" "}
+              <span style={textPrimary}>
+                {data.user.subscription_type === "yearly"
+                  ? "Yearly Plan 🏆"
+                  : data.user.subscription_type === "monthly"
+                    ? "Monthly Plan 📅"
+                    : "N/A"}
+              </span>
+            </p>
+
+            <p style={textSecondary}>
+              Expiry:{" "}
+              <span style={textPrimary}>
+                {data.user.subscription_end
+                  ? new Date(data.user.subscription_end).toLocaleDateString()
+                  : "N/A"}
+              </span>
+            </p>
+
+            <p style={textSecondary}>
+              Email: <span style={textPrimary}>{data.user.email}</span>
+            </p>
+          </div>
         </div>
 
-        <div style={card}>
+        {/* Score */}
+        <div style={cardHover}>
           <h3>🏌️ Enter Score</h3>
           <ScoreForm addScore={addScore} />
         </div>
 
-        <div style={card}>
+        {/* Scores */}
+        <div style={cardHover}>
           <h3>📊 Last 5 Scores</h3>
-
           {data.scores?.length > 0 ? (
             data.scores.map((s) => (
               <div key={s.id} style={item}>
@@ -147,14 +183,16 @@ function Dashboard() {
           )}
         </div>
 
-        <div style={card}>
+        {/* Charity */}
+        <div style={cardHover}>
           <h3>❤️ Charity Selection</h3>
-
-          <p>
+          <p style={{ color: "#334155" }}>
             Selected:{" "}
-            <b>{data.user.charity_name || "Not selected"}</b>
+            <span style={{ color: "#16a34a", fontWeight: "600" }}>
+              {data.user.charity_name || "Not selected"}
+            </span>
           </p>
-
+          
           <CharityList
             charities={charities}
             selectCharity={selectCharity}
@@ -162,35 +200,58 @@ function Dashboard() {
           />
         </div>
 
-        <div style={card}>
+        {/* Participation */}
+        <div style={cardHover}>
           <h3>📊 Participation</h3>
-          <p>Total Scores Entered: {data.scores?.length || 0}</p>
+          <p style={{ color: "#334155", fontWeight: "500" }}>
+            Total Scores Entered:
+            <span style={{ color: "#0f172a", fontWeight: "600" }}>
+              {" "} {data.scores?.length || 0}
+            </span>
+          </p>
         </div>
 
-        <div style={card}>
+        {/* Result */}
+        <div style={cardHover}>
           <h3>🎲 Draw & Result</h3>
 
-          <button style={btn} onClick={checkResult}>
+          <button
+            style={btn}
+            onClick={checkResult}
+            onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"}
+            onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
+          >
             Check Result
           </button>
 
           {result && (
             <div style={{ marginTop: "10px" }}>
               <p>Result: {result.result}</p>
-              <p>Number: {result.number}</p>
+              <p>Numbers: {result.numbers?.join(", ")}</p>
             </div>
           )}
         </div>
 
         <Winnings winnings={data.winnings || []} />
 
-        <div style={card}>
+        {/* Leaderboard */}
+        <div style={cardHover}>
           <h3>🥇 Leaderboard</h3>
 
           {leaderboard.length > 0 ? (
             leaderboard.map((l, i) => (
               <div key={i} style={item}>
-                #{i + 1} {l.email} → {l.best_score}
+                <span>
+                  {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
+                </span>
+
+                <span style={{ flex: 1, marginLeft: "10px" }}>
+                  {l.email}
+                </span>
+
+                <span style={{ fontWeight: "600" }}>
+                  🎯 {l.best_score}
+                </span>
               </div>
             ))
           ) : (
@@ -204,35 +265,77 @@ function Dashboard() {
 
 export default Dashboard;
 
+//
+// 🎨 PREMIUM STYLES
+//
+
+const theme = {
+  bg: "#0b1120",
+  card: "#111827",
+  border: "#1f2937",
+  text: "#e5e7eb",
+  subText: "#9ca3af",
+  primary: "#22c55e"
+};
+
 const container = {
-  background: "#0f172a",
+  background: "#f8fafc",
   minHeight: "100vh",
-  color: "white"
+  color: "#0f172a"
 };
 
 const content = {
-  padding: "20px",
-  maxWidth: "800px",
+  padding: "30px 20px",
+  maxWidth: "900px",
   margin: "auto"
 };
 
-const card = {
-  background: "#1e293b",
-  padding: "15px",
-  borderRadius: "10px",
+const title = {
+  fontSize: "28px",
+  fontWeight: "700",
   marginBottom: "20px"
 };
 
+const card = {
+  background: "white", // ✅ no blue
+  backdropFilter: "blur(12px)",
+  padding: "20px",
+  borderRadius: "16px",
+  marginBottom: "20px",
+  border: "1px solid rgba(255,255,255,0.06)",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+};
+
+const cardHover = {
+  ...card
+};
+
 const item = {
-  padding: "6px 0",
-  borderBottom: "1px solid #333"
+  padding: "10px 0",
+  borderBottom: `1px solid ${theme.border}`
+};
+
+const subText = {
+  color: theme.subText
 };
 
 const btn = {
-  padding: "8px 12px",
-  background: "#4caf50",
+  padding: "10px 16px",
+  background: theme.primary,
   color: "white",
   border: "none",
-  borderRadius: "6px",
-  cursor: "pointer"
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontWeight: "600",
+  boxShadow: "0 4px 14px rgba(34,197,94,0.4)",
+  transition: "0.2s"
+};
+
+const textPrimary = {
+  color: "#0f172a",
+  fontWeight: "600"
+};
+
+const textSecondary = {
+  color: "#64748b"
 };

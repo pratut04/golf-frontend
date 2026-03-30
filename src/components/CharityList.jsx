@@ -16,7 +16,10 @@ function CharityList({ charities, selectCharity, selectedId }) {
               key={c.id}
               style={{
                 ...item,
-                background: isSelected ? "#2e7d32" : "transparent"
+                background: isSelected ? "#f0fdf4" : "#f8fafc",
+                border: isSelected
+                  ? "2px solid #22c55e"
+                  : "1px solid #e2e8f0"
               }}
             >
               <p>
@@ -26,15 +29,17 @@ function CharityList({ charities, selectCharity, selectedId }) {
               <button
                 style={{
                   ...btn,
-                  background: isSelected ? "#888" : "#4caf50",
+                  background: isSelected ? "#22c55e" : "white",
+                  color: isSelected ? "white" : "#16a34a",
+                  border: "1px solid #22c55e",
                   cursor: isSelected ? "not-allowed" : "pointer"
                 }}
                 disabled={isSelected}
                 onClick={() => {
-                  if (!isSelected) selectCharity(c.id); // ✅ safety
+                  if (!isSelected) selectCharity(c.id); // ✅ same logic
                 }}
               >
-                {isSelected ? "Selected ✅" : "Select"}
+                {isSelected ? "Selected ✓" : "Select"}
               </button>
             </div>
           );
@@ -46,25 +51,33 @@ function CharityList({ charities, selectCharity, selectedId }) {
 
 export default CharityList;
 
-// 🎨 styles
+//
+// 🎨 LIGHT THEME STYLES
+//
+
 const card = {
-  background: "#1e1e1e",
+  background: "#ffffff",
   padding: "15px",
-  borderRadius: "8px",
+  borderRadius: "12px",
   marginBottom: "15px",
-  color: "white"
+  border: "1px solid #e2e8f0",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+  color: "#0f172a"
 };
 
 const item = {
-  borderBottom: "1px solid #333",
-  padding: "10px",
-  borderRadius: "6px",
-  marginBottom: "8px"
+  padding: "14px",
+  borderRadius: "10px",
+  marginBottom: "10px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0"
 };
 
 const btn = {
-  padding: "6px 10px",
-  border: "none",
+  padding: "6px 12px",
   borderRadius: "6px",
-  color: "white"
+  fontWeight: "500"
 };
