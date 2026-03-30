@@ -44,7 +44,7 @@ export default Winnings;
 
 // 🎨 styles
 const card = {
-  background: "#1e1e1e",
+  background: "#1e293b",
   padding: "15px",
   borderRadius: "8px",
   marginTop: "15px",
@@ -52,10 +52,10 @@ const card = {
 };
 
 const box = {
-  background: "#111",
-  padding: "10px",
-  borderRadius: "6px",
-  marginTop: "10px",
+  background: "#334155",
+  padding: "12px",
+  borderRadius: "8px",
+  marginTop: "12px",
   border: "1px solid #333"
 };
 

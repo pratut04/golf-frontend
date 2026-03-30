@@ -10,21 +10,31 @@ import Winnings from "../components/Winnings";
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [data, setData] = useState({});
+  const [data, setData] = useState(null); // ✅ FIX
   const [charities, setCharities] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [result, setResult] = useState(null);
+
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
 
+    // ✅ Auth check
     if (!token || !userId) {
       navigate("/");
       return;
     }
 
+    // ✅ Subscription check
+    API.post("/check-subscription", {
+      user_id: userId
+    });
+
+    // ✅ Load dashboard data
     loadData(userId);
+
   }, []);
 
   const loadData = async (userId) => {
@@ -36,12 +46,48 @@ function Dashboard() {
       setData(d.data);
       setCharities(c.data);
       setLeaderboard(l.data);
+
     } catch (err) {
       console.error("LOAD ERROR:", err);
+
+      alert("❌ Failed to load dashboard (check backend)");
     }
   };
 
+  // ✅ FIXED LOADING CONDITION
+  if (!data) {
+    return (
+      <p style={{ color: "white", textAlign: "center" }}>
+        Loading...
+      </p>
+    );
+  }
+
+  // ✅ ERROR CASE
+  if (data.error) {
+    return (
+      <p style={{ color: "red", textAlign: "center" }}>
+        Failed to load dashboard ❌ (check backend)
+      </p>
+    );
+  }
+
+  // ✅ SAFETY CHECK
+  if (!data.user) {
+    return (
+      <p style={{ color: "white", textAlign: "center" }}>
+        No user data found ❌
+      </p>
+    );
+  }
+
+  //=================addScore Function===============
   const addScore = async (score, date) => {
+    // 🔒 BLOCK IF INACTIVE
+    if (data?.user?.subscription_status !== "active") {
+      alert("Please subscribe to continue");
+      return;
+    }
     try {
       const userId = localStorage.getItem("userId");
 
@@ -57,8 +103,14 @@ function Dashboard() {
       alert("❌ Error adding score");
     }
   };
-
+  //================selectCharitiey function==================
   const selectCharity = async (id) => {
+
+    // 🔒 BLOCK IF INACTIVE
+    if (data?.user?.subscription_status !== "active") {
+      alert("Please subscribe to continue");
+      return;
+    }
     try {
       const userId = localStorage.getItem("userId");
 
@@ -68,13 +120,18 @@ function Dashboard() {
       });
 
       alert("Charity selected ✅");
-      loadData(userId);
+      await loadData(userId);
     } catch (err) {
       console.error("CHARITY ERROR:", err);
     }
   };
 
   const checkResult = async () => {
+    // 🔒 BLOCK IF INACTIVE
+    if (data?.user?.subscription_status !== "active") {
+      alert("Please subscribe to continue");
+      return;
+    }
     try {
       const userId = localStorage.getItem("userId");
 
@@ -83,7 +140,8 @@ function Dashboard() {
       });
 
       setResult(res.data);
-      loadData(userId);
+
+      await loadData(userId);
     } catch (err) {
       console.error("DRAW ERROR:", err);
     }
@@ -97,12 +155,14 @@ function Dashboard() {
     );
   }
 
+
   return (
     <div style={container}>
       <Navbar />
 
       <div style={content}>
         <h1 style={title}>🎯 User Dashboard</h1>
+
 
         {/* Subscription */}
         <div
@@ -118,48 +178,52 @@ function Dashboard() {
         >
           <h3 style={{ marginBottom: "10px" }}>📌 Subscription</h3>
 
-          <div style={{ lineHeight: "1.8" }}>
-            <p style={textSecondary}>
-              Status:{" "}
-              <span
-                style={{
-                  ...textPrimary,
-                  color:
-                    data.user.subscription_status === "active"
-                      ? "#22c55e"
-                      : "#ef4444"
-                }}
+          {data.user.subscription_status !== "active" ? (
+            <>
+              <p style={textSecondary}>
+                Status: <span style={{ color: "#ef4444" }}>Not Subscribed</span>
+              </p>
+
+              <button
+                style={btn}
+                onClick={() => navigate("/subscription")}
               >
-                {data.user.subscription_status || "Not Subscribed"}
-              </span>
-            </p>
+                💳 Subscribe Now
+              </button>
+            </>
+          ) : (
+            <>
+              <div style={{ lineHeight: "1.8" }}>
+                <p style={textSecondary}>
+                  Status:{" "}
+                  <span style={{ ...textPrimary, color: "#22c55e" }}>
+                    Active
+                  </span>
+                </p>
 
-            <p style={textSecondary}>
-              Plan:{" "}
-              <span style={textPrimary}>
-                {data.user.subscription_type === "yearly"
-                  ? "Yearly Plan 🏆"
-                  : data.user.subscription_type === "monthly"
-                    ? "Monthly Plan 📅"
-                    : "N/A"}
-              </span>
-            </p>
+                <p style={textSecondary}>
+                  Plan:{" "}
+                  <span style={textPrimary}>
+                    {data.user.subscription_type === "yearly"
+                      ? "Yearly Plan 🏆"
+                      : "Monthly Plan 📅"}
+                  </span>
+                </p>
 
-            <p style={textSecondary}>
-              Expiry:{" "}
-              <span style={textPrimary}>
-                {data.user.subscription_end
-                  ? new Date(data.user.subscription_end).toLocaleDateString()
-                  : "N/A"}
-              </span>
-            </p>
+                <p style={textSecondary}>
+                  Expiry:{" "}
+                  <span style={textPrimary}>
+                    {new Date(data.user.subscription_end).toLocaleDateString()}
+                  </span>
+                </p>
 
-            <p style={textSecondary}>
-              Email: <span style={textPrimary}>{data.user.email}</span>
-            </p>
-          </div>
+                <p style={textSecondary}>
+                  Email: <span style={textPrimary}>{data.user.email}</span>
+                </p>
+              </div>
+            </>
+          )}
         </div>
-
         {/* Score */}
         <div style={cardHover}>
           <h3>🏌️ Enter Score</h3>
@@ -192,7 +256,7 @@ function Dashboard() {
               {data.user.charity_name || "Not selected"}
             </span>
           </p>
-          
+
           <CharityList
             charities={charities}
             selectCharity={selectCharity}
@@ -216,7 +280,17 @@ function Dashboard() {
           <h3>🎲 Draw & Result</h3>
 
           <button
-            style={btn}
+            style={{
+              background: "#2563eb",   // ✅ blue
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "500",
+              transition: "all 0.2s ease",
+              boxShadow: "0 4px 10px rgba(37, 99, 235, 0.4)"
+            }}
             onClick={checkResult}
             onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"}
             onMouseLeave={(e) => e.target.style.transform = "scale(1)"}

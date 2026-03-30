@@ -25,7 +25,7 @@ function Navbar() {
           Dashboard
         </button>
 
-        {/*  NEW SUBSCRIPTION BUTTON */}
+        {/* NEW SUBSCRIPTION BUTTON */}
         <button style={navBtn} onClick={() => navigate("/subscription")}>
           Subscription
         </button>
@@ -84,7 +84,8 @@ const logoutBtn = {
   padding: "8px 14px",
   borderRadius: "8px",
   cursor: "pointer",
-  fontWeight: "600"
+  fontWeight: "600",
+  boxShadow:"0 4px 14px rgba(239,68,68,0.5)"
 };
 
 const navBtn = {

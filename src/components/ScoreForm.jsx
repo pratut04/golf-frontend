@@ -65,7 +65,7 @@ export default ScoreForm;
 // 🎨 LIGHT THEME STYLES
 
 const card = {
-  background: "#f8fafc",              // ✅ light background
+  background: "#0f172a",              // ✅ light background
   padding: "15px",
   borderRadius: "10px",
   marginBottom: "15px",

@@ -90,6 +90,8 @@ function Admin() {
         <p style={navItem}>Scores</p>
         <p style={navItem}>Charities</p>
         <p style={navItem}>Winnings</p>
+        <p style={navItem}>Leaderboard</p>
+
       </div>
 
       {/* MAIN */}

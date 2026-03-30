@@ -5,6 +5,9 @@ function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Get current user ID (string)
+  const currentUserId = localStorage.getItem("userId");
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -24,7 +27,6 @@ function AdminUsers() {
     <div style={card}>
       <h3>👥 User Management</h3>
 
-      {/* ✅ TOTAL USERS */}
       {!loading && (
         <p style={{ marginBottom: "10px" }}>
           Total Users: <b>{users.length}</b>
@@ -37,13 +39,25 @@ function AdminUsers() {
         <p>No users found</p>
       ) : (
         users
-          .slice() // avoid mutating state
-          .reverse() // ✅ latest first
-          .map((u, index) => (
-            <div key={u.id} style={item}>
-              #{index + 1} {u.email}
-            </div>
-          ))
+          .slice()
+          .reverse()
+          .map((u, index) => {
+            // ✅ FIX: loose comparison (handles string/number)
+            const isYou = u.id == currentUserId;
+
+            return (
+              <div key={u.id} style={item}>
+                #{index + 1} {u.email}
+
+                {/* ✅ YOU BADGE */}
+                {isYou && (
+                  <span style={youBadge}>
+                    You
+                  </span>
+                )}
+              </div>
+            );
+          })
       )}
     </div>
   );
@@ -51,7 +65,10 @@ function AdminUsers() {
 
 export default AdminUsers;
 
-// 🎨 styles
+//
+// 🎨 STYLES
+//
+
 const card = {
   background: "#1e293b",
   padding: "15px",
@@ -62,5 +79,18 @@ const card = {
 
 const item = {
   padding: "6px 0",
-  borderBottom: "1px solid #333"
+  borderBottom: "1px solid #333",
+  display: "flex",
+  alignItems: "center"
+};
+
+// ✅ Premium "You" badge
+const youBadge = {
+  background: "#22c55e",
+  color: "white",
+  padding: "2px 8px",
+  borderRadius: "6px",
+  fontSize: "12px",
+  marginLeft: "8px",
+  fontWeight: "600"
 };
