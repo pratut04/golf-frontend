@@ -7,7 +7,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate(); // ✅ important
+  const navigate = useNavigate(); //  important
 
   const login = async () => {
     if (loading) return;
@@ -20,7 +20,7 @@ function Login() {
     try {
       setLoading(true);
 
-      // 🔥 wake backend (Render sleep fix)
+      // wake backend (Render sleep fix)
       await fetch("https://golf-backend-new.onrender.com");
 
       const res = await API.post("/login", {
@@ -28,12 +28,12 @@ function Login() {
         password: password.trim()
       });
 
-      // ✅ STORE DATA
+      // STORE DATA
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.user.id);
       localStorage.setItem("email", res.data.user.email);
 
-      // ✅ REDIRECT (React way - NO reload)
+      // REDIRECT 
       if (res.data.user.email === "secure@gmail.com") {
         navigate("/admin");
       } else {
@@ -55,26 +55,28 @@ function Login() {
   };
 
   return (
-    <div className="login-box">
-      <h2>Login</h2>
+    <div className="login-container">
+      <div className="login-box">
+        <h2>Login</h2>
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      <button onClick={login} disabled={loading}>
-        {loading ? "Loading..." : "Login"}
-      </button>
+        <button onClick={login} disabled={loading}>
+          {loading ? "Loading..." : "Login"}
+        </button>
+      </div>
     </div>
   );
 }

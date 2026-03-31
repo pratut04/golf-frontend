@@ -5,7 +5,7 @@
   box-sizing: border-box;
 }
 
-/* BODY (🔥 PREMIUM BACKGROUND) */
+/* BODY  */
 body {
   font-family: "Segoe UI", sans-serif;
   background: radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 60%), #020617;
@@ -25,7 +25,7 @@ h1, h2, h3 {
   font-weight: 600;
 }
 
-/* BUTTON (🔥 MODERN BUTTON) */
+/* BUTTON  */
 button {
   background: linear-gradient(135deg, #22c55e, #15803d);
   border: none;
@@ -44,7 +44,7 @@ button:hover {
   box-shadow: 0 10px 25px rgba(34,197,94,0.6);
 }
 
-/* INPUT (🔥 CLEAN DARK INPUT) */
+/* INPUT */
 input {
   padding: 10px;
   margin: 8px 0;
@@ -64,18 +64,48 @@ input:focus {
 
 /* LOGIN BOX */
 .login-box {
-  width: 350px;
-  margin: 100px auto;
+  background: #ffffff; /* white */
   padding: 30px;
-  background: rgba(2, 6, 23, 0.8);
-  border-radius: 14px;
+  border-radius: 12px;
+  width: 320px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   text-align: center;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
-/* CARD (🔥 PREMIUM GLASS CARD) */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;     /* vertical center */
+  justify-content: center; /* horizontal center */
+}
+.login-box h2 {
+  color: #1e293b; /* dark text */
+}
+
+/* ✅ FIXED INPUTS INSIDE LOGIN */
+.login-box input {
+  background: #f9fafb;   /* light input */
+  color: #1e293b;        /* dark text */
+  border: 1px solid #ccc;
+}
+
+/* ✅ PLACEHOLDER FIX */
+.login-box input::placeholder {
+  color: #64748b;
+}
+
+/* LOGIN BUTTON */
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* CARD  */
 .card {
   background: rgba(2, 6, 23, 0.7);
   backdrop-filter: blur(12px);

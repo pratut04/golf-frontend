@@ -24,19 +24,25 @@ const AdminRoute = ({ children }) => {
 };
 
 // 🔐 Public Route (FIXED)
+
+
 const PublicRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const email = localStorage.getItem("email");
-
-  if (!token) return children;
-
-  // 🔥 smarter redirect
-  if (email === "secure@gmail.com") {
-    return <Navigate to="/admin" />;
-  }
-
-  return <Navigate to="/dashboard" />;
+  return children;
 };
+
+// const PublicRoute = ({ children }) => {
+//   const token = localStorage.getItem("token");
+//   const email = localStorage.getItem("email");
+
+//   if (!token) return children;
+
+//   //  smarter redirect
+//   if (email === "secure@gmail.com") {
+//     return <Navigate to="/admin" />;
+//   }
+
+//   return <Navigate to="/dashboard" />;
+// };
 
 function App() {
   return (

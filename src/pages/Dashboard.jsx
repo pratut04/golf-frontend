@@ -14,29 +14,38 @@ function Dashboard() {
   const [charities, setCharities] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [result, setResult] = useState(null);
-
+  const [subscriptionStatus, setSubscriptionStatus] = useState("active");
 
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
+    const checkAndLoad = async () => {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
 
-    // ✅ Auth check
-    if (!token || !userId) {
-      navigate("/");
-      return;
-    }
+      if (!token || !userId) {
+        navigate("/");
+        return;
+      }
 
-    // ✅ Subscription check
-    API.post("/check-subscription", {
-      user_id: userId
-    });
+      try {
+        const res = await API.post("/check-subscription", {
+          user_id: userId
+        });
 
-    // ✅ Load dashboard data
-    loadData(userId);
+        // ✅ store status
+        setSubscriptionStatus(res.data.status);
 
+
+        // ✅ ALWAYS load dashboard
+        loadData(userId);
+
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    checkAndLoad();
   }, []);
-
   const loadData = async (userId) => {
     try {
       const d = await API.get(`/dashboard/${userId}`);
