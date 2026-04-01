@@ -91,14 +91,26 @@ function Dashboard() {
   }
 
   //=================addScore Function===============
-  const addScore = async (score, date) => {
-    // 🔒 BLOCK IF INACTIVE
-    if (data?.user?.subscription_status !== "active") {
-      alert("Please subscribe to continue");
-      return;
-    }
+  const addScore = async (score) => {
     try {
       const userId = localStorage.getItem("userId");
+
+      const subRes = await API.post("/check-subscription", {
+        user_id: userId
+      });
+
+      if (subRes.data.status !== "active") {
+        const end = subRes.data.subscription_end;
+
+        let msg = "Subscription expired ❌";
+
+        if (end) {
+          msg = `Your subscription ended on ${new Date(end).toLocaleDateString()} ❌ Please Subscribe`;
+        }
+
+        alert(msg);
+        return;
+      }
 
       await API.post("/scores", {
         user_id: userId,
@@ -107,22 +119,33 @@ function Dashboard() {
 
       alert("✅ Score added");
       loadData(userId);
+
     } catch (err) {
       console.error(err);
-      alert("❌ Error adding score");
+      alert("Error adding score");
     }
   };
   //================selectCharitiey function==================
   const selectCharity = async (id) => {
 
-    // 🔒 BLOCK IF INACTIVE
-    if (data?.user?.subscription_status !== "active") {
-      alert("Please subscribe to continue");
-      return;
-    }
     try {
       const userId = localStorage.getItem("userId");
+      const subRes = await API.post("/check-subscription", {
+        user_id: userId
+      });
 
+      if (subRes.data.status !== "active") {
+        const end = subRes.data.subscription_end;
+
+        let msg = "Subscription expired ❌";
+
+        if (end) {
+          msg = `Your subscription ended on ${new Date(end).toLocaleDateString()} ❌ Please Subscribe`;
+        }
+
+        alert(msg);
+        return;
+      }
       await API.post("/select-charity", {
         user_id: userId,
         charity_id: id
@@ -136,33 +159,36 @@ function Dashboard() {
   };
 
   const checkResult = async () => {
-    // 🔒 BLOCK IF INACTIVE
-    if (data?.user?.subscription_status !== "active") {
-      alert("Please subscribe to continue");
-      return;
-    }
     try {
       const userId = localStorage.getItem("userId");
+      const subRes = await API.post("/check-subscription", {
+        user_id: userId
+      });
+
+      if (subRes.data.status !== "active") {
+        const end = subRes.data.subscription_end;
+
+        let msg = "Subscription expired ❌";
+
+        if (end) {
+          msg = `Your subscription ended on ${new Date(end).toLocaleDateString()} ❌ Please Subscribe`;
+        }
+
+        alert(msg);
+        return;
+      }
 
       const res = await API.post("/check-result", {
         user_id: userId
       });
 
       setResult(res.data);
+      loadData(userId);
 
-      await loadData(userId);
     } catch (err) {
-      console.error("DRAW ERROR:", err);
+      console.error(err);
     }
   };
-
-  if (!data.user) {
-    return (
-      <p style={{ color: "white", textAlign: "center" }}>
-        Loading...
-      </p>
-    );
-  }
 
 
   return (
@@ -187,11 +213,21 @@ function Dashboard() {
         >
           <h3 style={{ marginBottom: "10px" }}>📌 Subscription</h3>
 
-          {data.user.subscription_status !== "active" ? (
+          {subscriptionStatus !== "active" ? (
             <>
               <p style={textSecondary}>
                 Status: <span style={{ color: "#ef4444" }}>Not Subscribed</span>
               </p>
+
+              {/* ✅ SHOW EXPIRED DATE */}
+              {data.user.subscription_end && (
+                <p style={textSecondary}>
+                  Last expiry:{" "}
+                  <span style={textPrimary}>
+                    {new Date(data.user.subscription_end).toLocaleDateString()}
+                  </span>
+                </p>
+              )}
 
               <button
                 style={btn}

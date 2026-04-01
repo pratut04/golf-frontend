@@ -20,8 +20,8 @@ function Login() {
     try {
       setLoading(true);
 
-      // wake backend (Render sleep fix)
-      await fetch("https://golf-backend-new.onrender.com");
+      // // wake backend (Render sleep fix)
+      // await fetch("https://golf-backend-new.onrender.com");
 
       const res = await API.post("/login", {
         email: email.trim(),
