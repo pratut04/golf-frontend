@@ -31,7 +31,7 @@ function Dashboard() {
         const res = await API.post("/check-subscription", {
           user_id: userId
         });
-
+        console.log("SUBSCRIPTION API RESPONSE:", res.data);
         // ✅ store status
         setSubscriptionStatus(res.data.status);
 
@@ -197,8 +197,7 @@ function Dashboard() {
 
       <div style={content}>
         <h1 style={title}>🎯 User Dashboard</h1>
-
-
+        
         {/* Subscription */}
         <div
           style={card}

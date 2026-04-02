@@ -41,7 +41,7 @@ function ScoreForm({ addScore }) {
 
   return (
     <div style={card}>
-      <h3>🎯 Add Score</h3>
+      <h3 style={{color: "white"}}>🎯 Add Score</h3>
 
       <input
         type="number"

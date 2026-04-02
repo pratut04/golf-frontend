@@ -3,7 +3,7 @@ import React from "react";
 function CharityList({ charities, selectCharity, selectedId }) {
   return (
     <div style={card}>
-      <h3>Charity Selection</h3>
+      <h3 style={{color: "white"}}>Charity Selection</h3>
 
       {charities.length === 0 ? (
         <p style={{ opacity: 0.7 }}>No charities available 😢</p>
