@@ -12,6 +12,7 @@ function Admin() {
   const [drawResult, setDrawResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [winnings, setWinnings] = useState([]);
+  const [numbers, setNumbers] = useState([]);
 
   const navigate = useNavigate();
 
@@ -32,6 +33,10 @@ function Admin() {
     loadLeaderboard();
   }, []);
 
+  useEffect(() => {
+    loadLatestDraw();
+  }, []);
+
   const loadLeaderboard = async () => {
     try {
       const res = await API.get("/leaderboard");
@@ -43,15 +48,51 @@ function Admin() {
     }
   };
 
+
   const runDraw = async () => {
     try {
       const res = await API.post("/draw");
-      setDrawResult(res.data);
-      loadLeaderboard();
+
+      alert("✅ Draw completed");
+
+      // ✅ set numbers properly
+      setNumbers(res.data.numbers);
+
     } catch (err) {
       console.error(err);
+
+      if (err.response) {
+        if (err.response.data.numbers) {
+
+          // ✅ show message WITH numbers
+          alert(
+            `⚠️ Draw already done this month\nNumbers: ${err.response.data.numbers.join(", ")}`
+          );
+
+          // ✅ STILL SHOW NUMBERS IN UI
+          setNumbers(err.response.data.numbers);
+
+        } else {
+          alert(err.response.data.error);
+        }
+      } else {
+        alert("Server error");
+      }
     }
   };
+
+
+   const loadLatestDraw = async () => {
+      try {
+        const res = await API.get("/latest-draw");
+
+        if (res.data.numbers && res.data.numbers.length > 0) {
+          setNumbers(res.data.numbers);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
   const loadWinnings = async () => {
     try {
@@ -108,9 +149,9 @@ function Admin() {
               Run Draw
             </button>
 
-            {drawResult && (
-              <p style={{ marginTop: "10px" }}>
-                {drawResult.numbers.join(", ")}
+            {numbers.length > 0 && (
+              <p style={{ marginTop: "10px", fontWeight: "bold" }}>
+                🎯Monthly Draw: {numbers.join(", ")}
               </p>
             )}
           </div>

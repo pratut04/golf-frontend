@@ -46,6 +46,9 @@ function Dashboard() {
 
     checkAndLoad();
   }, []);
+
+ 
+
   const loadData = async (userId) => {
     try {
       const d = await API.get(`/dashboard/${userId}`);
