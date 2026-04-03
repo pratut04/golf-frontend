@@ -15,7 +15,8 @@ function Dashboard() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [result, setResult] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState("active");
-
+  const [subMsg, setSubMsg] = useState("");
+  const [resultMsg, setResultMsg] = useState("");
 
   useEffect(() => {
     const checkAndLoad = async () => {
@@ -47,7 +48,7 @@ function Dashboard() {
     checkAndLoad();
   }, []);
 
- 
+
 
   const loadData = async (userId) => {
     try {
@@ -102,16 +103,26 @@ function Dashboard() {
         user_id: userId
       });
 
-      if (subRes.data.status !== "active") {
-        const end = subRes.data.subscription_end;
+      const status = subRes.data.status;
+      const end = subRes.data.subscription_end;
 
-        let msg = "Subscription expired ❌";
+      // ❌ NOT SUBSCRIBED
+      if (status === "not_subscribed") {
+        alert("⚠️ Please subscribe to use this feature");
 
-        if (end) {
-          msg = `Your subscription ended on ${new Date(end).toLocaleDateString()} ❌ Please Subscribe`;
-        }
+        document.getElementById("sub-msg").innerHTML =
+          `<p style="color:red;">Please subscribe to use this feature</p>`;
 
-        alert(msg);
+        return;
+      }
+
+      // ❌ EXPIRED
+      if (status === "expired") {
+        alert(`❌ Subscription expired on ${new Date(end).toLocaleDateString()}`);
+
+        document.getElementById("sub-msg").innerHTML =
+          `<p style="color:red;">Subscription expired. Please renew.</p>`;
+
         return;
       }
 
@@ -124,72 +135,87 @@ function Dashboard() {
       loadData(userId);
 
     } catch (err) {
-      console.error(err);
-      alert("Error adding score");
+      console.error("FULL ERROR:", err);
+
+      if (err.response && err.response.data && err.response.data.error) {
+        alert(err.response.data.error);   // ✅ THIS LINE FIXES EVERYTHING
+      } else {
+        alert("Error adding score ❌");
+      }
     }
   };
   //================selectCharitiey function==================
   const selectCharity = async (id) => {
-
     try {
       const userId = localStorage.getItem("userId");
-      const subRes = await API.post("/check-subscription", {
-        user_id: userId
-      });
 
-      if (subRes.data.status !== "active") {
-        const end = subRes.data.subscription_end;
-
-        let msg = "Subscription expired ❌";
-
-        if (end) {
-          msg = `Your subscription ended on ${new Date(end).toLocaleDateString()} ❌ Please Subscribe`;
-        }
-
-        alert(msg);
-        return;
-      }
       await API.post("/select-charity", {
         user_id: userId,
         charity_id: id
       });
 
-      alert("Charity selected ✅");
+      setSubMsg("Charity selected ✅"); // success message
       await loadData(userId);
+
     } catch (err) {
       console.error("CHARITY ERROR:", err);
+
+      if (err.response?.data?.error) {
+        setSubMsg(err.response.data.error); // 🔥 THIS WAS MISSING
+      } else {
+        setSubMsg("Something went wrong ❌");
+      }
     }
   };
 
+  //================check result===================
   const checkResult = async () => {
     try {
       const userId = localStorage.getItem("userId");
+
       const subRes = await API.post("/check-subscription", {
         user_id: userId
       });
 
-      if (subRes.data.status !== "active") {
-        const end = subRes.data.subscription_end;
+      const status = subRes.data.status;
+      const end = subRes.data.subscription_end;
 
-        let msg = "Subscription expired ❌";
-
-        if (end) {
-          msg = `Your subscription ended on ${new Date(end).toLocaleDateString()} ❌ Please Subscribe`;
-        }
-
-        alert(msg);
+      // NOT SUBSCRIBED
+      if (status === "not_subscribed") {
+        setResultMsg("⚠️ Please subscribe to check results");
+        setResult(null);
         return;
       }
 
+      // EXPIRED
+      if (status === "expired") {
+        setResultMsg(
+          `❌ Subscription expired on ${new Date(end).toLocaleDateString()}`
+        );
+        setResult(null);
+        return;
+      }
+
+      // ✅ CALL RESULT API
       const res = await API.post("/check-result", {
         user_id: userId
       });
 
       setResult(res.data);
-      loadData(userId);
+      setResultMsg("");
+
+      await loadData(userId);
 
     } catch (err) {
       console.error(err);
+
+      if (err.response?.data?.error) {
+        setResultMsg(err.response.data.error);
+      } else {
+        setResultMsg("Something went wrong ❌");
+      }
+
+      setResult(null);
     }
   };
 
@@ -200,7 +226,7 @@ function Dashboard() {
 
       <div style={content}>
         <h1 style={title}>🎯 User Dashboard</h1>
-        
+
         {/* Subscription */}
         <div
           style={card}
@@ -214,6 +240,11 @@ function Dashboard() {
           }}
         >
           <h3 style={{ marginBottom: "10px" }}>📌 Subscription</h3>
+
+          {/* ✅ ALWAYS SHOW EMAIL */}
+          <p style={textSecondary}>
+            Email: <span style={textPrimary}>{data.user.email}</span>
+          </p>
 
           {subscriptionStatus !== "active" ? (
             <>
@@ -263,10 +294,6 @@ function Dashboard() {
                     {new Date(data.user.subscription_end).toLocaleDateString()}
                   </span>
                 </p>
-
-                <p style={textSecondary}>
-                  Email: <span style={textPrimary}>{data.user.email}</span>
-                </p>
               </div>
             </>
           )}
@@ -297,6 +324,18 @@ function Dashboard() {
         {/* Charity */}
         <div style={cardHover}>
           <h3>❤️ Charity Selection</h3>
+
+          {subMsg && (
+            <div style={{
+              background: "#ffe6e6",
+              color: "red",
+              padding: "10px",
+              borderRadius: "8px",
+              marginBottom: "10px"
+            }}>
+              {subMsg}
+            </div>
+          )}
           <p style={{ color: "#334155" }}>
             Selected:{" "}
             <span style={{ color: "#16a34a", fontWeight: "600" }}>
@@ -322,13 +361,29 @@ function Dashboard() {
           </p>
         </div>
 
-        {/* Result */}
+        {/* Draw & Result */}
         <div style={cardHover}>
           <h3>🎲 Draw & Result</h3>
 
+          {/* ✅ MESSAGE */}
+          {resultMsg && (
+            <div
+              style={{
+                background: "#ffe6e6",
+                color: "red",
+                padding: "10px",
+                borderRadius: "8px",
+                marginBottom: "10px"
+              }}
+            >
+              {resultMsg}
+            </div>
+          )}
+
+          {/* ✅ BUTTON */}
           <button
             style={{
-              background: "#2563eb",   // ✅ blue
+              background: "#2563eb",
               color: "white",
               padding: "8px 16px",
               borderRadius: "8px",
@@ -339,16 +394,28 @@ function Dashboard() {
               boxShadow: "0 4px 10px rgba(37, 99, 235, 0.4)"
             }}
             onClick={checkResult}
-            onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"}
-            onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
+            onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
+            onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
           >
             Check Result
           </button>
 
-          {result && (
+          {/* ✅ RESULT (ONLY WHEN ACTIVE + NO ERROR) */}
+          {result && !resultMsg && subscriptionStatus === "active" && (
             <div style={{ marginTop: "10px" }}>
               <p>Result: {result.result}</p>
               <p>Numbers: {result.numbers?.join(", ")}</p>
+
+              {/* OPTIONAL DATE */}
+              {result.created_at && (
+                <p>
+                  Draw Date:{" "}
+                  {new Date(result.created_at).toLocaleString("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                  })}
+                </p>
+              )}
             </div>
           )}
         </div>
