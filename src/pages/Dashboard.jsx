@@ -32,12 +32,10 @@ function Dashboard() {
         const res = await API.post("/check-subscription", {
           user_id: userId
         });
-        console.log("SUBSCRIPTION API RESPONSE:", res.data);
-        // ✅ store status
+
         setSubscriptionStatus(res.data.status);
 
-
-        // ✅ ALWAYS load dashboard
+        // first load
         loadData(userId);
 
       } catch (err) {
@@ -45,7 +43,20 @@ function Dashboard() {
       }
     };
 
+    // 🔥 first load
     checkAndLoad();
+
+    // 🔥 AUTO REFRESH
+    const interval = setInterval(() => {
+      const userId = localStorage.getItem("userId");
+      if (userId) {
+        loadData(userId);
+      }
+    }, 10000); // every 10 sec
+
+    // 🔥 cleanup
+    return () => clearInterval(interval);
+
   }, []);
 
 
