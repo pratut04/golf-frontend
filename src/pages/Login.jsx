@@ -21,7 +21,10 @@ const login = async () => {
 
   try {
     // 🔥 STEP 1: Wake server
-    await fetch("https://golf-backend-new.onrender.com");
+
+  await fetch("https://golf-backend-new.onrender.com");
+
+     
 
     // 🔥 STEP 2: Try login (1st attempt)
     let res;
