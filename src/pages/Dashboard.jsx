@@ -425,12 +425,11 @@ function Dashboard() {
               {/* OPTIONAL DATE */}
               <p>
                 Draw Date:{" "}
-                {result.created_at
-                  ? new Date(result.created_at).toLocaleString("en-IN", {
-                    dateStyle: "medium",
-                    timeStyle: "short"
-                  })
-                  : "N/A"}
+                {new Date(result.created_at).toLocaleString("en-IN", {
+                  timeZone: "Asia/Kolkata",
+                  dateStyle: "medium",
+                  timeStyle: "short"
+                })}
               </p>
             </div>
           )}
