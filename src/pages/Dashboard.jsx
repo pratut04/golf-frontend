@@ -312,7 +312,11 @@ function Dashboard() {
         {/* Score */}
         <div style={cardHover}>
           <h3>🏌️ Enter Score</h3>
-          <ScoreForm addScore={addScore} />
+          <ScoreForm
+            addScore={addScore}
+            subscriptionStatus={subscriptionStatus}
+            subscriptionEnd={data.user.subscription_end}
+          />
         </div>
 
         {/* Scores */}

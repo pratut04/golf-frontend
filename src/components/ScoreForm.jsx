@@ -1,13 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import API from "../api/api";
 
-function ScoreForm({ addScore }) {
+function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd }) {
   const [score, setScore] = useState("");
   const [loading, setLoading] = useState(false);
+  const [locked, setLocked] = useState(false);
 
+  // ================= DRAW LOCK =================
+  useEffect(() => {
+    const checkDraw = async () => {
+      try {
+        const res = await API.get("/latest-draw");
+
+        if (res.data.created_at) {
+          const drawDate = new Date(res.data.created_at);
+          const now = new Date();
+
+          const sameMonth =
+            drawDate.getMonth() === now.getMonth() &&
+            drawDate.getFullYear() === now.getFullYear();
+
+          setLocked(sameMonth);
+        }
+      } catch (err) {
+        console.error("Draw check error:", err);
+      }
+    };
+
+    checkDraw();
+  }, []);
+
+  // ================= SUBMIT =================
   const handleSubmit = async () => {
     if (loading) return;
 
-    // ✅ validation
+    if (locked) {
+      alert("❌ Scores locked for this month");
+      return;
+    }
+
     if (!score || isNaN(score)) {
       alert("Enter valid number");
       return;
@@ -20,17 +51,10 @@ function ScoreForm({ addScore }) {
       return;
     }
 
-    
-
     try {
       setLoading(true);
-
       await addScore(num);
-
-      // ✅ reset
       setScore("");
-  
-
     } catch (err) {
       console.error("Score submit error:", err);
       alert("❌ Failed to add score");
@@ -39,9 +63,26 @@ function ScoreForm({ addScore }) {
     }
   };
 
+  
+  // ================= NORMAL UI =================
+  
   return (
     <div style={card}>
-      <h3 style={{color: "white"}}>🎯 Add Score</h3>
+      <h3 style={{ color: "white" }}>🎯 Add Score</h3>
+      // ================= EARLY RETURN =================
+    
+      {
+        subscriptionStatus !== "active" ? (
+          <p style={{ color: "red" }}>
+            ❌ Please subscribe or renew to add scores
+          </p>
+        ) : locked ? (
+          <p style={{ color: "red" }}>
+            🔒 Scores locked for this month
+          </p>
+        ) : null
+      }
+
 
       <input
         type="number"
@@ -49,11 +90,14 @@ function ScoreForm({ addScore }) {
         onChange={(e) => setScore(e.target.value)}
         placeholder="Enter score (1-45)"
         style={input}
+        disabled={locked}
       />
 
-      
-
-      <button onClick={handleSubmit} style={btn} disabled={loading}>
+      <button
+        onClick={handleSubmit}
+        style={btn}
+        disabled={loading || locked}
+      >
         {loading ? "Submitting..." : "Submit"}
       </button>
     </div>
@@ -62,15 +106,14 @@ function ScoreForm({ addScore }) {
 
 export default ScoreForm;
 
-// 🎨 LIGHT THEME STYLES
+// 🎨 STYLES
 
 const card = {
-  background: "#0f172a",              // ✅ light background
+  background: "#0f172a",
   padding: "15px",
   borderRadius: "10px",
   marginBottom: "15px",
   border: "1px solid #e2e8f0",
-  color: "#0f172a",                  // ✅ dark text
 };
 
 const input = {
@@ -78,18 +121,15 @@ const input = {
   marginRight: "10px",
   borderRadius: "6px",
   border: "1px solid #e2e8f0",
-  background: "#ffffff",             // ✅ white input
+  background: "#ffffff",
   color: "#0f172a",
-  outline: "none"
 };
 
 const btn = {
   padding: "10px 14px",
-  background: "#2563eb",             // ✅ professional blue
+  background: "#2563eb",
   color: "white",
   border: "none",
   borderRadius: "6px",
   cursor: "pointer",
-  fontWeight: "600",
-  boxShadow: "0 4px 10px rgba(37,99,235,0.25)"
 };
