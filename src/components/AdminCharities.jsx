@@ -23,7 +23,7 @@ function AdminCharities() {
   };
 
   const addCharity = async () => {
-    if (adding) return; // ✅ prevent double click
+    if (adding) return; 
 
     if (!name.trim()) {
       alert("Enter charity name");

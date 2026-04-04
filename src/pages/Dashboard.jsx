@@ -17,9 +17,13 @@ function Dashboard() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("active");
   const [subMsg, setSubMsg] = useState("");
   const [resultMsg, setResultMsg] = useState("");
+  const [jackpot, setJackpot] = useState(0);
 
   useEffect(() => {
     const checkAndLoad = async () => {
+
+
+
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
 
@@ -38,14 +42,15 @@ function Dashboard() {
         // first load
         loadData(userId);
 
+        
       } catch (err) {
         console.error("Error:", err);
       }
     };
-
+    
     // 🔥 first load
     checkAndLoad();
-
+    
     // 🔥 AUTO REFRESH
     const interval = setInterval(() => {
       const userId = localStorage.getItem("userId");
@@ -53,12 +58,18 @@ function Dashboard() {
         loadData(userId);
       }
     }, 10000); // every 10 sec
-
+    
     // 🔥 cleanup
     return () => clearInterval(interval);
-
+    
   }, []);
-
+  
+  useEffect(() => {
+    fetch("http://localhost:5000/jackpot")
+      .then(res => res.json())
+      .then(data => setJackpot(data.jackpot))
+      .catch(err => console.error(err));
+  }, []);
 
 
   const loadData = async (userId) => {
@@ -375,7 +386,17 @@ function Dashboard() {
             </span>
           </p>
         </div>
+        <div style={jackpotCard}>
+          <h3>💰 Jackpot</h3>
 
+          <div style={jackpotAmount}>
+            ₹{Number(jackpot).toLocaleString()}
+          </div>
+
+          <p style={{ opacity: 0.7 }}>
+            Next draw prize pool
+          </p>
+        </div>
         {/* Draw & Result */}
         <div style={cardHover}>
           <h3>🎲 Draw & Result</h3>
@@ -541,4 +562,20 @@ const textPrimary = {
 
 const textSecondary = {
   color: "#64748b"
+};
+
+const jackpotCard = {
+  background: "linear-gradient(135deg, #1e293b, #0f172a)",
+  padding: "20px",
+  borderRadius: "10px",
+  marginTop: "15px",
+  color: "white",
+  boxShadow: "0 0 20px rgba(255,215,0,0.2)"
+};
+
+const jackpotAmount = {
+  fontSize: "28px",
+  fontWeight: "bold",
+  color: "#facc15",
+  marginTop: "10px"
 };
