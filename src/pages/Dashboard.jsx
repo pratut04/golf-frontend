@@ -65,7 +65,7 @@ function Dashboard() {
   }, []);
   
   useEffect(() => {
-    fetch("http://localhost:5000/jackpot")
+    fetch("https://golf-backend-new.onrender.com/jackpot")
       .then(res => res.json())
       .then(data => setJackpot(data.jackpot))
       .catch(err => console.error(err));
