@@ -417,20 +417,21 @@ function Dashboard() {
 
           {/* ✅ RESULT (ONLY WHEN ACTIVE + NO ERROR) */}
           {result && !resultMsg && subscriptionStatus === "active" && (
+
             <div style={{ marginTop: "10px" }}>
               <p>Result: {result.result}</p>
               <p>Numbers: {result.numbers?.join(", ")}</p>
 
               {/* OPTIONAL DATE */}
-              {result.created_at && (
-                <p>
-                  Draw Date:{" "}
-                  {new Date(result.created_at).toLocaleString("en-IN", {
+              <p>
+                Draw Date:{" "}
+                {result.created_at
+                  ? new Date(result.created_at).toLocaleString("en-IN", {
                     dateStyle: "medium",
                     timeStyle: "short"
-                  })}
-                </p>
-              )}
+                  })
+                  : "N/A"}
+              </p>
             </div>
           )}
         </div>
