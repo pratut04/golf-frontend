@@ -18,6 +18,7 @@ function Dashboard() {
   const [subMsg, setSubMsg] = useState("");
   const [resultMsg, setResultMsg] = useState("");
   const [jackpot, setJackpot] = useState(0);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const checkAndLoad = async () => {
@@ -54,10 +55,12 @@ function Dashboard() {
     // 🔥 AUTO REFRESH
     const interval = setInterval(() => {
       const userId = localStorage.getItem("userId");
+
       if (userId) {
         loadData(userId);
+        setRefresh(prev => !prev); // 🔥 THIS LINE FIXES EVERYTHING
       }
-    }, 10000); // every 10 sec
+    }, 10000);
 
     // 🔥 cleanup
     return () => clearInterval(interval);
@@ -342,6 +345,7 @@ function Dashboard() {
             addScore={addScore}
             subscriptionStatus={subscriptionStatus}
             subscriptionEnd={data.user.subscription_end}
+            refresh={refresh} // 🔥 ADD THIS
           />
         </div>
 
@@ -465,7 +469,7 @@ function Dashboard() {
               <p>
                 Draw Date:{" "}
                 {new Date(result.created_at).toLocaleString("en-IN", {
-                  
+
                   dateStyle: "medium",
                   timeStyle: "short"
                 })}

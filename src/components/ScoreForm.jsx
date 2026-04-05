@@ -1,41 +1,101 @@
 import React, { useState, useEffect } from "react";
 import API from "../api/api";
 
-function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd }) {
+function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
   const [score, setScore] = useState("");
   const [loading, setLoading] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [nextMonthDate, setNextMonthDate] = useState("");
 
   // ================= DRAW LOCK =================
-  useEffect(() => {
-    const checkDraw = async () => {
-      try {
-        const res = await API.get("/latest-draw");
+  // const checkDraw = async () => {
+  //   try {
+  //     const res = await API.get("/latest-draw");
 
-        if (res.data.created_at) {
-          const drawDate = new Date(res.data.created_at);
-          const now = new Date();
+  //     if (res.data.created_at) {
+  //       const drawDate = new Date(res.data.created_at);
+  //       const now = new Date();
 
-          const sameMonth =
-            drawDate.getMonth() === now.getMonth() &&
-            drawDate.getFullYear() === now.getFullYear();
+  //       const sameMonth =
+  //         drawDate.getMonth() === now.getMonth() &&
+  //         drawDate.getFullYear() === now.getFullYear();
 
-          setLocked(sameMonth);
-        }
-      } catch (err) {
-        console.error("Draw check error:", err);
+  //       setLocked(sameMonth);
+
+  //       // ✅ ADD THIS
+  //       const nextMonthStart = new Date(
+  //         drawDate.getFullYear(),
+  //         drawDate.getMonth() + 1,
+  //         1
+  //       );
+
+  //       const formatted = nextMonthStart.toLocaleDateString("en-IN", {
+  //         day: "numeric",
+  //         month: "long",
+  //         year: "numeric"
+  //       });
+
+  //       setNextMonthDate(formatted);
+  //     }
+  //   } catch (err) {
+  //     console.error("Draw check error:", err);
+  //   }
+  // };
+  const checkDraw = async () => {
+    try {
+      const res = await API.get("/latest-draw");
+
+      // ❗ CASE 1: NO DRAW EXISTS
+      if (!res.data || !res.data.created_at) {
+        setLocked(false);              // ✅ unlock
+        setNextMonthDate("");          // optional reset
+        return;
       }
-    };
 
+      // ❗ CASE 2: DRAW EXISTS
+      const drawDate = new Date(res.data.created_at);
+      const now = new Date();
+
+      const sameMonth =
+        drawDate.getMonth() === now.getMonth() &&
+        drawDate.getFullYear() === now.getFullYear();
+
+      setLocked(sameMonth);
+
+      const nextMonthStart = new Date(
+        drawDate.getFullYear(),
+        drawDate.getMonth() + 1,
+        1
+      );
+
+      const formatted = nextMonthStart.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+
+      setNextMonthDate(formatted);
+
+    } catch (err) {
+      console.error("Draw check error:", err);
+    }
+  };
+
+  useEffect(() => {
     checkDraw();
   }, []);
+
+  useEffect(() => {
+    checkDraw();
+  }, [refresh]);
+
 
   // ================= SUBMIT =================
   const handleSubmit = async () => {
     if (loading) return;
 
     if (locked) {
-      alert("❌ Scores locked for this month");
+      alert(`❌ Score entry closed. Next opens on ${nextMonthDate}`);
       return;
     }
 
@@ -63,22 +123,26 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd }) {
     }
   };
 
-  
+
   // ================= NORMAL UI =================
-  
+
   return (
     <div style={card}>
       <h3 style={{ color: "white" }}>🎯 Add Score</h3>
       // ================= EARLY RETURN =================
-    
+
       {
         subscriptionStatus !== "active" ? (
           <p style={{ color: "red" }}>
             ❌ Please subscribe or renew to add scores
           </p>
         ) : locked ? (
-          <p style={{ color: "red" }}>
-            🔒 Scores locked for this month
+          <p style={{ color: "#ef4444", fontSize: "14px", lineHeight: "1.6" }}>
+            🔒 Score entry closed for this month <br />
+            📅 Next entry opens on{" "}
+            <b style={{ color: "#22c55e" }}>
+              {nextMonthDate || "next month"}
+            </b>
           </p>
         ) : null
       }
