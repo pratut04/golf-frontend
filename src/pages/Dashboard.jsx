@@ -42,15 +42,15 @@ function Dashboard() {
         // first load
         loadData(userId);
 
-        
+
       } catch (err) {
         console.error("Error:", err);
       }
     };
-    
+
     // 🔥 first load
     checkAndLoad();
-    
+
     // 🔥 AUTO REFRESH
     const interval = setInterval(() => {
       const userId = localStorage.getItem("userId");
@@ -58,19 +58,26 @@ function Dashboard() {
         loadData(userId);
       }
     }, 10000); // every 10 sec
-    
+
     // 🔥 cleanup
     return () => clearInterval(interval);
-    
-  }, []);
-  
-  useEffect(() => {
-    fetch("https://golf-backend-new.onrender.com/jackpot")
-      .then(res => res.json())
-      .then(data => setJackpot(data.jackpot))
-      .catch(err => console.error(err));
+
   }, []);
 
+  useEffect(() => {
+    const fetchJackpot = () => {
+      fetch("http://localhost:5000/jackpot")
+        .then(res => res.json())
+        .then(data => setJackpot(data.jackpot))
+        .catch(err => console.error(err));
+    };
+
+    fetchJackpot(); // first load
+
+    const interval = setInterval(fetchJackpot, 10000); // every 10 sec
+
+    return () => clearInterval(interval);
+  }, []);
 
   const loadData = async (userId) => {
     try {
@@ -132,18 +139,22 @@ function Dashboard() {
       if (status === "not_subscribed") {
         alert("⚠️ Please subscribe to use this feature");
 
-        document.getElementById("sub-msg").innerHTML =
-          `<p style="color:red;">Please subscribe to use this feature</p>`;
+        // document.getElementById("sub-msg").innerHTML =
+        //`<p style="color:red;">Please subscribe to use this feature</p>`;
 
         return;
       }
 
       // ❌ EXPIRED
       if (status === "expired") {
-        alert(`❌ Subscription expired on ${new Date(end).toLocaleDateString()}`);
+        alert(`❌ Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric"
+        })}`);
 
-        document.getElementById("sub-msg").innerHTML =
-          `<p style="color:red;">Subscription expired. Please renew.</p>`;
+        //document.getElementById("sub-msg").innerHTML =
+        //`<p style="color:red;">Subscription expired. Please renew.</p>`;
 
         return;
       }
@@ -183,7 +194,7 @@ function Dashboard() {
       console.error("CHARITY ERROR:", err);
 
       if (err.response?.data?.error) {
-        setSubMsg(err.response.data.error); // 🔥 THIS WAS MISSING
+        setSubMsg(err.response.data.error); // THIS WAS MISSING
       } else {
         setSubMsg("Something went wrong ❌");
       }
@@ -212,7 +223,11 @@ function Dashboard() {
       // EXPIRED
       if (status === "expired") {
         setResultMsg(
-          `❌ Subscription expired on ${new Date(end).toLocaleDateString()}`
+          `❌ Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+          })}`
         );
         setResult(null);
         return;
@@ -394,7 +409,10 @@ function Dashboard() {
           </div>
 
           <p style={{ opacity: 0.7 }}>
-            Next draw prize pool
+            5 match prize (40% of jackpot)
+          </p>
+          <p style={{ marginTop: "5px", fontSize: "14px" }}>
+            🏆 5 Match Prize: ₹{Math.floor(jackpot * 0.4)}
           </p>
         </div>
         {/* Draw & Result */}
@@ -447,7 +465,7 @@ function Dashboard() {
               <p>
                 Draw Date:{" "}
                 {new Date(result.created_at).toLocaleString("en-IN", {
-                  timeZone: "Asia/Kolkata",
+                  
                   dateStyle: "medium",
                   timeStyle: "short"
                 })}

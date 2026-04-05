@@ -27,7 +27,7 @@ function Winnings({ winnings }) {
 
             {winnings.map((w, i) => (
               <div key={i} style={historyCard}>
-                
+
                 {/* LEFT */}
                 <div>
                   <p style={matchText}>
@@ -37,7 +37,11 @@ function Winnings({ winnings }) {
                   </p>
 
                   <p style={dateText}>
-                    {new Date(w.created_at).toLocaleDateString("en-IN")}
+                    {new Date(w.created_at).toLocaleString("en-IN", {
+                     
+                      dateStyle: "medium",
+                      timeStyle: "short"
+                    })}
                   </p>
                 </div>
 

@@ -9,10 +9,10 @@ import AdminCharities from "../components/AdminCharities";
 
 function Admin() {
   const [leaderboard, setLeaderboard] = useState([]);
-  const [drawResult, setDrawResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [winnings, setWinnings] = useState([]);
   const [numbers, setNumbers] = useState([]);
+  const [jackpot, setJackpot] = useState(0);
 
   const navigate = useNavigate();
 
@@ -35,6 +35,12 @@ function Admin() {
 
   useEffect(() => {
     loadLatestDraw();
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/jackpot")
+      .then(res => res.json())
+      .then(data => setJackpot(data.jackpot));
   }, []);
 
   const loadLeaderboard = async () => {
@@ -82,17 +88,17 @@ function Admin() {
   };
 
 
-   const loadLatestDraw = async () => {
-      try {
-        const res = await API.get("/latest-draw");
+  const loadLatestDraw = async () => {
+    try {
+      const res = await API.get("/latest-draw");
 
-        if (res.data.numbers && res.data.numbers.length > 0) {
-          setNumbers(res.data.numbers);
-        }
-      } catch (err) {
-        console.error(err);
+      if (res.data.numbers && res.data.numbers.length > 0) {
+        setNumbers(res.data.numbers);
       }
-    };
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const loadWinnings = async () => {
     try {
@@ -142,6 +148,19 @@ function Admin() {
         <div style={content}>
           <h1 style={title}>Admin Dashboard</h1>
 
+
+          <div style={card}>
+            <h3>💰 Jackpot</h3>
+
+            <p style={{ fontSize: "22px", fontWeight: "bold" }}>
+              ₹{Number(jackpot).toLocaleString()}
+            </p>
+
+            <small style={{ opacity: 0.7 }}>
+              5 Match Prize: ₹{Math.floor(jackpot * 0.4)}
+            </small>
+          </div>
+
           {/* DRAW */}
           <div style={card}>
             <h3>🎲 Draw Management</h3>
@@ -172,11 +191,15 @@ function Admin() {
               <div key={w.id} style={row}>
                 <div>
                   <div>{w.email}</div>
-                  <small style={{ color: "#9ca3af" }}>
-                    ₹{w.amount}
-                  </small>
-                </div>
 
+                  <small style={{ color: "#9ca3af" }}>
+                    {w.match_type}
+                  </small>
+
+                  <div style={{ fontWeight: "600" }}>
+                    ₹{Number(w.amount).toLocaleString()}
+                  </div>
+                </div>
                 <div>
                   <span
                     style={{
@@ -185,7 +208,7 @@ function Admin() {
                       marginRight: "10px",
                     }}
                   >
-                    {w.status}
+                    {w.status === "paid" ? "✅ Paid" : "⏳ Pending"}
                   </span>
 
                   {w.status === "pending" && (
