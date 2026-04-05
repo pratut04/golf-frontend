@@ -60,7 +60,7 @@ function Dashboard() {
         loadData(userId);
         setRefresh(prev => !prev); // 🔥 THIS LINE FIXES EVERYTHING
       }
-    }, 10000);
+    }, 15000);
 
     // 🔥 cleanup
     return () => clearInterval(interval);
@@ -69,7 +69,7 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchJackpot = () => {
-      fetch("http://localhost:5000/jackpot")
+      fetch("https://golf-backend-new.onrender.com/jackpot") //http://localhost:5000/jackpot
         .then(res => res.json())
         .then(data => setJackpot(data.jackpot))
         .catch(err => console.error(err));

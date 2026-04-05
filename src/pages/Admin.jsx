@@ -13,6 +13,11 @@ function Admin() {
   const [winnings, setWinnings] = useState([]);
   const [numbers, setNumbers] = useState([]);
   const [jackpot, setJackpot] = useState(0);
+  const [simMsg, setSimMsg] = useState("");
+  const [simulation, setSimulation] = useState(null);
+  const maxMatch = simulation
+    ? Math.max(...simulation.results.map(r => r.matchCount))
+    : 0;
 
   const navigate = useNavigate();
 
@@ -38,7 +43,7 @@ function Admin() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5000/jackpot")
+    fetch("https://golf-backend-new.onrender.com/jackpot")//("http://localhost:5000/jackpot")
       .then(res => res.json())
       .then(data => setJackpot(data.jackpot));
   }, []);
@@ -55,37 +60,75 @@ function Admin() {
   };
 
 
+  // const runDraw = async () => {
+  //   try {
+  //     const res = await API.post("/draw");
+
+  //     alert("✅ Draw completed");
+
+  //     // ✅ set numbers properly
+  //     setNumbers(res.data.numbers);
+
+  //   } catch (err) {
+  //     console.error(err);
+
+  //     if (err.response) {
+  //       if (err.response.data.numbers) {
+
+  //         // ✅ show message WITH numbers
+  //         alert(
+  //           `⚠️ Draw already done this month\nNumbers: ${err.response.data.numbers.join(", ")}`
+  //         );
+
+  //         // ✅ STILL SHOW NUMBERS IN UI
+  //         setNumbers(err.response.data.numbers);
+
+  //       } else {
+  //         alert(err.response.data.error);
+  //       }
+  //     } else {
+  //       alert("Server error");
+  //     }
+  //   }
+  // };
   const runDraw = async () => {
-    try {
-      const res = await API.post("/draw");
+  // ❗ simulation check (OUTSIDE try — best practice)
+  if (!simulation || !simulation.numbers) {
+    alert("⚠️ Please run simulation first");
+    return;
+  }
 
-      alert("✅ Draw completed");
+  try {
+    // ✅ use simulation numbers
+    const res = await API.post("/draw", {
+      numbers: simulation.numbers
+    });
 
-      // ✅ set numbers properly
-      setNumbers(res.data.numbers);
+    alert("✅ Draw completed");
 
-    } catch (err) {
-      console.error(err);
+    // ✅ update UI
+    setNumbers(res.data.numbers);
 
-      if (err.response) {
-        if (err.response.data.numbers) {
+  } catch (err) {
+    console.error(err);
 
-          // ✅ show message WITH numbers
-          alert(
-            `⚠️ Draw already done this month\nNumbers: ${err.response.data.numbers.join(", ")}`
-          );
+    if (err.response) {
+      if (err.response.data.numbers) {
 
-          // ✅ STILL SHOW NUMBERS IN UI
-          setNumbers(err.response.data.numbers);
+        alert(
+          `⚠️ Draw already done this month\nNumbers: ${err.response.data.numbers.join(", ")}`
+        );
 
-        } else {
-          alert(err.response.data.error);
-        }
+        setNumbers(err.response.data.numbers);
+
       } else {
-        alert("Server error");
+        alert(err.response.data.error);
       }
+    } else {
+      alert("Server error");
     }
-  };
+  }
+};
 
 
   const loadLatestDraw = async () => {
@@ -97,6 +140,26 @@ function Admin() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+
+  const runSimulation = async () => {
+    try {
+      const res = await API.post("/simulate-draw");
+
+      setSimulation(res.data);
+
+      setSimMsg("🧪 Simulation complete"); // ✅ message set
+
+      // auto hide after 3 sec
+      setTimeout(() => setSimMsg(""), 3000);
+
+    } catch (err) {
+      console.error(err);
+      setSimMsg("❌ Simulation failed");
+
+      setTimeout(() => setSimMsg(""), 3000);
     }
   };
 
@@ -172,6 +235,61 @@ function Admin() {
               <p style={{ marginTop: "10px", fontWeight: "bold" }}>
                 🎯Monthly Draw: {numbers.join(", ")}
               </p>
+            )}
+          </div>
+          {/* 🧪 SIMULATION */}
+          <div style={card}>
+            <h3>🧪 Simulation</h3>
+            {simMsg && (
+              <div style={{
+                background: "#ecfdf5",
+                color: "#065f46",
+                padding: "10px",
+                borderRadius: "8px",
+                marginBottom: "10px",
+                fontWeight: "500"
+              }}>
+                {simMsg}
+              </div>
+            )}
+
+            <button style={btn} onClick={runSimulation}>
+              🎲 Simulate Draw
+            </button>
+
+            {simulation && (
+
+              <div style={{ marginTop: "10px" }}>
+                <p><b>Numbers:</b> {simulation.numbers.join(", ")}</p>
+
+                <h4>Results:</h4>
+
+                <p><b>Pool:</b> ₹{simulation.poolAmount}</p>
+
+                {simulation.results.map((r, i) => (
+                  <div key={i} style={{
+                    background: r.matchCount === maxMatch ? "#dcfce7" : "transparent",
+                    padding: "8px",
+                    borderRadius: "8px",
+                    marginBottom: "6px",
+                    border: r.matchCount === maxMatch ? "1px solid #22c55e" : "none"
+                  }}>
+                    🧑 {r.email} → 🎯 Matches: {r.matchCount}
+
+                    {r.matchCount >= 3 && (
+                      <span style={{ marginLeft: "10px", color: "#16a34a", fontWeight: "600" }}>
+                        💰 ₹{r.prize}
+                      </span>
+                    )}
+
+                    {r.matchCount === maxMatch && r.matchCount > 0 && (
+                      <span style={{ marginLeft: "10px" }}>
+                        🏆 Winner
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 

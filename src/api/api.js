@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-   baseURL:  "http://localhost:5000",
-   //"https://golf-backend-new.onrender.com",
+   baseURL:"https://golf-backend-new.onrender.com", //"http://localhost:5000",
   timeout: 15000
 });
 
