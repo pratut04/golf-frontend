@@ -60,7 +60,7 @@ function Dashboard() {
         loadData(userId);
         setRefresh(prev => !prev); // 🔥 THIS LINE FIXES EVERYTHING
       }
-    }, 10000);
+    }, 15000);
 
     // 🔥 cleanup
     return () => clearInterval(interval);
