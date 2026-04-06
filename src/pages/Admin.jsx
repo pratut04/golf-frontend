@@ -16,22 +16,25 @@ function Admin() {
   const [basePool, setBasePool] = useState(0);
   const [simMsg, setSimMsg] = useState("");
   const [simulation, setSimulation] = useState(null);
-  const maxMatch = simulation
-    ? Math.max(...simulation.results.map(r => r.matchCount))
-    : 0;
-
+  const maxMatch = React.useMemo(() => {
+    return simulation
+      ? Math.max(...simulation.results.map(r => r.matchCount))
+      : 0;
+  }, [simulation]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const email = localStorage.getItem("email");
+    const role = localStorage.getItem("role");
 
+    // ❌ No token → logout
     if (!token) {
       navigate("/");
       return;
     }
 
-    if (email !== "secure@gmail.com") {
+    // ❌ Not admin → redirect
+    if (role !== "admin") {
       navigate("/dashboard");
       return;
     }
@@ -40,16 +43,21 @@ function Admin() {
   }, []);
 
   useEffect(() => {
-    loadLatestDraw();
-  }, []);
+    const fetchJackpot = async () => {
+      try {
+        const res = await API.get("/jackpot");
+        setJackpot(res.data.jackpot);
+        setBasePool(res.data.basePool);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  useEffect(() => {
-    fetch("https://golf-backend-new.onrender.com/jackpot") //("http://localhost:5000/jackpot")
-      .then(res => res.json())
-      .then(data => {
-        setJackpot(data.jackpot);
-        setBasePool(data.basePool); // ✅ IMPORTANT
-      })
+    fetchJackpot();
+
+    const interval = setInterval(fetchJackpot, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const loadLeaderboard = async () => {
@@ -96,44 +104,46 @@ function Admin() {
   //   }
   // };
   const runDraw = async () => {
-    // ❗ simulation check (OUTSIDE try — best practice)
-    if (!simulation || !simulation.numbers) {
-      alert("⚠️ Please run simulation first");
-      return;
-    }
+  try {
+    // ✅ CALL BACKEND FIRST (with or without numbers)
+    const res = await API.post("/draw", {
+      numbers: simulation?.numbers || []   // safe fallback
+    });
 
-    try {
-      // ✅ use simulation numbers
-      const res = await API.post("/draw", {
-        numbers: simulation.numbers
-      });
+    alert("✅ Draw completed");
+    setNumbers(res.data.numbers);
 
-      alert("✅ Draw completed");
+  } catch (err) {
+    console.error(err);
 
-      // ✅ update UI
-      setNumbers(res.data.numbers);
+    if (err.response) {
 
-    } catch (err) {
-      console.error(err);
+      const error = err.response.data.error;
 
-      if (err.response) {
-        if (err.response.data.numbers) {
-
-          alert(
-            `⚠️ Draw already done this month\nNumbers: ${err.response.data.numbers.join(", ")}`
-          );
-
-          setNumbers(err.response.data.numbers);
-
-        } else {
-          alert(err.response.data.error);
-        }
-      } else {
-        alert("Server error");
+      // 🔥 DRAW ALREADY DONE (priority)
+      if (error?.includes("already done")) {
+        alert(error);
+        return;
       }
-    }
-  };
 
+      // 🔥 SIMULATION NOT RUN
+      if (!simulation || !simulation.numbers) {
+        alert("⚠️ Please run simulation first");
+        return;
+      }
+
+      // 🔥 OTHER ERRORS
+      if (error) {
+        alert(error);
+      } else {
+        alert("Something went wrong ❌");
+      }
+
+    } else {
+      alert("Server error");
+    }
+  }
+};
 
   const loadLatestDraw = async () => {
     try {

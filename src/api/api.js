@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-   baseURL: "https://golf-backend-new.onrender.com", 
-  //  "http://localhost:5000",
+  baseURL:"https://golf-backend-new.onrender.com",                      //"http://localhost:5000",
   timeout: 15000
 });
 
@@ -22,17 +21,22 @@ API.interceptors.response.use(
   (res) => res,
   (err) => {
 
+    console.log("API ERROR:", err.response?.data || err.message);
+
     // 🔐 Unauthorized → logout
     if (err.response?.status === 401) {
-      localStorage.clear();
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("email");
 
-      // safer redirect
       setTimeout(() => {
         window.location.href = "/";
       }, 100);
     }
 
-    // ⚠️ Network error (Render sleep)
+    // ❌ DO NOT HANDLE 403 HERE
+
+    // ⚠️ Network error
     if (!err.response) {
       console.warn("Server not responding");
     }

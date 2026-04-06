@@ -47,15 +47,22 @@ function Subscription() {
 
       const amount = type === "yearly" ? 1000 : 100;
 
+      // ✅ STEP 1: CREATE ORDER FROM BACKEND
+      const orderRes = await API.post("/create-order", { amount });
+
+      const order = orderRes.data;
+
       if (!window.Razorpay) {
         alert("Razorpay not loaded ❌");
         return;
       }
 
       const options = {
-        key: "rzp_test_SXQLt37SiX7Arq",
-        amount: amount * 100,
-        currency: "INR",
+        key:  "rzp_test_SXQLt37SiX7Arq", // public key
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.id, // 🔥 IMPORTANT
+
         name: "Golf App",
         description: `${type} subscription`,
 
@@ -63,9 +70,8 @@ function Subscription() {
           try {
             await API.post("/verify-payment", {
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id || null,
-              razorpay_signature: response.razorpay_signature || null,
-              user_id: localStorage.getItem("userId"),
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
               type: type
             });
 
@@ -73,7 +79,6 @@ function Subscription() {
             navigate("/dashboard");
 
           } catch (err) {
-            console.error("VERIFY ERROR:", err);
             alert("❌ Verification failed");
           }
         },
@@ -93,7 +98,6 @@ function Subscription() {
       setLoading(false);
     }
   };
-
   return (
     <div style={container}>
       <h1>💳 Choose Subscription</h1>
@@ -112,11 +116,11 @@ function Subscription() {
           }
         >
           {subscriptionStatus === "active" &&
-          subscriptionType === "monthly"
+            subscriptionType === "monthly"
             ? "Already Subscribed🎉"
             : loading
-            ? "Processing..."
-            : "Subscribe Monthly"}
+              ? "Processing..."
+              : "Subscribe Monthly"}
         </button>
       </div>
 
@@ -134,11 +138,11 @@ function Subscription() {
           }
         >
           {subscriptionStatus === "active" &&
-          subscriptionType === "yearly"
+            subscriptionType === "yearly"
             ? "Already Subscribed🎉"
             : loading
-            ? "Processing..."
-            : "Subscribe Yearly"}
+              ? "Processing..."
+              : "Subscribe Yearly"}
         </button>
       </div>
     </div>

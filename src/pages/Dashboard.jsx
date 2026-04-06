@@ -36,14 +36,12 @@ function Dashboard() {
       }
 
       try {
-        const res = await API.post("/check-subscription", {
-          user_id: userId
-        });
+        const res = await API.post("/check-subscription");
 
         setSubscriptionStatus(res.data.status);
 
         // first load
-        loadData(userId);
+        loadData();
 
 
       } catch (err) {
@@ -59,7 +57,7 @@ function Dashboard() {
       const userId = localStorage.getItem("userId");
 
       if (userId) {
-        loadData(userId);
+        loadData();
         setRefresh(prev => !prev); // 🔥 THIS LINE FIXES EVERYTHING
       }
     }, 15000);
@@ -70,16 +68,15 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const fetchJackpot = () => {
-      fetch("https://golf-backend-new.onrender.com/jackpot") //    ("http://localhost:5000/jackpot")
-        .then(res => res.json())
-        .then(data => {
-          setJackpot(data.jackpot);
-          setBasePool(data.basePool);
-        })
-        .catch(err => console.error(err));
+    const fetchJackpot = async () => {
+      try {
+        const res = await API.get("/jackpot");
+        setJackpot(res.data.jackpot);
+        setBasePool(res.data.basePool);
+      } catch (err) {
+        console.error(err);
+      }
     };
-
     fetchJackpot(); // first load
 
     const interval = setInterval(fetchJackpot, 10000); // every 10 sec
@@ -89,7 +86,7 @@ function Dashboard() {
 
   const loadData = async (userId) => {
     try {
-      const d = await API.get(`/dashboard/${userId}`);
+      const d = await API.get("/dashboard");
       const c = await API.get("/charities");
       const l = await API.get("/leaderboard");
 
@@ -136,9 +133,7 @@ function Dashboard() {
     try {
       const userId = localStorage.getItem("userId");
 
-      const subRes = await API.post("/check-subscription", {
-        user_id: userId
-      });
+      const subRes = await API.post("/check-subscription");
 
       const status = subRes.data.status;
       const end = subRes.data.subscription_end;
@@ -168,12 +163,12 @@ function Dashboard() {
       }
 
       await API.post("/scores", {
-        user_id: userId,
+
         score: Number(score),
       });
 
       alert("✅ Score added");
-      loadData(userId);
+      loadData();
 
     } catch (err) {
       console.error("FULL ERROR:", err);
@@ -188,21 +183,23 @@ function Dashboard() {
   //================selectCharitiey function==================
   const selectCharity = async (id) => {
     try {
-      const userId = localStorage.getItem("userId");
+      // const userId = localStorage.getItem("userId");
 
       await API.post("/select-charity", {
-        user_id: userId,
+        // user_id: userId,
         charity_id: id
       });
 
       setSubMsg("Charity selected ✅"); // success message
-      await loadData(userId);
+      await loadData();
 
     } catch (err) {
       console.error("CHARITY ERROR:", err);
 
-      if (err.response?.data?.error) {
-        setSubMsg(err.response.data.error); // THIS WAS MISSING
+      const error = err.response?.data?.error;
+
+      if (error) {
+        setSubMsg(error);   // ✅ always show backend message
       } else {
         setSubMsg("Something went wrong ❌");
       }
@@ -214,9 +211,7 @@ function Dashboard() {
     try {
       const userId = localStorage.getItem("userId");
 
-      const subRes = await API.post("/check-subscription", {
-        user_id: userId
-      });
+      const subRes = await API.post("/check-subscription");
 
       const status = subRes.data.status;
       const end = subRes.data.subscription_end;
@@ -242,20 +237,20 @@ function Dashboard() {
       }
 
       // ✅ CALL RESULT API
-      const res = await API.post("/check-result", {
-        user_id: userId
-      });
+      const res = await API.post("/check-result");
 
       setResult(res.data);
       setResultMsg("");
 
-      await loadData(userId);
+      await loadData();
 
     } catch (err) {
       console.error(err);
 
-      if (err.response?.data?.error) {
-        setResultMsg(err.response.data.error);
+      const error = err.response?.data?.error;
+
+      if (error) {
+        setResultMsg(error);   // ✅ show real backend message
       } else {
         setResultMsg("Something went wrong ❌");
       }

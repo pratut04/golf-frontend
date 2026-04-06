@@ -9,67 +9,68 @@ function Login() {
 
   const navigate = useNavigate(); //  important
 
-const login = async () => {
-  if (loading) return;
+  const login = async () => {
+    if (loading) return;
 
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
+    if (!email || !password) {
+      alert("Enter email and password");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    // 🔥 STEP 1: Wake server
+    try {
+      // 🔥 STEP 1: Wake server
 
       await fetch("https://golf-backend-new.onrender.com");
 
-     
 
-    // 🔥 STEP 2: Try login (1st attempt)
-    let res;
 
-    try {
-      res = await API.post("/login", {
-        email: email.trim(),
-        password: password.trim()
-      });
+      // 🔥 STEP 2: Try login (1st attempt)
+      let res;
+
+      try {
+        res = await API.post("/login", {
+          email: email.trim(),
+          password: password.trim()
+        });
+      } catch (err) {
+        // ⏳ WAIT + RETRY (THIS IS THE MAGIC FIX)
+        console.log("Retrying login...");
+        await new Promise(r => setTimeout(r, 5000));
+
+        res = await API.post("/login", {
+          email: email.trim(),
+          password: password.trim()
+        });
+      }
+
+      // ✅ STORE DATA
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userId", res.data.user.id);
+      localStorage.setItem("email", res.data.user.email);
+      localStorage.setItem("role", res.data.user.role);
+
+      // ✅ REDIRECT
+      if (res.data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+
     } catch (err) {
-      // ⏳ WAIT + RETRY (THIS IS THE MAGIC FIX)
-      console.log("Retrying login...");
-      await new Promise(r => setTimeout(r, 5000));
+      console.error("LOGIN ERROR:", err);
 
-      res = await API.post("/login", {
-        email: email.trim(),
-        password: password.trim()
-      });
+      if (err.response) {
+        alert(err.response.data.error);
+      } else {
+        alert("❌ Server not responding. Try again.");
+      }
+
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ STORE DATA
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("userId", res.data.user.id);
-    localStorage.setItem("email", res.data.user.email);
-
-    // ✅ REDIRECT
-    if (res.data.user.email === "secure@gmail.com") {
-      navigate("/admin");
-    } else {
-      navigate("/dashboard");
-    }
-
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-
-    if (err.response) {
-      alert(err.response.data.error);
-    } else {
-      alert("❌ Server not responding. Try again.");
-    }
-
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="login-container">
