@@ -18,7 +18,9 @@ function Dashboard() {
   const [subMsg, setSubMsg] = useState("");
   const [resultMsg, setResultMsg] = useState("");
   const [jackpot, setJackpot] = useState(0);
+  const [basePool, setBasePool] = useState(0);
   const [refresh, setRefresh] = useState(false);
+
 
   useEffect(() => {
     const checkAndLoad = async () => {
@@ -69,9 +71,12 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchJackpot = () => {
-      fetch("https://golf-backend-new.onrender.com/jackpot") //http://localhost:5000/jackpot
+      fetch("https://golf-backend-new.onrender.com/jackpot") //    ("http://localhost:5000/jackpot")
         .then(res => res.json())
-        .then(data => setJackpot(data.jackpot))
+        .then(data => {
+          setJackpot(data.jackpot);
+          setBasePool(data.basePool);
+        })
         .catch(err => console.error(err));
     };
 
@@ -413,10 +418,10 @@ function Dashboard() {
           </div>
 
           <p style={{ opacity: 0.7 }}>
-            5 match prize (40% of jackpot)
+            5 match prize = jackpot + 40% of pool
           </p>
           <p style={{ marginTop: "5px", fontSize: "14px" }}>
-            🏆 5 Match Prize: ₹{Math.floor(jackpot * 0.4)}
+            🏆 Estimated Next Jackpot: ₹{Math.floor(Number(jackpot) + (Number(basePool) * 0.4))}
           </p>
         </div>
         {/* Draw & Result */}
