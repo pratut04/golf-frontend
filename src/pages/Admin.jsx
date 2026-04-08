@@ -13,7 +13,9 @@ function Admin() {
   const [winnings, setWinnings] = useState([]);
   const [numbers, setNumbers] = useState([]);
   const [jackpot, setJackpot] = useState(0);
+  const [preview, setPreview] = useState(null);
   const [basePool, setBasePool] = useState(0);
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const [simMsg, setSimMsg] = useState("");
   const [simulation, setSimulation] = useState(null);
   const maxMatch = React.useMemo(() => {
@@ -104,46 +106,46 @@ function Admin() {
   //   }
   // };
   const runDraw = async () => {
-  try {
-    // ✅ CALL BACKEND FIRST (with or without numbers)
-    const res = await API.post("/draw", {
-      numbers: simulation?.numbers || []   // safe fallback
-    });
+    try {
+      // ✅ CALL BACKEND FIRST (with or without numbers)
+      const res = await API.post("/draw", {
+        numbers: simulation?.numbers || []   // safe fallback
+      });
 
-    alert("✅ Draw completed");
-    setNumbers(res.data.numbers);
+      alert("✅ Draw completed");
+      setNumbers(res.data.numbers);
 
-  } catch (err) {
-    console.error(err);
+    } catch (err) {
+      console.error(err);
 
-    if (err.response) {
+      if (err.response) {
 
-      const error = err.response.data.error;
+        const error = err.response.data.error;
 
-      // 🔥 DRAW ALREADY DONE (priority)
-      if (error?.includes("already done")) {
-        alert(error);
-        return;
-      }
+        // 🔥 DRAW ALREADY DONE (priority)
+        if (error?.includes("already done")) {
+          alert(error);
+          return;
+        }
 
-      // 🔥 SIMULATION NOT RUN
-      if (!simulation || !simulation.numbers) {
-        alert("⚠️ Please run simulation first");
-        return;
-      }
+        // 🔥 SIMULATION NOT RUN
+        if (!simulation || !simulation.numbers) {
+          alert("⚠️ Please run simulation first");
+          return;
+        }
 
-      // 🔥 OTHER ERRORS
-      if (error) {
-        alert(error);
+        // 🔥 OTHER ERRORS
+        if (error) {
+          alert(error);
+        } else {
+          alert("Something went wrong ❌");
+        }
+
       } else {
-        alert("Something went wrong ❌");
+        alert("Server error");
       }
-
-    } else {
-      alert("Server error");
     }
-  }
-};
+  };
 
   const loadLatestDraw = async () => {
     try {
@@ -194,6 +196,15 @@ function Admin() {
     try {
       await API.post("/approve-winning", { winning_id: id });
       loadWinnings();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const rejectWinning = async (id) => {
+    try {
+      await API.post("/reject-winning", { winning_id: id });
+      loadWinnings(); // refresh list
     } catch (err) {
       console.error(err);
     }
@@ -342,16 +353,63 @@ function Admin() {
                       marginRight: "10px",
                     }}
                   >
-                    {w.status === "paid" ? "✅ Paid" : "⏳ Pending"}
+                    {w.status === "paid" && "✅ Paid"}
+                    {w.status === "pending" && "⏳ Pending"}
+                    {w.status === "rejected" && "❌ Rejected"}
                   </span>
 
+                  {/* {w.proof && (
+                    <img
+                      src={`http://localhost:5000/${w.proof}`}
+                      width="80"
+                      alt="proof"
+                      style={{
+                        marginTop: "6px",
+                        borderRadius: "6px",
+                        cursor: "pointer"
+                      }}
+                      onClick={() =>
+                        setPreview(`http://localhost:5000/${w.proof}`)
+                      }
+                    />
+                  )} */}
+                  {w.proof && (
+                    <img
+                      src={`${BASE_URL}/${w.proof}`}
+                      width="80"
+                      alt="proof"
+                      style={{
+                        marginTop: "6px",
+                        borderRadius: "6px",
+                        cursor: "pointer"
+                      }}
+                      onClick={() =>
+                        setPreview(`${BASE_URL}/${w.proof}`)
+                      }
+                    />
+                  )}
+
                   {w.status === "pending" && (
-                    <button
-                      style={btn}
-                      onClick={() => approveWinning(w.id)}
-                    >
-                      Approve
-                    </button>
+                    <>
+                      <button
+                        style={btn}
+                        onClick={() => approveWinning(w.id)}
+                      >
+                        Approve
+                      </button>
+
+                      {/* 🔥 ADD THIS BELOW */}
+                      <button
+                        style={{
+                          ...btn,
+                          background: "#ef4444", // red
+                          marginLeft: "8px"
+                        }}
+                        onClick={() => rejectWinning(w.id)}
+                      >
+                        Reject
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -376,6 +434,36 @@ function Admin() {
               </div>
             ))}
           </div>
+
+
+          {preview && (
+            <div
+              onClick={() => setPreview(null)}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                background: "rgba(0,0,0,0.8)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 999
+              }}
+            >
+              <img
+                src={preview}
+                alt="preview"
+                style={{
+                  maxWidth: "90%",
+                  maxHeight: "90%",
+                  borderRadius: "10px",
+                  boxShadow: "0 0 20px rgba(0,0,0,0.5)"
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,10 +1,29 @@
 import React from "react";
+import API from "../api/api"; // 🔥 ADD THIS AT TOP
 
 function Winnings({ winnings }) {
   const totalEarnings = winnings?.reduce(
     (acc, w) => acc + Number(w.amount || 0),
     0
   );
+
+
+  const uploadProof = async (file, winningId) => {
+    const formData = new FormData();
+    formData.append("proof", file);
+    formData.append("winningId", winningId);
+
+    try {
+      await API.post("/upload-proof", formData);
+      alert("✅ Proof uploaded");
+
+      // OPTIONAL: reload page (quick fix)
+      window.location.reload();
+
+    } catch (err) {
+      alert("❌ Upload failed");
+    }
+  };
 
   return (
     <div style={card}>
@@ -38,7 +57,7 @@ function Winnings({ winnings }) {
 
                   <p style={dateText}>
                     {new Date(w.created_at).toLocaleString("en-IN", {
-                     
+
                       dateStyle: "medium",
                       timeStyle: "short"
                     })}
@@ -62,6 +81,12 @@ function Winnings({ winnings }) {
                   >
                     {w.status === "paid" ? "✅ Paid" : "⏳ Pending"}
                   </p>
+                  {w.status === "pending" && (
+                    <input
+                      type="file"
+                      onChange={(e) => uploadProof(e.target.files[0], w.id)}
+                    />
+                  )}
                 </div>
 
               </div>
