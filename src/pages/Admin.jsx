@@ -15,7 +15,7 @@ function Admin() {
   const [jackpot, setJackpot] = useState(0);
   const [preview, setPreview] = useState(null);
   const [basePool, setBasePool] = useState(0);
-  const BASE_URL = "https://golf-backend-new.onrender.com";
+  //const BASE_URL = "https://golf-backend-new.onrender.com";
   const [simMsg, setSimMsg] = useState("");
   const [simulation, setSimulation] = useState(null);
   const maxMatch = React.useMemo(() => {
@@ -358,7 +358,7 @@ function Admin() {
                     {w.status === "rejected" && "❌ Rejected"}
                   </span>
 
-                  {/* {w.proof && (
+                  {w.proof && (
                     <img
                       src={`http://localhost:5000/${w.proof}`}
                       width="80"
@@ -372,8 +372,8 @@ function Admin() {
                         setPreview(`http://localhost:5000/${w.proof}`)
                       }
                     />
-                  )} */}
-                  {w.proof && (
+                  )}
+                  {/* {w.proof && (
                     <img
                       src={`${BASE_URL}/${w.proof}`}
                       width="80"
@@ -387,7 +387,7 @@ function Admin() {
                         setPreview(`${BASE_URL}/${w.proof}`)
                       }
                     />
-                  )}
+                  )} */}
 
                   {w.status === "pending" && (
                     <>

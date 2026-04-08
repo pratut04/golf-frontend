@@ -22,7 +22,7 @@ function Login() {
     try {
       // 🔥 STEP 1: Wake server
 
-      await fetch("https://golf-backend-new.onrender.com");
+      //await fetch("https://golf-backend-new.onrender.com");
 
 
 
