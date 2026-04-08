@@ -15,7 +15,7 @@ function Admin() {
   const [jackpot, setJackpot] = useState(0);
   const [preview, setPreview] = useState(null);
   const [basePool, setBasePool] = useState(0);
-  const BASE_URL = import.meta.env.VITE_API_URL;
+  const BASE_URL = "https://golf-backend-new.onrender.com";
   const [simMsg, setSimMsg] = useState("");
   const [simulation, setSimulation] = useState(null);
   const maxMatch = React.useMemo(() => {
