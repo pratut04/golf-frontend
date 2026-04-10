@@ -34,7 +34,7 @@ function AdminCharities() {
       setAdding(true);
 
       await API.post("/charities", {
-        name: name.trim(), // ✅ trim fix
+        name: name.trim(), 
         description: "Added by admin",
         image: ""
       });
