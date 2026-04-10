@@ -37,8 +37,10 @@ function Admin() {
   const BASE_URL = "https://golf-backend-new.onrender.com";
   const [simMsg, setSimMsg] = useState("");
   const [stats, setStats] = useState(null);
+  const [charityData, setCharityData] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [simulation, setSimulation] = useState(null);
+  const COLORS = ["#8b5cf6", "#22c55e", "#facc15"];
   const maxMatch = React.useMemo(() => {
     return simulation
       ? Math.max(...simulation.results.map(r => r.matchCount))
@@ -87,6 +89,22 @@ function Admin() {
     };
 
     loadAnalytics();
+  }, []);
+
+  useEffect(() => {
+    const loadCharity = async () => {
+      const res = await API.get("/charity-breakdown");
+
+      // 🔥 FIX HERE
+      const formatted = res.data.map(item => ({
+        ...item,
+        total: Number(item.total)
+      }));
+
+      setCharityData(formatted);
+    };
+
+    loadCharity();
   }, []);
 
   useEffect(() => {
@@ -384,7 +402,18 @@ function Admin() {
 
             </div>
           )}
-
+          {/* 💖 TOTAL CHARITY */}
+          <div
+            style={{
+              ...statCard,
+              background: "linear-gradient(135deg, #fdf2f8, #fce7f3)"
+            }}
+          >
+            <div style={statTitle}>💖 Charity Donations</div>
+            <div style={statValue}>
+              ₹{Number(stats?.totalCharity || 0).toLocaleString()}
+            </div>
+          </div>
 
           {/* 📊 Analytics Chart */}
 
@@ -420,6 +449,52 @@ function Admin() {
             </div>
           )}
 
+          <div style={card}>
+            <h3>💖 Charity Breakdown</h3>
+
+            <div style={{ width: "100%", height: 320 }}>
+              <ResponsiveContainer>
+                <PieChart>
+
+                  {/* 🔥 GRADIENT */}
+                  <defs>
+                    <linearGradient id="charityGradient" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#a78bfa" />
+                      <stop offset="100%" stopColor="#6d28d9" />
+                    </linearGradient>
+                  </defs>
+
+                  <Pie
+                    data={charityData}
+                    dataKey="total"
+                    nameKey="charity_name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={110}   // 🔥 bigger
+                    label={({ value }) => `₹${value}`}   // 🔥 show ₹
+                  >
+                    {charityData.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill="url(#charityGradient)"   // 🔥 gradient applied
+                      />
+                    ))}
+                  </Pie>
+
+                  <Tooltip
+                    formatter={(value) => `₹${value}`}
+                    contentStyle={{
+                      borderRadius: "10px",
+                      border: "1px solid #e2e8f0"
+                    }}
+                  />
+
+                  <Legend />
+
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
           {/* 🥧 Distribution Chart */}
           {/* 🥧 Payment Distribution */}
@@ -634,8 +709,7 @@ function Admin() {
                     {w.status === "rejected" && "❌ Rejected"}
                   </span>
 
-{/* 
-                  {w.proof && (
+                  {/* {w.proof && (
                     <img
                       src={`http://localhost:5000/${w.proof}`}
                       width="80"
@@ -650,7 +724,7 @@ function Admin() {
                       }
                     />
                   )} */}
-                  
+
                   {w.proof && (
                     <img
                       src={`${BASE_URL}/${w.proof}`}
