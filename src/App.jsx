@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import React from "react";
 
@@ -6,7 +7,15 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Subscription from "./pages/Subscription";
 
-//  Protected Route
+// 🔥 ADMIN PAGES
+import AdminUsers from "./components/AdminUsers";
+import AdminScores from "./components/AdminScores";
+import AdminCharities from "./components/AdminCharities";
+import AdminWinnings from "./components/AdminWinnings";
+import AdminLeaderboard from "./components/AdminLeaderboard";
+// ================= ROUTES =================
+
+// 🔐 Protected Route
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/" />;
@@ -23,33 +32,17 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
-// 🔐 Public Route (FIXED)
-
-
+// 🌐 Public Route
 const PublicRoute = ({ children }) => {
   return children;
 };
-
-// const PublicRoute = ({ children }) => {
-//   const token = localStorage.getItem("token");
-//   const email = localStorage.getItem("email");
-
-//   if (!token) return children;
-
-//   //  smarter redirect
-//   if (email === "secure@gmail.com") {
-//     return <Navigate to="/admin" />;
-//   }
-
-//   return <Navigate to="/dashboard" />;
-// };
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* PUBLIC */}
+        {/* ================= PUBLIC ================= */}
         <Route
           path="/"
           element={
@@ -59,7 +52,7 @@ function App() {
           }
         />
 
-        {/* USER */}
+        {/* ================= USER ================= */}
         <Route
           path="/dashboard"
           element={
@@ -69,17 +62,7 @@ function App() {
           }
         />
 
-        {/* ADMIN */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <Admin />
-            </AdminRoute>
-          }
-        />
-
-        {/* SUBSCRIPTION */}
+        {/* ================= SUBSCRIPTION ================= */}
         <Route
           path="/subscription"
           element={
@@ -88,6 +71,29 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        {/* ================= ADMIN (LAYOUT ROUTE) ================= */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <Admin />
+            </AdminRoute>
+          }
+        >
+          {/* 🔥 NESTED ROUTES */}
+
+          
+
+          {/* Pages */}
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="scores" element={<AdminScores />} />
+          <Route path="charities" element={<AdminCharities />} />
+
+          <Route path="winnings" element={<AdminWinnings />} />
+          <Route path="leaderboard" element={<AdminLeaderboard />} />
+
+        </Route>
 
       </Routes>
     </BrowserRouter>

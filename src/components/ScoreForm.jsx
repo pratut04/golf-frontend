@@ -159,7 +159,7 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
 
       <button
         onClick={handleSubmit}
-        style={btn}
+        className="admin-btn"
         disabled={loading || locked}
       >
         {loading ? "Submitting..." : "Submit"}
@@ -189,11 +189,3 @@ const input = {
   color: "#0f172a",
 };
 
-const btn = {
-  padding: "10px 14px",
-  background: "#2563eb",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-};

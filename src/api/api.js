@@ -1,11 +1,17 @@
+
 import axios from "axios";
 
+const BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://golf-backend-new.onrender.com"
+    : "http://localhost:5000";
+
 const API = axios.create({
-  baseURL:"https://golf-backend-new.onrender.com",  //"http://localhost:5000",      
+  baseURL: BASE_URL,
   timeout: 15000
 });
 
-// ✅ Attach token
+//  Attach token
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
 
@@ -13,32 +19,36 @@ API.interceptors.request.use((req) => {
     req.headers.Authorization = `Bearer ${token}`;
   }
 
+  // FIX: Don't override FormData
+  if (!(req.data instanceof FormData)) {
+    req.headers["Content-Type"] = "application/json";
+  }
+
   return req;
 });
 
-// ✅ Global response handler
+//  Global response handler
 API.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    console.log("✅ API:", res.config.url);
+    return res;
+  },
   (err) => {
+    const error = err.response?.data?.error || err.message;
 
-    console.log("API ERROR:", err.response?.data || err.message);
+    console.log("❌ API ERROR:", error);
 
-    // 🔐 Unauthorized → logout
     if (err.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("email");
-
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 100);
+      localStorage.clear();
+      window.location.href = "/";
     }
 
-    // ❌ DO NOT HANDLE 403 HERE
+    if (err.response?.status === 403) {
+      alert(error || "Access denied ❌");
+    }
 
-    // ⚠️ Network error
     if (!err.response) {
-      console.warn("Server not responding");
+      alert("Server not responding 🚨");
     }
 
     return Promise.reject(err);

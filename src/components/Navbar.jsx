@@ -10,7 +10,7 @@ function Navbar() {
     localStorage.removeItem("userId");
     localStorage.removeItem("email");
 
-    navigate("/"); 
+    navigate("/");
   };
 
   return (
@@ -21,12 +21,29 @@ function Navbar() {
         <button
           style={navBtn}
           onClick={() => navigate("/dashboard")}
+          onMouseEnter={(e) => {
+            e.target.style.background = "#1e293b";
+            e.target.style.boxShadow = "none";   // ✅ remove glow
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "transparent";
+          }}
         >
           Dashboard
         </button>
 
         {/* NEW SUBSCRIPTION BUTTON */}
-        <button style={navBtn} onClick={() => navigate("/subscription")}>
+        <button
+          style={navBtn}
+          onClick={() => navigate("/subscription")}
+          onMouseEnter={(e) => {
+            e.target.style.background = "#1e293b";
+            e.target.style.boxShadow = "none";   // ✅ remove glow
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "transparent";
+          }}
+        >
           Subscription
         </button>
 
@@ -35,6 +52,13 @@ function Navbar() {
           <button
             style={navBtn}
             onClick={() => navigate("/admin")}
+            onMouseEnter={(e) => {
+              e.target.style.background = "#1e293b";
+              e.target.style.boxShadow = "none";   // ✅ remove glow
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = "transparent";
+            }}
           >
             Admin
           </button>
@@ -50,7 +74,7 @@ function Navbar() {
 
 export default Navbar;
 
-// 🎨 styles
+
 const nav = {
   display: "flex",
   justifyContent: "space-between",
@@ -59,7 +83,8 @@ const nav = {
   background: "rgba(2,6,23,0.8)",
   backdropFilter: "blur(10px)",
   borderBottom: "1px solid rgba(255,255,255,0.08)",
-  color: "#e5e7eb"
+  color: "#e5e7eb",
+  outline: "none"
 };
 
 const links = {
@@ -85,15 +110,16 @@ const logoutBtn = {
   borderRadius: "8px",
   cursor: "pointer",
   fontWeight: "600",
-  boxShadow:"0 4px 14px rgba(239,68,68,0.5)"
+  boxShadow: "0 4px 14px rgba(239,68,68,0.5)"
 };
 
 const navBtn = {
   background: "transparent",
-  color: "#cbd5e1",
+  color: "#e2e8f0",
   border: "1px solid rgba(255,255,255,0.1)",
   padding: "8px 14px",
   borderRadius: "8px",
   cursor: "pointer",
-  boxShadow: "none" 
+  transition: "all 0.2s ease",
+  boxShadow: "none"   // ✅ IMPORTANT (removes green glow)
 };

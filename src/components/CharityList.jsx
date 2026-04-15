@@ -27,6 +27,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
               </p>
 
               <button
+                className="green-btn"
                 style={{
                   ...btn,
                   background: isSelected ? "#22c55e" : "white",
@@ -36,10 +37,10 @@ function CharityList({ charities, selectCharity, selectedId }) {
                 }}
                 disabled={isSelected}
                 onClick={() => {
-                  if (!isSelected) selectCharity(c.id); // ✅ same logic
+                  if (!isSelected) selectCharity(c.id); 
                 }}
               >
-                {isSelected ? "Selected ✓" : "Select"}
+                {isSelected ? "Selected" : "Select"}
               </button>
             </div>
           );
