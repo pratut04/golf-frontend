@@ -18,6 +18,7 @@ export default function VerifyOtp() {
     const [resendLoading, setResendLoading] = useState(false);
     const [timer, setTimer] = useState(30);
     const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
 
     // ⏳ countdown
     useEffect(() => {
@@ -95,10 +96,12 @@ export default function VerifyOtp() {
             });
 
             setTimer(30);
-            setError("New OTP sent");
+            setMessage("New OTP sent");
+            setError("");
 
         } catch {
             setError("Failed to resend");
+            setMessage("");
         }
 
         setResendLoading(false);
@@ -130,6 +133,18 @@ export default function VerifyOtp() {
                         />
                     ))}
                 </div>
+
+                {message && (
+                    <p style={{ color: "#22c55e", marginBottom: "12px" }}>
+                        {message}
+                    </p>
+                )}
+
+                {error && (
+                    <p style={{ color: "red", marginBottom: "12px" }}>
+                        {error}
+                    </p>
+                )}
 
                 {error && <p style={styles.error}>{error}</p>}
 
@@ -163,7 +178,10 @@ export default function VerifyOtp() {
                             fontSize: "14px",
                             letterSpacing: "0.5px",
                             cursor: timer > 0 ? "not-allowed" : "pointer",
-
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
                             background: timer > 0
                                 ? "#334155"
                                 : "linear-gradient(135deg, #6366f1, #3b82f6)",
@@ -249,7 +267,7 @@ const styles = {
         fontSize: "14px"
     }
 
-   
+
 
 };
 
