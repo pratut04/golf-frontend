@@ -15,6 +15,7 @@ export default function VerifyOtp() {
     const inputs = useRef([]);
 
     const [loading, setLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
     const [timer, setTimer] = useState(30);
     const [error, setError] = useState("");
 
@@ -79,8 +80,13 @@ export default function VerifyOtp() {
 
     // 🔁 resend OTP
     const handleResend = async () => {
+        if (resendLoading) return; // prevent multiple clicks
+
+        setResendLoading(true);
+        setError(""); // clear old error
+
         try {
-            await fetch("https://golf-backend-new.onrender.com/resend-otp", { //"https://golf-backend.onrender.com/resend-otp"  "http://localhost:5000/resend-otp"
+            await fetch("https://golf-backend-new.onrender.com/resend-otp", {   //"https://golf-backend.onrender.com/resend-otp"  "http://localhost:5000/resend-otp"
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -89,16 +95,19 @@ export default function VerifyOtp() {
             });
 
             setTimer(30);
-            alert("OTP resent 📩");
+            setError("New OTP sent");
+
         } catch {
-            alert("Failed to resend");
+            setError("Failed to resend");
         }
+
+        setResendLoading(false);
     };
 
     if (!email) {
         return (
             <div style={{ color: "white", textAlign: "center", marginTop: "100px" }}>
-                ❌ Email missing. Please signup again.
+                Email missing! Please signup again.
             </div>
         );
     }
@@ -144,7 +153,7 @@ export default function VerifyOtp() {
                     {/* BUTTON */}
                     <button
                         onClick={handleResend}
-                        disabled={timer > 0}
+                        disabled={timer > 0 || resendLoading}
                         style={{
                             width: "100%",
                             padding: "12px",
@@ -175,7 +184,14 @@ export default function VerifyOtp() {
                             e.target.style.transform = "scale(1)";
                         }}
                     >
-                        {timer > 0 ? "Wait..." : "Resend OTP"}
+                        {resendLoading && (
+                            <span className="spinner"></span>
+                        )}
+                        {resendLoading
+                            ? "Sending..."
+                            : timer > 0
+                                ? `Wait ${timer}s`
+                                : "Resend OTP"}
                     </button>
                 </div>
             </div>
@@ -232,4 +248,10 @@ const styles = {
         color: "red",
         fontSize: "14px"
     }
+
+   
+
 };
+
+
+
