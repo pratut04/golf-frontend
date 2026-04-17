@@ -54,7 +54,7 @@ export default function VerifyOtp() {
         const finalOtp = otp.join("");
 
         try {
-            const res = await fetch("https://golf-backend.onrender.com/verify-otp", {   //"https://golf-backend.onrender.com/verify-otp"   "http://localhost:5000/verify-otp"
+            const res = await fetch("https://golf-backend-new.onrender.com/verify-otp", {   //"https://golf-backend.onrender.com/verify-otp"   "http://localhost:5000/verify-otp"
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -80,7 +80,7 @@ export default function VerifyOtp() {
     // 🔁 resend OTP
     const handleResend = async () => {
         try {
-            await fetch("https://golf-backend.onrender.com/resend-otp", { //"https://golf-backend.onrender.com/resend-otp"  "http://localhost:5000/resend-otp"
+            await fetch("https://golf-backend-new.onrender.com/resend-otp", { //"https://golf-backend.onrender.com/resend-otp"  "http://localhost:5000/resend-otp"
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
