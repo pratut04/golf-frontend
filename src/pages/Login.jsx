@@ -6,6 +6,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
+  const [msg, setMsg] = useState("");
 
   const navigate = useNavigate(); //  important
 
@@ -13,7 +15,7 @@ function Login() {
     if (loading) return;
 
     if (!email || !password) {
-      alert("Enter email and password");
+      setMsg("Enter email and password");
       return;
     }
 
@@ -50,14 +52,22 @@ function Login() {
       localStorage.setItem("userId", res.data.user.id);
       localStorage.setItem("email", res.data.user.email);
       localStorage.setItem("role", res.data.user.role);
+      localStorage.removeItem("guest");
 
+      // ✅ REDIRECT
       // ✅ REDIRECT
       if (res.data.user.role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/dashboard");
-      }
+        const redirect = localStorage.getItem("redirectAfterLogin");
 
+        if (redirect) {
+          localStorage.removeItem("redirectAfterLogin"); // 🔥 VERY IMPORTANT
+          navigate(redirect);
+        } else {
+          navigate("/dashboard");
+        }
+      }
     } catch (err) {
       console.error("LOGIN ERROR:", err);
 
@@ -71,6 +81,34 @@ function Login() {
       setLoading(false);
     }
   };
+
+  const signup = async () => {
+    try {
+      if (!email || !password) {
+        setMsg("Enter email & password");
+        return;
+      }
+
+      await API.post("/users", {
+        email: email.trim(),
+        password: password.trim()
+      });
+
+      setMsg("Account created ✅ Now login");
+      setIsSignup(false);
+
+    } catch (err) {
+      setMsg(err.response?.data?.error || "Signup failed ❌");
+    }
+  };
+
+  const skipLogin = () => {
+    localStorage.clear();
+    localStorage.setItem("guest", "true");
+    navigate("/dashboard");
+  };
+
+
 
   return (
     <div className="login-container">
@@ -91,9 +129,48 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button onClick={login} disabled={loading}>
-          {loading ? "Loading..." : "Login"}
+        {/* ✅ ADD THIS */}
+        <p
+          onClick={() => navigate("/forgot-password")}
+          style={{
+            cursor: "pointer",
+            color: "#2563eb",
+            fontSize: "13px",
+            marginTop: "6px",
+            marginBottom: "10px",
+            textAlign: "right"
+          }}
+        >
+          Forgot Password?
+        </p>
+
+        <button onClick={isSignup ? signup : login} disabled={loading}>
+          {loading ? "Loading..." : isSignup ? "Signup" : "Login"}
         </button>
+
+        <p style={{ marginTop: "10px", cursor: "pointer", color: "#2563eb" }}
+          onClick={() => {
+            setIsSignup(!isSignup);
+            setMsg("");
+          }}>
+          {isSignup ? "Already have account? Login" : "Create new account"}
+        </p>
+
+        <button
+          style={{
+            marginTop: "10px",
+            background: "#64748b"
+          }}
+          onClick={skipLogin}
+        >
+          Skip as Guest
+        </button>
+
+        {msg && (
+          <p style={{ marginTop: "10px", color: "red" }}>
+            {msg}
+          </p>
+        )}
       </div>
     </div>
   );

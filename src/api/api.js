@@ -39,8 +39,12 @@ API.interceptors.response.use(
     console.log("❌ API ERROR:", error);
 
     if (err.response?.status === 401) {
-      localStorage.clear();
-      window.location.href = "/";
+      const isGuest = localStorage.getItem("guest") === "true";
+
+      if (!isGuest) {
+        localStorage.clear();
+        window.location.href = "/";
+      }
     }
 
     if (err.response?.status === 403) {

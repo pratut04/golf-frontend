@@ -5,6 +5,7 @@ import { useOutletContext } from "react-router-dom";
 function AdminWinnings() {
     const { winnings, approveWinning, rejectWinning } = useOutletContext();
     const [preview, setPreview] = React.useState(null);
+    const BASE_URL = "https://golf-backend-new.onrender.com";
 
     return (
         <div style={card}>
@@ -100,7 +101,7 @@ function AdminWinnings() {
                 <p style={{ opacity: 0.6 }}>No winnings found 😢</p>
             )}
 
-            {/* 🔥 PREVIEW MODAL (OUTSIDE MAP - IMPORTANT FIX) */}
+            {/*  PREVIEW MODAL (OUTSIDE MAP - IMPORTANT FIX) */}
             {preview && (
                 <div style={overlay} onClick={() => setPreview(null)}>
                     <img src={preview} alt="preview" style={previewImg} />

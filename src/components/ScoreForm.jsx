@@ -129,12 +129,12 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
   return (
     <div style={card}>
       <h3 style={{ color: "white" }}>🎯 Add Score</h3>
-      // ================= EARLY RETURN =================
+    
 
       {
         subscriptionStatus !== "active" ? (
           <p style={{ color: "red" }}>
-            ❌ Please subscribe or renew to add scores
+            Please subscribe or renew to add scores
           </p>
         ) : locked ? (
           <p style={{ color: "#ef4444", fontSize: "14px", lineHeight: "1.6" }}>
@@ -158,8 +158,21 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
       />
 
       <button
-        onClick={handleSubmit}
-        className="admin-btn"
+       
+        style={{
+              background: "#2563eb",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "500",
+              transition: "all 0.2s ease",
+              boxShadow: "none"
+            }}
+             onClick={handleSubmit}
+            onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
+            onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
         disabled={loading || locked}
       >
         {loading ? "Submitting..." : "Submit"}

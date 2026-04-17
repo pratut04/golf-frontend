@@ -6,11 +6,26 @@ function Navbar() {
   const email = localStorage.getItem("email");
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("email");
+    localStorage.clear();
 
     navigate("/");
+  };
+
+  const goToSubscription = () => {
+    const token = localStorage.getItem("token");
+
+    const isGuest =
+      localStorage.getItem("guest") === "true" &&
+      !token;
+
+    if (isGuest) {
+      localStorage.setItem("redirectAfterLogin", "/subscription"); // ✅ important
+      alert("🔒 Please sign in to continue with subscription");
+      navigate("/");
+      return;
+    }
+
+    navigate("/subscription");
   };
 
   return (
@@ -35,10 +50,10 @@ function Navbar() {
         {/* NEW SUBSCRIPTION BUTTON */}
         <button
           style={navBtn}
-          onClick={() => navigate("/subscription")}
+          onClick={goToSubscription}
           onMouseEnter={(e) => {
             e.target.style.background = "#1e293b";
-            e.target.style.boxShadow = "none";   // ✅ remove glow
+            e.target.style.boxShadow = "none";
           }}
           onMouseLeave={(e) => {
             e.target.style.background = "transparent";

@@ -25,7 +25,7 @@ function AdminScores() {
     }
   };
 
-  // ✅ CREATE MAP (PERFORMANCE FIX)
+  //  CREATE MAP (PERFORMANCE FIX)
   const userMap = {};
   users.forEach(u => {
     userMap[u.id] = u.email;
@@ -41,7 +41,7 @@ function AdminScores() {
         <p>No scores found</p>
       ) : (
         scores
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // ✅ latest first
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) //latest first
           .slice(0, 10)
           .map((s, index) => (
             <div key={s.id} style={item}>
@@ -61,7 +61,7 @@ function AdminScores() {
 
 export default AdminScores;
 
-// 🎨 styles
+//  styles
 const card = {
   background: "#1e293b",
   padding: "15px",

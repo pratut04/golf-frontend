@@ -28,10 +28,20 @@ function Dashboard() {
 
 
       const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
 
-      if (!token || !userId) {
+      const isGuest =
+        localStorage.getItem("guest") === "true" &&
+        !localStorage.getItem("token");
+
+      if (!token && !isGuest) {
         navigate("/");
+        return;
+      }
+
+      // ✅ GUEST MODE
+      if (isGuest) {
+        setSubscriptionStatus("inactive");
+        loadData();
         return;
       }
 
@@ -40,7 +50,6 @@ function Dashboard() {
 
         setSubscriptionStatus(res.data.status);
 
-        // first load
         loadData();
 
 
@@ -54,11 +63,18 @@ function Dashboard() {
 
     // 🔥 AUTO REFRESH
     const interval = setInterval(() => {
-      const userId = localStorage.getItem("userId");
+      const isGuest =
+        localStorage.getItem("guest") === "true" &&
+        !localStorage.getItem("token");
 
-      if (userId) {
-        loadData();
-        setRefresh(prev => !prev); // 🔥 THIS LINE FIXES EVERYTHING
+      if (isGuest) {
+        loadData();   // ✅ allow guest refresh
+      } else {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          loadData();
+          setRefresh(prev => !prev);
+        }
       }
     }, 15000);
 
@@ -84,7 +100,41 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const loadData = async (userId) => {
+  const loadData = async () => {
+    const isGuest =
+      localStorage.getItem("guest") === "true" &&
+      !localStorage.getItem("token");
+
+    // ✅ STOP API CALLS FOR GUEST
+    if (isGuest) {
+      setSubscriptionStatus("inactive");
+
+      try {
+        // ✅ Allow read-only data for guest
+        const c = await API.get("/charities");
+        const l = await API.get("/leaderboard");
+
+        setCharities(c.data);
+        setLeaderboard(l.data);
+
+      } catch (err) {
+        console.error("Guest load error:", err);
+      }
+
+      // ✅ Fake user
+      setData({
+        user: {
+          email: "Guest User",
+          charity_name: null
+        },
+        scores: [],
+        winnings: []
+      });
+
+      return;
+    }
+
+    // ✅ NORMAL USER FLOW
     try {
       const d = await API.get("/dashboard");
       const c = await API.get("/charities");
@@ -96,8 +146,7 @@ function Dashboard() {
 
     } catch (err) {
       console.error("LOAD ERROR:", err);
-
-      alert("❌ Failed to load dashboard (check backend)");
+      setSubMsg("❌ Failed to load dashboard (check backend)");
     }
   };
 
@@ -128,10 +177,23 @@ function Dashboard() {
     );
   }
 
+  const isGuest =
+    localStorage.getItem("guest") === "true" &&
+    !localStorage.getItem("token");
+
   //=================addScore Function===============
   const addScore = async (score) => {
+    setSubMsg("");
     try {
-      const userId = localStorage.getItem("userId");
+      const isGuest =
+        localStorage.getItem("guest") === "true" &&
+        !localStorage.getItem("token");
+      if (isGuest) {
+        setSubMsg("Login required to add score ⚠️");
+        return;
+      }
+
+
 
       const subRes = await API.post("/check-subscription");
 
@@ -140,24 +202,22 @@ function Dashboard() {
 
       // ❌ NOT SUBSCRIBED
       if (status === "not_subscribed") {
-        alert("⚠️ Please subscribe to use this feature");
+        setSubMsg("⚠️ Please subscribe to use this feature");
 
-        // document.getElementById("sub-msg").innerHTML =
-        //`<p style="color:red;">Please subscribe to use this feature</p>`;
+
 
         return;
       }
 
       // ❌ EXPIRED
       if (status === "expired") {
-        alert(`❌ Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
+        setSubMsg(` Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
           day: "2-digit",
           month: "short",
           year: "numeric"
         })}`);
 
-        //document.getElementById("sub-msg").innerHTML =
-        //`<p style="color:red;">Subscription expired. Please renew.</p>`;
+
 
         return;
       }
@@ -167,23 +227,31 @@ function Dashboard() {
         score: Number(score),
       });
 
-      alert("✅ Score added");
+      setSubMsg("✅ Score added");
       loadData();
 
     } catch (err) {
       console.error("FULL ERROR:", err);
 
       if (err.response && err.response.data && err.response.data.error) {
-        alert(err.response.data.error);   // ✅ THIS LINE FIXES EVERYTHING
+        setSubMsg(err.response.data.error);   // ✅ THIS LINE FIXES EVERYTHING
       } else {
-        alert("Error adding score ❌");
+        setSubMsg("Error adding score ❌");
       }
     }
   };
   //================selectCharitiey function==================
   const selectCharity = async (id) => {
+    setSubMsg("");
     try {
-      // const userId = localStorage.getItem("userId");
+
+      const isGuest =
+        localStorage.getItem("guest") === "true" &&
+        !localStorage.getItem("token");
+      if (isGuest) {
+        setSubMsg("Login required to select charity ⚠️");
+        return;
+      }
 
       await API.post("/select-charity", {
         // user_id: userId,
@@ -208,8 +276,9 @@ function Dashboard() {
 
   //================check result===================
   const checkResult = async () => {
+    setResultMsg("");
+
     try {
-      const userId = localStorage.getItem("userId");
 
       const subRes = await API.post("/check-subscription");
 
@@ -226,7 +295,7 @@ function Dashboard() {
       // EXPIRED
       if (status === "expired") {
         setResultMsg(
-          `❌ Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
+          `Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
             year: "numeric"
@@ -265,7 +334,101 @@ function Dashboard() {
       <Navbar />
 
       <div style={content}>
-        <h1 style={title}>🎯 User Dashboard</h1>
+        <div
+          style={{
+            marginBottom: "30px",
+            padding: "22px 24px",
+            borderRadius: "18px",
+            background: "linear-gradient(135deg, #020617, #0f172a)",
+            color: "white",
+            //boxShadow: "0 15px 40px rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            transition: "0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.01)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          {/* LEFT SIDE */}
+          <div>
+            <h1
+              style={{
+                fontSize: "32px",
+                fontWeight: "800",
+                background: "linear-gradient(90deg, #22c55e, #38bdf8)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                textShadow: "0 2px 12px rgba(34,197,94,0.25)",
+                marginBottom: "6px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px"
+              }}
+            >
+              Golf Performance Hub
+            </h1>
+
+            {/* ✅ UPDATED TAGLINE (INSIDE, NOT OUTSIDE) */}
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#e2e8f0",
+                opacity: 0.9
+              }}
+            >
+              Play smarter. Track better. Win bigger.
+            </p>
+          </div>
+
+          {/* RIGHT SIDE BADGE */}
+          <div
+            style={{
+              background: "rgba(255,255,255,0.1)",
+              padding: "8px 14px",
+              borderRadius: "999px",
+              fontSize: "13px",
+              fontWeight: "500",
+              backdropFilter: "blur(10px)"
+            }}
+          >
+            🚀 Live Dashboard
+          </div>
+        </div>
+
+        {isGuest && (
+          <div style={{
+            background: "rgba(251, 191, 36, 0.15)",
+            border: "1px solid rgba(251, 191, 36, 0.3)",
+            color: "#92400e",
+            padding: "12px",
+            borderRadius: "8px",
+            marginBottom: "15px",
+            textAlign: "center"
+          }}>
+            <p style={{ marginBottom: "8px" }}>
+              🔒 You are in Guest Mode — limited access
+            </p>
+
+            <button
+              onClick={() => navigate("/")}
+              style={{
+                padding: "8px 16px",
+                background: "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer"
+              }}
+            >
+              Login to Unlock Features
+            </button>
+          </div>
+        )}
 
         {/* Subscription */}
         <div
@@ -304,7 +467,20 @@ function Dashboard() {
 
               <button
                 style={btn}
-                onClick={() => navigate("/subscription")}
+                onClick={() => {
+                  const isGuest = localStorage.getItem("guest") === "true";
+
+                  if (isGuest) {
+                    alert("🔒 Please sign in to continue with subscription");
+
+
+                    setTimeout(() => {
+                      navigate("/");
+                    }, 200);
+                  } else {
+                    navigate("/subscription");
+                  }
+                }}
               >
                 💳 Subscribe Now
               </button>
@@ -341,12 +517,45 @@ function Dashboard() {
         {/* Score */}
         <div style={cardHover}>
           <h3>🏌️ Enter Score</h3>
-          <ScoreForm
-            addScore={addScore}
-            subscriptionStatus={subscriptionStatus}
-            subscriptionEnd={data.user.subscription_end}
-            refresh={refresh} // 🔥 ADD THIS
-          />
+          <div style={{ position: "relative" }}>
+            {/* Actual content */}
+            <div style={{
+              opacity: isGuest ? 0.6 : 1,
+              filter: isGuest ? "blur(1.5px)" : "none"
+            }}>
+              <ScoreForm
+                addScore={addScore}
+                subscriptionStatus={subscriptionStatus}
+                subscriptionEnd={data.user.subscription_end}
+                refresh={refresh}
+              />
+            </div>
+
+            {/* Overlay for guest */}
+            {isGuest && (
+              <div
+                onClick={() => navigate("/")}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: "rgba(255,255,255,0.65)",
+                  backdropFilter: "blur(3px)",
+                  borderRadius: "10px",
+                  fontWeight: "600",
+                  cursor: "pointer"
+                }}
+              >
+                🔒 Sign in to record your score
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* Scores */}
@@ -367,6 +576,7 @@ function Dashboard() {
         </div>
 
         {/* Charity */}
+
         <div style={cardHover}>
           <h3>❤️ Charity Selection</h3>
 
@@ -381,6 +591,7 @@ function Dashboard() {
               {subMsg}
             </div>
           )}
+
           <p style={{ color: "#334155" }}>
             Selected:{" "}
             <span style={{ color: "#16a34a", fontWeight: "600" }}>
@@ -388,12 +599,45 @@ function Dashboard() {
             </span>
           </p>
 
-          <CharityList
-            charities={charities}
-            selectCharity={selectCharity}
-            selectedId={data.user.charity_id}
-          />
+          <div style={{ position: "relative" }}>
+            {/* Actual Charity List */}
+            <div style={{
+              opacity: isGuest ? 0.6 : 1,
+              filter: isGuest ? "blur(1.5px)" : "none"
+            }}>
+              <CharityList
+                charities={charities}
+                selectCharity={selectCharity}
+                selectedId={data.user.charity_id}
+              />
+            </div>
+
+            {/* Overlay */}
+            {isGuest && (
+              <div
+                onClick={() => navigate("/")}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: "rgba(255,255,255,0.65)",
+                  backdropFilter: "blur(3px)",
+                  borderRadius: "10px",
+                  fontWeight: "600",
+                  cursor: "pointer"
+                }}
+              >
+                🔒 Sign in to choose a charity
+              </div>
+            )}
+          </div>
         </div>
+
 
         {/* Participation */}
         <div style={cardHover}>
@@ -419,11 +663,12 @@ function Dashboard() {
             🏆 Estimated Next Jackpot: ₹{Math.floor(Number(jackpot) + (Number(basePool) * 0.4))}
           </p>
         </div>
+        
         {/* Draw & Result */}
         <div style={cardHover}>
           <h3>🎲 Draw & Result</h3>
 
-          {/* ✅ MESSAGE */}
+          {/* MESSAGE */}
           {resultMsg && (
             <div
               style={{
@@ -438,44 +683,73 @@ function Dashboard() {
             </div>
           )}
 
-          {/* ✅ BUTTON */}
-          <button
-            style={{
-              background: "#2563eb",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-              boxShadow: "0 4px 10px rgba(37, 99, 235, 0.4)"
-            }}
-            onClick={checkResult}
-            onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
-            onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
-          >
-            Check Result
-          </button>
+          <div style={{ position: "relative" }}>
+            {/* ACTUAL CONTENT */}
+            <div
+              style={{
+                opacity: isGuest ? 0.6 : 1,
+                filter: isGuest ? "blur(1.5px)" : "none"
+              }}
+            >
+              <button
+                style={{
+                  background: "#2563eb",
+                  color: "white",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 10px rgba(37, 99, 235, 0.4)"
+                }}
+                onClick={checkResult}
+                onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
+                onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+              >
+                Check Result
+              </button>
 
-          {/* ✅ RESULT (ONLY WHEN ACTIVE + NO ERROR) */}
-          {result && !resultMsg && subscriptionStatus === "active" && (
+              {/* RESULT */}
+              {result && !resultMsg && subscriptionStatus === "active" && (
+                <div style={{ marginTop: "10px" }}>
+                  <p>Result: {result.result}</p>
+                  <p>Numbers: {result.numbers?.join(", ")}</p>
 
-            <div style={{ marginTop: "10px" }}>
-              <p>Result: {result.result}</p>
-              <p>Numbers: {result.numbers?.join(", ")}</p>
-
-              {/* OPTIONAL DATE */}
-              <p>
-                Draw Date:{" "}
-                {new Date(result.created_at).toLocaleString("en-IN", {
-
-                  dateStyle: "medium",
-                  timeStyle: "short"
-                })}
-              </p>
+                  <p>
+                    Draw Date:{" "}
+                    {new Date(result.created_at).toLocaleString("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short"
+                    })}
+                  </p>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* 🔒 OVERLAY */}
+            {isGuest && (
+              <div
+                onClick={() => navigate("/")}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: "rgba(255,255,255,0.6)",
+                  borderRadius: "10px",
+                  fontWeight: "600",
+                  cursor: "pointer"
+                }}
+              >
+                🔒 Sign in to continue
+              </div>
+            )}
+          </div>
         </div>
 
         <Winnings winnings={data.winnings || []} />

@@ -237,6 +237,13 @@ function Admin() {
     loadWinnings();
   }, [simulation]);
 
+
+  useEffect(() => {
+    if (simulation) {
+      loadWinnings();   // reload 
+    }
+  }, [simulation]);
+
   useEffect(() => {
     loadStats();
   }, []);

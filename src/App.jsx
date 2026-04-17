@@ -6,6 +6,8 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Subscription from "./pages/Subscription";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // 🔥 ADMIN PAGES
 import AdminUsers from "./components/AdminUsers";
@@ -18,7 +20,11 @@ import AdminLeaderboard from "./components/AdminLeaderboard";
 // 🔐 Protected Route
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/" />;
+
+  const isGuest =
+    localStorage.getItem("guest") === "true" && !token;
+
+  return token || isGuest ? children : <Navigate to="/" />;
 };
 
 // 🔐 Admin Route
@@ -51,6 +57,8 @@ function App() {
             </PublicRoute>
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* ================= USER ================= */}
         <Route
@@ -83,7 +91,7 @@ function App() {
         >
           {/* 🔥 NESTED ROUTES */}
 
-          
+
 
           {/* Pages */}
           <Route path="users" element={<AdminUsers />} />
