@@ -8,7 +8,7 @@ export default function VerifyOtp() {
     const email = location.state?.email || localStorage.getItem("otpEmail");
 
     if (!email) {
-        return <h2 style={{ color: "white" }}>Email missing ❌</h2>;
+        return <h2 style={{ color: "white" }}>Email missing!</h2>;
     }
 
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -128,16 +128,55 @@ export default function VerifyOtp() {
                     {loading ? "Verifying..." : "Verify"}
                 </button>
 
-                <div style={{ marginTop: 15 }}>
-                    {timer > 0 ? (
-                        <p style={{ color: "#aaa" }}>
+                <div style={{ marginTop: 20 }}>
+
+                    {/* TIMER TEXT */}
+                    {timer > 0 && (
+                        <p style={{
+                            color: "#94a3b8",
+                            fontSize: "13px",
+                            marginBottom: "10px"
+                        }}>
                             Resend OTP in <b>{timer}s</b>
                         </p>
-                    ) : (
-                        <button onClick={handleResend} style={styles.resend}>
-                            Resend OTP
-                        </button>
                     )}
+
+                    {/* BUTTON */}
+                    <button
+                        onClick={handleResend}
+                        disabled={timer > 0}
+                        style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "10px",
+                            border: "none",
+                            fontWeight: "600",
+                            fontSize: "14px",
+                            letterSpacing: "0.5px",
+                            cursor: timer > 0 ? "not-allowed" : "pointer",
+
+                            background: timer > 0
+                                ? "#334155"
+                                : "linear-gradient(135deg, #6366f1, #3b82f6)",
+
+                            color: "#fff",
+                            opacity: timer > 0 ? 0.6 : 1,
+
+                            transition: "all 0.3s ease",
+                            boxShadow: timer === 0
+                                ? "0 6px 20px rgba(59,130,246,0.4)"
+                                : "none"
+                        }}
+
+                        onMouseEnter={(e) => {
+                            if (timer === 0) e.target.style.transform = "scale(1.05)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = "scale(1)";
+                        }}
+                    >
+                        {timer > 0 ? "Wait..." : "Resend OTP"}
+                    </button>
                 </div>
             </div>
         </div>

@@ -83,18 +83,23 @@ function Login() {
   };
 
   const signup = async () => {
-    try {
-      if (!email || !password) {
-        setMsg("Enter email & password");
-        return;
-      }
+    if (loading) return; // 🛑 prevent double click
 
+    if (!email || !password) {
+      setMsg("Enter email & password");
+      return;
+    }
+
+    setLoading(true);
+    setMsg("");
+
+    try {
       await API.post("/users", {
         email: email.trim(),
         password: password.trim()
       });
 
-      // 🔥 GO TO OTP PAGE
+      // 🔥 store email for OTP page
       localStorage.setItem("otpEmail", email);
 
       navigate("/verify-otp", {
@@ -103,6 +108,8 @@ function Login() {
 
     } catch (err) {
       setMsg(err.response?.data?.error || "Signup failed!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -147,9 +154,27 @@ function Login() {
         >
           Forgot Password?
         </p>
+        <button
+          onClick={isSignup ? signup : login}
+          disabled={loading}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            opacity: loading ? 0.7 : 1,
+            cursor: loading ? "not-allowed" : "pointer"
+          }}
+        >
+          {loading && <span style={styles.spinner}></span>}
 
-        <button onClick={isSignup ? signup : login} disabled={loading}>
-          {loading ? "Loading..." : isSignup ? "Signup" : "Login"}
+          {loading
+            ? isSignup
+              ? "Sending OTP..."
+              : "Logging in..."
+            : isSignup
+              ? "Signup"
+              : "Login"}
         </button>
 
         <p style={{ marginTop: "10px", cursor: "pointer", color: "#2563eb" }}
@@ -181,3 +206,15 @@ function Login() {
 }
 
 export default Login;
+
+
+const styles = {
+  spinner: {
+    width: "14px",
+    height: "14px",
+    border: "2px solid #fff",
+    borderTop: "2px solid transparent",
+    borderRadius: "50%",
+    animation: "spin 0.8s linear infinite"
+  }
+};
