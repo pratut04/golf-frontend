@@ -166,7 +166,7 @@ function Login() {
             cursor: loading ? "not-allowed" : "pointer"
           }}
         >
-          {loading && <span style={styles.spinner}></span>}
+          {loading && <span className="spinner"></span>}
 
           {loading
             ? isSignup
@@ -208,13 +208,3 @@ function Login() {
 export default Login;
 
 
-const styles = {
-  spinner: {
-    width: "14px",
-    height: "14px",
-    border: "2px solid #fff",
-    borderTop: "2px solid transparent",
-    borderRadius: "50%",
-    animation: "spin 0.8s linear infinite"
-  }
-};
