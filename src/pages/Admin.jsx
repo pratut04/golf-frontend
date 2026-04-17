@@ -808,7 +808,7 @@ function Admin() {
                             setPreview(`${BASE_URL}/${w.proof}`)
                           }
                         />
-                      )}
+                      )} 
 
                       {w.status === "pending" && (
                         <>

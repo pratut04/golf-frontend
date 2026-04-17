@@ -8,6 +8,7 @@ import Admin from "./pages/Admin";
 import Subscription from "./pages/Subscription";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import VerifyOtp from "./pages/VerifyOtp";
 
 // 🔥 ADMIN PAGES
 import AdminUsers from "./components/AdminUsers";
@@ -49,6 +50,8 @@ function App() {
       <Routes>
 
         {/* ================= PUBLIC ================= */}
+        <Route path="/login" element={<Login />} />
+        
         <Route
           path="/"
           element={
@@ -57,8 +60,14 @@ function App() {
             </PublicRoute>
           }
         />
+
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
+
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+
+        <Route path="/verify-otp" element={<VerifyOtp />} />
 
         {/* ================= USER ================= */}
         <Route
@@ -89,6 +98,10 @@ function App() {
             </AdminRoute>
           }
         >
+
+
+
+
           {/* 🔥 NESTED ROUTES */}
 
 

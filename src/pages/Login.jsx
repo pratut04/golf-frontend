@@ -94,11 +94,15 @@ function Login() {
         password: password.trim()
       });
 
-      setMsg("Account created ✅ Now login");
-      setIsSignup(false);
+      // 🔥 GO TO OTP PAGE
+      localStorage.setItem("otpEmail", email);
+
+      navigate("/verify-otp", {
+        state: { email }
+      });
 
     } catch (err) {
-      setMsg(err.response?.data?.error || "Signup failed ❌");
+      setMsg(err.response?.data?.error || "Signup failed!");
     }
   };
 
