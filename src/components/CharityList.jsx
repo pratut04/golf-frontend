@@ -11,7 +11,7 @@ import "swiper/css/navigation";
 function CharityList({ charities, selectCharity, selectedId }) {
 
 
-  // change to production URL when deploying
+  
   const [preview, setPreview] = React.useState(null);
 
   const handleDonate = async (charity) => {
@@ -81,7 +81,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
 
   return (
     <div style={card}>
-      {/* ❤️ Main Message */}
+      {/*  Main Message */}
       <div
         style={{
           background: "linear-gradient(135deg, #fff1f2, #ffe4e6)",
@@ -103,7 +103,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
       </div>
 
 
-      {/* 💚 Win Message */}
+      {/*  Win Message */}
       <div
         style={{
           background: "linear-gradient(135deg, #ecfdf5, #dcfce7)",
@@ -126,7 +126,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
       </div>
 
 
-      {/* 💛 Skip Message */}
+      {/*  Skip Message */}
       <div
         style={{
           background: "linear-gradient(135deg, #fefce8, #fef3c7)",
@@ -185,14 +185,14 @@ function CharityList({ charities, selectCharity, selectedId }) {
                       {c.images.map((imgObj, i) => (
                         <SwiperSlide key={imgObj.id}>
                           <img
-                            src={imgObj.image}   // ✅ DIRECT CLOUDINARY URL
+                            src={imgObj.image}   
                             style={{
                               width: "100%",
                               height: "140px",
                               objectFit: "cover",
                               borderRadius: "8px"
                             }}
-                            onClick={() => setPreview(imgObj.image)} // ✅ FIXED
+                            onClick={() => setPreview(imgObj.image)} 
                           />
                         </SwiperSlide>
                       ))}
@@ -264,7 +264,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
           <img
             src={preview}
             alt="preview"
-            onClick={(e) => e.stopPropagation()} // 🔥 IMPORTANT
+            onClick={(e) => e.stopPropagation()} 
             style={{
               maxWidth: "80%",
               maxHeight: "80%",
@@ -281,7 +281,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
 export default CharityList;
 
 //
-// 🎨 STYLES
+//  STYLES
 //
 
 const card = {

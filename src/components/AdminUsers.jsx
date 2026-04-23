@@ -5,7 +5,7 @@ function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Get current user ID (string)
+  
   const currentUserId = localStorage.getItem("userId");
 
   useEffect(() => {
@@ -42,14 +42,14 @@ function AdminUsers() {
           .slice()
           .reverse()
           .map((u, index) => {
-            // ✅ FIX: loose comparison (handles string/number)
+           
             const isYou = u.id == currentUserId;
 
             return (
               <div key={u.id} style={item}>
                 #{index + 1} {u.email}
 
-                {/* ✅ YOU BADGE */}
+                {/* BADGE */}
                 {isYou && (
                   <span style={youBadge}>
                     You
@@ -66,7 +66,7 @@ function AdminUsers() {
 export default AdminUsers;
 
 //
-// 🎨 STYLES
+//  STYLES
 //
 
 const card = {
@@ -84,7 +84,7 @@ const item = {
   alignItems: "center"
 };
 
-// ✅ Premium "You" badge
+
 const youBadge = {
   background: "#22c55e",
   color: "white",

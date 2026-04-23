@@ -52,11 +52,11 @@ function AdminWinnings() {
                             {/* PROOF IMAGE */}
                             {w.proof && (
                                 <img
-                                    src={w.proof}   // ✅ FIXED
+                                    src={w.proof} 
                                     width="80"
                                     alt="proof"
                                     style={img}
-                                    onClick={() => setPreview(w.proof)}  // ✅ FIXED
+                                    onClick={() => setPreview(w.proof)}  
                                 />
                             )}
 
@@ -84,14 +84,14 @@ function AdminWinnings() {
                 <p style={{ opacity: 0.6 }}>No winnings found 😢</p>
             )}
 
-            {/*  PREVIEW MODAL (OUTSIDE MAP - IMPORTANT FIX) */}
+            {/*  PREVIEW MODAL */}
             {preview && (
                 <div style={overlay} onClick={() => setPreview(null)}>
                     <img
                         src={preview}
                         alt="preview"
                         style={previewImg}
-                        onClick={(e) => e.stopPropagation()} // 🔥 ADD THIS
+                        onClick={(e) => e.stopPropagation()} 
                     />
                 </div>
             )}
@@ -101,7 +101,7 @@ function AdminWinnings() {
 
 export default AdminWinnings;
 
-// ✅ STYLES
+//  STYLES
 const card = {
     background: "#ffffff",
     padding: "22px",

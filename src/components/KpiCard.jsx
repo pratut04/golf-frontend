@@ -1,6 +1,6 @@
 import React from "react";
 
-// 🔢 Count animation hook (clean + reusable)
+//  Count animation hook 
 function useCountUp(value, duration = 800) {
   const [display, setDisplay] = React.useState(0);
 
@@ -32,7 +32,7 @@ function KpiCard({
   highlight,
   positive,
   warning,
-  isCurrency // ✅ NEW PROP
+  isCurrency 
 }) {
   const displayValue = useCountUp(value);
 
@@ -60,7 +60,7 @@ function KpiCard({
       <div
         style={{
           ...label,
-          color: highlight ? "rgba(255,255,255,0.85)" : "#64748b" // ✅ FIX
+          color: highlight ? "rgba(255,255,255,0.85)" : "#64748b" 
         }}
       >
         {title}
@@ -73,7 +73,7 @@ function KpiCard({
           color:
             positive ? "#16a34a" :
               warning ? "#d97706" :
-                title === "Charity Donations" ? "#ec4899" :  // 💖 pink
+                title === "Charity Donations" ? "#ec4899" :  
                   highlight ? "#fff" :
                     "#0f172a"
         }}
@@ -88,7 +88,7 @@ function KpiCard({
 export default KpiCard;
 
 //
-// 🎨 STYLES
+//  STYLES
 //
 
 const card = {

@@ -12,7 +12,7 @@ body {
   color: #e5e7eb;
 }
 
-/* 🔥 Smooth entry animation */
+/*  Smooth entry animation */
 
 
 .Toastify__toast {
@@ -187,7 +187,7 @@ input:focus {
   /* dark text */
 }
 
-/* ✅ FIXED INPUTS INSIDE LOGIN */
+/*  INPUTS INSIDE LOGIN */
 .login-box input {
   background: #f9fafb;
   /* light input */
@@ -196,7 +196,7 @@ input:focus {
   border: 1px solid #ccc;
 }
 
-/* ✅ PLACEHOLDER FIX */
+/* PLACEHOLDER  */
 .login-box input::placeholder {
   color: #64748b;
 }

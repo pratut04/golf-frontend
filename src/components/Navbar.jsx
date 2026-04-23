@@ -19,7 +19,7 @@ function Navbar() {
       !token;
 
     if (isGuest) {
-      localStorage.setItem("redirectAfterLogin", "/subscription"); // ✅ important
+      localStorage.setItem("redirectAfterLogin", "/subscription"); 
       alert("🔒 Please sign in to continue with subscription");
       navigate("/");
       return;
@@ -38,7 +38,7 @@ function Navbar() {
           onClick={() => navigate("/dashboard")}
           onMouseEnter={(e) => {
             e.target.style.background = "#1e293b";
-            e.target.style.boxShadow = "none";   // ✅ remove glow
+            e.target.style.boxShadow = "none";   
           }}
           onMouseLeave={(e) => {
             e.target.style.background = "transparent";
@@ -69,7 +69,7 @@ function Navbar() {
             onClick={() => navigate("/admin")}
             onMouseEnter={(e) => {
               e.target.style.background = "#1e293b";
-              e.target.style.boxShadow = "none";   // ✅ remove glow
+              e.target.style.boxShadow = "none";   
             }}
             onMouseLeave={(e) => {
               e.target.style.background = "transparent";
@@ -136,5 +136,5 @@ const navBtn = {
   borderRadius: "8px",
   cursor: "pointer",
   transition: "all 0.2s ease",
-  boxShadow: "none"   // ✅ IMPORTANT (removes green glow)
+  boxShadow: "none"  
 };

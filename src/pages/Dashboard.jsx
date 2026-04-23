@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [data, setData] = useState(null); // ✅ FIX
+  const [data, setData] = useState(null); 
   const [charities, setCharities] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [result, setResult] = useState(null);
@@ -55,7 +55,7 @@ function Dashboard() {
         return;
       }
 
-      // ✅ GUEST MODE
+      //  GUEST MODE
       if (isGuest) {
         setSubscriptionStatus("inactive");
         loadData();
@@ -78,17 +78,17 @@ function Dashboard() {
       }
     };
 
-    // 🔥 first load
+    //  first load
     checkAndLoad();
 
-    // 🔥 AUTO REFRESH
+    //  AUTO REFRESH
     const interval = setInterval(() => {
       const isGuest =
         localStorage.getItem("guest") === "true" &&
         !localStorage.getItem("token");
 
       if (isGuest) {
-        loadData();   // ✅ allow guest refresh
+        loadData();   
       } else {
         const userId = localStorage.getItem("userId");
         if (userId) {
@@ -98,7 +98,7 @@ function Dashboard() {
       }
     }, 15000);
 
-    // 🔥 cleanup
+    //  cleanup
     return () => clearInterval(interval);
 
   }, []);
@@ -125,7 +125,7 @@ function Dashboard() {
       localStorage.getItem("guest") === "true" &&
       !localStorage.getItem("token");
 
-    // ✅ STOP API CALLS FOR GUEST
+    //  STOP API CALLS FOR GUEST
     if (isGuest) {
       setSubscriptionStatus("inactive");
 
@@ -142,7 +142,7 @@ function Dashboard() {
         showToast("error", "Failed to load data");
       }
 
-      // ✅ Fake user
+      // Fake user
       setData({
         user: {
           email: "Guest User",
@@ -155,22 +155,22 @@ function Dashboard() {
       return;
     }
 
-    // ✅ NORMAL USER FLOW
+    //  NORMAL USER FLOW
     try {
       const d = await API.get("/dashboard");
 
-      // ✅ get all scores from backend
+      //  get all scores from backend
       const allScores = d.data.scores || [];
 
-      // ✅ sort latest first (important safety)
+      //  sort latest first 
       const sortedScores = allScores.sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
 
-      // ✅ take only latest 5
+      //  take only latest 5
       const latestFiveScores = sortedScores.slice(0, 5);
 
-      // ✅ set data with limited scores
+      // set data with limited scores
       setData({
         ...d.data,
         scores: latestFiveScores
@@ -191,7 +191,7 @@ function Dashboard() {
     }
   };
 
-  // ✅ FIXED LOADING CONDITION
+  // LOADING CONDITION
   if (!data) {
     return (
       <p style={{ color: "white", textAlign: "center" }}>
@@ -200,7 +200,7 @@ function Dashboard() {
     );
   }
 
-  // ✅ ERROR CASE
+  //  ERROR CASE
   if (data.success === false) {
     return (
       <p style={{ color: "red", textAlign: "center" }}>
@@ -209,7 +209,7 @@ function Dashboard() {
     );
   }
 
-  // ✅ SAFETY CHECK
+  //  SAFETY CHECK
   if (!data.user) {
     return (
       <p style={{ color: "white", textAlign: "center" }}>
@@ -223,64 +223,7 @@ function Dashboard() {
     !localStorage.getItem("token");
 
   //=================addScore Function===============
-  // const addScore = async (score) => {
-  //   setSubMsg("");
-  //   try {
-  //     const isGuest =
-  //       localStorage.getItem("guest") === "true" &&
-  //       !localStorage.getItem("token");
-  //     if (isGuest) {
-  //       setSubMsg("Login required to add score ⚠️");
-  //       return;
-  //     }
-
-
-
-  //     const subRes = await API.post("/check-subscription");
-
-  //     const status = subRes.data.status;
-  //     const end = subRes.data.subscription_end;
-
-  //     // ❌ NOT SUBSCRIBED
-  //     if (status === "not_subscribed") {
-  //       setSubMsg("⚠️ Please subscribe to use this feature");
-
-
-
-  //       return;
-  //     }
-
-  //     // ❌ EXPIRED
-  //     if (status === "expired") {
-  //       setSubMsg(` Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
-  //         day: "2-digit",
-  //         month: "short",
-  //         year: "numeric"
-  //       })}`);
-
-
-
-  //       return;
-  //     }
-
-  //     await API.post("/scores", {
-
-  //       score: Number(score),
-  //     });
-
-  //     setSubMsg("✅ Score added");
-  //     loadData();
-
-  //   } catch (err) {
-  //     console.error("FULL ERROR:", err);
-
-  //     if (err.response && err.response.data && err.response.data.error) {
-  //       setSubMsg(err.response.data.error);   // ✅ THIS LINE FIXES EVERYTHING
-  //     } else {
-  //       setSubMsg("Error adding score ❌");
-  //     }
-  //   }
-  // };
+  
   const addScore = async (score) => {
     try {
       const isGuest =
@@ -315,111 +258,23 @@ function Dashboard() {
     }
   };
   //================selectCharitiey function==================
-  // const selectCharity = async (id) => {
-  //   try {
-  //     const isGuest =
-  //       localStorage.getItem("guest") === "true" &&
-  //       !localStorage.getItem("token");
-
-  //     if (isGuest) {
-  //       showToast("warning", "Login required to select charity");
-  //       return;
-  //     }
-
-  //     // ✅ Update UI instantly
-  //     setSelectedId(Number(id));
-
-  //     await API.post("/select-charity", {
-  //       charity_id: id
-  //     });
-
-  //     showToast("success", "Charity selected ❤️");
-
-  //     const selected = charities.find(c => Number(c.id) === Number(id));
-
-  //     setData(prev => ({
-  //       ...prev,
-  //       user: {
-  //         ...prev.user,
-  //         charity_id: Number(id),
-  //         charity_name: selected?.name || prev.user.charity_name
-  //       }
-  //     }));
-
-  //   } catch (err) {
-  //     const errData = err.response?.data;
-
-  //     if (err.response?.status === 403) {
-  //       if (errData?.code === "NOT_SUBSCRIBED") {
-  //         showToast("warning", "Please subscribe first 💳");
-  //       } else if (errData?.code === "SUBSCRIPTION_EXPIRED") {
-  //         showToast(
-  //           "error",
-  //           `Expired on ${new Date(errData.expiry).toLocaleDateString("en-IN")}`
-  //         );
-  //       } else {
-  //         showToast("error", "Access denied");
-  //       }
-  //     } else {
-  //       showToast("error", errData?.message || "Something went wrong");
-  //     }
-  //   }
-  // };
-
-  // const selectCharity = async (id) => {
-  //   try {
-  //     await API.post("/select-charity", {
-  //       charity_id: id // ✅ string 그대로
-  //     });
-
-  //     const selected = charities.find(c => c.id === id);
-
-  //     setData(prev => ({
-  //       ...prev,
-  //       user: {
-  //         ...prev.user,
-  //         charity_id: id,
-  //         charity_name: selected?.name
-  //       }
-  //     }));
-
-  //     showToast("success", "Charity selected ❤️");
-
-  //   } catch (err) {
-  //     const errData = err.response?.data;
-
-  //     if (errData?.code === "ALREADY_SELECTED") {
-  //       setData(prev => ({
-  //         ...prev,
-  //         user: {
-  //           ...prev.user,
-  //           charity_id: id
-  //         }
-  //       }));
-  //     }
-
-  //     showToast("error", errData?.message || "Something went wrong");
-  //   }
-  // };
-
-
-  const selectCharity = async (id) => {
+ const selectCharity = async (id) => {
   try {
     const isGuest =
       localStorage.getItem("guest") === "true" &&
       !localStorage.getItem("token");
 
-    // 🔒 GUEST MODE
+    //  GUEST MODE
     if (isGuest) {
       showToast("warning", "Login required to select charity");
       return;
     }
 
-    // ✅ Optimistic UI update (instant selection)
+    // (instant selection)
     setSelectedId(id);
 
     await API.post("/select-charity", {
-      charity_id: id   // ✅ KEEP STRING (UUID)
+      charity_id: id   
     });
 
     showToast("success", "Charity selected ❤️");
@@ -438,7 +293,7 @@ function Dashboard() {
   } catch (err) {
     const errData = err.response?.data;
 
-    // 🔁 rollback UI if API fails
+    
     setSelectedId(data?.user?.charity_id || null);
 
     if (err.response?.status === 403) {
@@ -454,7 +309,7 @@ function Dashboard() {
       }
 
     } else if (errData?.code === "ALREADY_SELECTED") {
-      // ✅ Handle already selected properly
+      
       setSelectedId(id);
       showToast("info", "Already selected ✅");
 
@@ -482,12 +337,12 @@ function Dashboard() {
         return;
       }
 
-      // ✅ CALL API
+      //  CALL API
       const res = await API.post("/check-result");
 
       console.log("RESULT:", res.data);
 
-      setResult(res.data); // ✅ FIX ADDED HERE
+      setResult(res.data); 
 
       showToast("success", "Result loaded 🎯");
 
@@ -542,7 +397,7 @@ function Dashboard() {
               Golf Performance Hub
             </h1>
 
-            {/* ✅ UPDATED TAGLINE (INSIDE, NOT OUTSIDE) */}
+            {/*  TAGLINE */}
             <p
               style={{
                 fontSize: "14px",
@@ -613,7 +468,7 @@ function Dashboard() {
         >
           <h3 style={{ marginBottom: "10px" }}>📌 Subscription</h3>
 
-          {/* ✅ ALWAYS SHOW EMAIL */}
+          {/*  SHOW EMAIL */}
           <p style={textSecondary}>
             Email: <span style={textPrimary}>{data.user.email}</span>
           </p>
@@ -624,7 +479,7 @@ function Dashboard() {
                 Status: <span style={{ color: "#ef4444" }}>Not Subscribed</span>
               </p>
 
-              {/* ✅ SHOW EXPIRED DATE */}
+              {/* EXPIRED DATE */}
               {data.user.subscription_end && (
                 <p style={textSecondary}>
                   Last expiry:{" "}
@@ -687,7 +542,7 @@ function Dashboard() {
         <div style={cardHover}>
           <h3>🏌️ Enter Score</h3>
           <div style={{ position: "relative" }}>
-            {/* Actual content */}
+            {/*  content */}
             <div style={{
               opacity: isGuest ? 0.6 : 1,
               filter: isGuest ? "blur(1.5px)" : "none"
@@ -831,7 +686,7 @@ function Dashboard() {
 
 
           <div style={{ position: "relative" }}>
-            {/* ACTUAL CONTENT */}
+           
             <div
               style={{
                 opacity: isGuest ? 0.6 : 1,
@@ -874,7 +729,7 @@ function Dashboard() {
               )}
             </div>
 
-            {/* 🔒 OVERLAY */}
+            {/*  OVERLAY */}
             {isGuest && (
               <div
                 onClick={() => navigate("/")}
@@ -933,7 +788,7 @@ function Dashboard() {
 export default Dashboard;
 
 //
-// 🎨 PREMIUM STYLES
+//   STYLES
 //
 
 const theme = {
@@ -964,7 +819,7 @@ const title = {
 };
 
 const card = {
-  background: "white", // ✅ no blue
+  background: "white", 
   backdropFilter: "blur(12px)",
   padding: "20px",
   borderRadius: "16px",

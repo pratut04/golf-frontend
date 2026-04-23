@@ -1,5 +1,5 @@
 import React from "react";
-import API from "../api/api"; // 🔥 ADD THIS AT TOP
+import API from "../api/api"; 
 import { toast } from "react-toastify";
 
 
@@ -14,7 +14,7 @@ function Winnings({ winnings }) {
 
 
   const uploadProof = async (file, winningId) => {
-    // ✅ Validation
+    //  Validation
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -32,7 +32,7 @@ function Winnings({ winnings }) {
     formData.append("winningId", winningId);
 
     try {
-      setUploadingId(winningId); // 🔥 start loader
+      setUploadingId(winningId); // loader
 
       await API.post("/upload-proof", formData);
 
@@ -63,7 +63,7 @@ function Winnings({ winnings }) {
             <b>₹{totalEarnings.toLocaleString()}</b>
           </div>
 
-          {/* 🔥 IMPROVED HISTORY */}
+          {/*  IMPROVED HISTORY */}
           <div style={{ marginTop: "15px" }}>
             <h4>📜 History</h4>
 
@@ -150,7 +150,7 @@ function Winnings({ winnings }) {
             left: 0,
             width: "100%",
             height: "100%",
-            background: "rgba(0,0,0,0.8)", // ✅ FIXED
+            background: "rgba(0,0,0,0.8)", 
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -160,7 +160,7 @@ function Winnings({ winnings }) {
           <img
             src={preview}
             alt="preview"
-            onClick={(e) => e.stopPropagation()} // 🔥 IMPORTANT
+            onClick={(e) => e.stopPropagation()} 
             style={{
               maxWidth: "90%",
               maxHeight: "90%",
@@ -177,7 +177,7 @@ function Winnings({ winnings }) {
 export default Winnings;
 
 //
-// 🎨 STYLES
+// STYLES
 //
 
 const card = {

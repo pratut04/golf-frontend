@@ -23,12 +23,12 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
 
       //  CASE 1: NO DRAW EXISTS
       if (!res.data || !res.data.created_at) {
-        setLocked(false);              // unlock
-        setNextMonthDate("");          // optional reset
+        setLocked(false);            
+        setNextMonthDate("");          
         return;
       }
 
-      //  CASE 2: DRAW EXISTS
+      //  DRAW EXISTS
       const drawDate = new Date(res.data.created_at);
       const now = new Date();
 
@@ -194,7 +194,7 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
 
 export default ScoreForm;
 
-// 🎨 STYLES
+//  STYLES
 
 const card = {
   background: "#0f172a",

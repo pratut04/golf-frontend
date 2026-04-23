@@ -14,7 +14,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
-// 🔥 ADMIN PAGES
+//  ADMIN PAGES
 import AdminUsers from "./components/AdminUsers";
 import AdminScores from "./components/AdminScores";
 import AdminCharities from "./components/AdminCharities";
@@ -25,7 +25,7 @@ import {Slide, Zoom, Bounce} from "react-toastify";
 
 // ================= ROUTES =================
 
-// 🔐 Protected Route
+//  Protected Route
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
 
@@ -35,7 +35,7 @@ const PrivateRoute = ({ children }) => {
   return token || isGuest ? children : <Navigate to="/" />;
 };
 
-// 🔐 Admin Route
+//  Admin Route
 const AdminRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   const email = localStorage.getItem("email");
@@ -46,7 +46,7 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
-// 🌐 Public Route
+//  Public Route
 const PublicRoute = ({ children }) => {
   return children;
 };
@@ -61,7 +61,7 @@ function App() {
         pauseOnHover={false}
         newestOnTop
         theme="dark"
-        transition={Slide}   // ✅ use this instead of CSS animation
+        transition={Slide}   
       />
       <Routes>
 
@@ -119,7 +119,7 @@ function App() {
 
 
 
-          {/* 🔥 NESTED ROUTES */}
+          {/*  NESTED ROUTES */}
 
 
 

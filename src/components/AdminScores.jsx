@@ -25,7 +25,7 @@ function AdminScores() {
     }
   };
 
-  //  CREATE MAP (PERFORMANCE FIX)
+  //  CREATE MAP 
   const userMap = {};
   users.forEach(u => {
     userMap[u.id] = u.email;

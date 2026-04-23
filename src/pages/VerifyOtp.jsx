@@ -20,7 +20,7 @@ export default function VerifyOtp() {
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
 
-    // ⏳ countdown
+    //  countdown
     useEffect(() => {
         if (timer === 0) return;
         const interval = setInterval(() => {
@@ -29,7 +29,7 @@ export default function VerifyOtp() {
         return () => clearInterval(interval);
     }, [timer]);
 
-    // 🔢 handle input
+    //  handle input
     const handleChange = (value, index) => {
         if (!/^\d?$/.test(value)) return;
 
@@ -48,7 +48,7 @@ export default function VerifyOtp() {
         }
     };
 
-    // ✅ verify OTP
+    // verify OTP
     const handleVerify = async () => {
         setLoading(true);
         setError("");
@@ -80,12 +80,12 @@ export default function VerifyOtp() {
         setLoading(false);
     };
 
-    // 🔁 resend OTP
+    //  resend OTP
     const handleResend = async () => {
         if (resendLoading) return; // prevent multiple clicks
 
         setResendLoading(true);
-        setError(""); // clear old error
+        setError(""); 
 
         try {
             await fetch("https://golf-backend.onrender.com/resend-otp", {   //"https://golf-backend.onrender.com/resend-otp"  "http://localhost:5000/resend-otp"

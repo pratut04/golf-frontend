@@ -13,7 +13,7 @@ function Subscription() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("inactive");
   const [subscriptionType, setSubscriptionType] = useState(null);
 
-  // 🔐 Protect + get subscription
+  //  Protect + get subscription
   useEffect(() => {
     const checkSub = async () => {
       const token = localStorage.getItem("token");
@@ -40,7 +40,7 @@ function Subscription() {
     checkSub();
   }, [navigate]);
 
-  // 💳 PAYMENT FUNCTION
+  //  PAYMENT FUNCTION
   const handlePayment = async (type) => {
     if (loading) return;
 
@@ -49,7 +49,7 @@ function Subscription() {
 
       const amount = type === "yearly" ? 1000 : 100;
 
-      // ✅ STEP 1: CREATE ORDER FROM BACKEND
+      // CREATE ORDER FROM BACKEND
       const orderRes = await API.post("/create-order", { amount });
 
       const order = orderRes.data.data;
@@ -63,7 +63,7 @@ function Subscription() {
         key:  "rzp_test_SXQLt37SiX7Arq", 
         amount: order.amount,
         currency: order.currency,
-        order_id: order.id, // 🔥 IMPORTANT
+        order_id: order.id, 
 
         name: "Golf App",
         description: `${type} subscription`,
@@ -153,7 +153,7 @@ function Subscription() {
 
 export default Subscription;
 
-// 🎨 styles
+//  styles
 const container = {
   textAlign: "center",
   padding: "40px",

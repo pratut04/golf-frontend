@@ -80,7 +80,7 @@ function ForgotPassword() {
 export default ForgotPassword;
 
 //
-// 🎨 PREMIUM STYLES
+//  STYLES
 //
 
 const container = {

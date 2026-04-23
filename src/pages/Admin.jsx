@@ -75,10 +75,7 @@ function Admin() {
 
 
   const chartData = analytics?.monthly || [];
-  //   const chartData = [
-  //   { name: "Mar 2026", earnings: 300, payouts: 100, profit: 200 },
-  //   { name: "Apr 2026", earnings: 200, payouts: 465, profit: -265 }
-  // ];
+ 
   const pieData = [
     { name: "Paid", value: Number(stats?.paid) || 0 },
     { name: "Pending", value: Number(stats?.pending) || 0 }
@@ -88,13 +85,13 @@ function Admin() {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
-    // ❌ No token → logout
+    // No token - logout
     if (!token) {
       navigate("/");
       return;
     }
 
-    // ❌ Not admin → redirect
+    // Not admin - redirect
     if (role !== "admin") {
       navigate("/dashboard");
       return;
@@ -162,47 +159,6 @@ function Admin() {
 
 
 
-  // const runDraw = async () => {
-  //   try {
-  //     // ✅ CALL BACKEND FIRST (with or without numbers)
-  //     const res = await API.post("/draw", {
-  //       numbers: simulation?.numbers || []   // safe fallback
-  //     });
-
-  //     alert("✅ Draw completed");
-  //     setNumbers(res.data.numbers);
-
-  //   } catch (err) {
-  //     console.error(err);
-
-  //     if (err.response) {
-
-  //       const error = err.response.data.error;
-
-  //       // 🔥 DRAW ALREADY DONE (priority)
-  //       if (error?.includes("already done")) {
-  //         alert(error);
-  //         return;
-  //       }
-
-  //       // 🔥 SIMULATION NOT RUN
-  //       if (!simulation || !simulation.numbers) {
-  //         alert("⚠️ Please run simulation first");
-  //         return;
-  //       }
-
-  //       // 🔥 OTHER ERRORS
-  //       if (error) {
-  //         alert(error);
-  //       } else {
-  //         alert("Something went wrong ❌");
-  //       }
-
-  //     } else {
-  //       alert("Server error");
-  //     }
-  //   }
-  // };
 
   const runDraw = async () => {
     try {
@@ -468,7 +424,7 @@ function Admin() {
                 }}
               >
 
-                {/* 🔥 FULL WIDTH CARD */}
+                {/*  FULL WIDTH CARD */}
                 <div style={{ gridColumn: "span 4" }}>
                   <KpiCard
                     title="Total Earnings"
@@ -479,7 +435,7 @@ function Admin() {
                   />
                 </div>
 
-                {/* 🔽 NORMAL GRID CARDS */}
+                {/*  NORMAL GRID CARDS */}
                 <KpiCard
                   title="Total Payout"
                   value={analytics?.totalPaid || 0}
@@ -533,7 +489,7 @@ function Admin() {
               </div>
 
 
-              {/* 📊 Analytics Chart */}
+              {/*  Analytics Chart */}
 
               {analytics && (
                 <div style={card}>
@@ -560,7 +516,7 @@ function Admin() {
                           }}
                         />
 
-                        {/* 🟢 Earnings */}
+                        {/*  Earnings */}
                         <Bar dataKey="total_pool" fill="#22c55e" />
                         <Bar dataKey="paid" fill="#ef4444" />
                       </BarChart>
@@ -576,7 +532,7 @@ function Admin() {
                   <ResponsiveContainer>
                     <PieChart>
 
-                      {/* 🔥 GRADIENT */}
+                      {/*  GRADIENT */}
                       <defs>
                         <linearGradient id="charityGradient" x1="0" y1="0" x2="1" y2="1">
                           <stop offset="0%" stopColor="#a78bfa" />
@@ -590,8 +546,8 @@ function Admin() {
                         nameKey="charity_name"
                         cx="50%"
                         cy="50%"
-                        outerRadius={110}   // 🔥 bigger
-                        label={({ value }) => `₹${value}`}   // 🔥 show ₹
+                        outerRadius={110}   
+                        label={({ value }) => `₹${value}`}   
                       >
                         {charityData.map((entry, index) => (
                           <Cell
@@ -616,8 +572,8 @@ function Admin() {
                 </div>
               </div>
 
-              {/* 🥧 Distribution Chart */}
-              {/* 🥧 Payment Distribution */}
+              
+              {/* Payment Distribution */}
               {stats && (
                 <div style={card}>
                   <h3>💳 Payment Breakdown</h3>
@@ -652,7 +608,7 @@ function Admin() {
                 </div>
               )}
 
-              {/* 📈 Monthly Growth */}
+              {/*  Monthly Growth */}
               {analytics && (
                 <div style={card}>
                   <h3>📈 Monthly Growth</h3>
@@ -675,7 +631,7 @@ function Admin() {
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={analytics.monthly}>
 
-                        {/* 🔥 Gradient */}
+                        {/*  Gradient */}
                         <defs>
                           <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
@@ -731,7 +687,7 @@ function Admin() {
                   </p>
                 )}
               </div>
-              {/* 🧪 SIMULATION */}
+              {/*  SIMULATION */}
               <div style={card}>
                 <h3>🧪 Simulation</h3>
                 {simMsg && (
@@ -873,7 +829,7 @@ function Admin() {
                             Approve
                           </button>
 
-                          {/* 🔥 ADD THIS BELOW */}
+                          
                           <button
                             className="admin-btn admin-btn-danger"
                             onClick={() => rejectWinning(w.id)}
@@ -955,13 +911,13 @@ function Admin() {
 export default Admin;
 
 //
-// 🎨 CLEAN LIGHT ADMIN STYLES
+//  ADMIN STYLES
 //
 
 const layout = {
   display: "flex",
   minHeight: "100vh",
-  background: "#f8fafc",   // ✅ clean light
+  background: "#f8fafc",   
   color: "#0f172a"
 };
 

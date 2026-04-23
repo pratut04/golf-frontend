@@ -19,7 +19,7 @@ API.interceptors.request.use((req) => {
     req.headers.Authorization = `Bearer ${token}`;
   }
 
-  // FIX: Don't override FormData
+  // Don't override FormData
   if (!(req.data instanceof FormData)) {
     req.headers["Content-Type"] = "application/json";
   }
@@ -36,7 +36,7 @@ API.interceptors.response.use(
   (err) => {
     console.log("❌ API ERROR:", err.response?.data || err.message);
 
-    // ✅ ONLY handle 401 globally
+    // handle 401 globally
     if (err.response?.status === 401) {
       const isGuest = localStorage.getItem("guest") === "true";
 
@@ -46,7 +46,7 @@ API.interceptors.response.use(
       }
     }
 
-    // ❌ REMOVE 403 handling from here
+   
 
     if (!err.response) {
       alert("Server not responding 🚨");

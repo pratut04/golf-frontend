@@ -17,7 +17,7 @@ export default function ResendOTP({ onResend }) {
   const handleResend = async () => {
     setLoading(true);
 
-    await onResend(); // call your API
+    await onResend(); 
 
     setTimer(30); // reset timer
     setLoading(false);

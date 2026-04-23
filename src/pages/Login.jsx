@@ -22,7 +22,7 @@ function Login() {
     setMsg("");
 
     try {
-      // 🔥 Wake server (Render fix)
+      // Wake server (Render)
       await fetch("https://golf-backend-new.onrender.com");
 
       let res;
@@ -42,14 +42,14 @@ function Login() {
         });
       }
 
-      // ✅ Store data
+      // Store data
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.user.id);
       localStorage.setItem("email", res.data.user.email);
       localStorage.setItem("role", res.data.user.role);
       localStorage.removeItem("guest");
 
-      // ✅ Redirect
+      //  Redirect
       if (res.data.user.role === "admin") {
         navigate("/admin");
       } else {
@@ -133,7 +133,7 @@ function Login() {
           {loading ? "Logging in..." : "Login"}
         </button>
 
-        {/* 🔥 GO TO SIGNUP PAGE */}
+        {/* GO TO SIGNUP PAGE */}
         <p
           style={{ marginTop: "12px", cursor: "pointer", color: "#2563eb" }}
           onClick={() => navigate("/signup")}

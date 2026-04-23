@@ -124,7 +124,7 @@ function AdminCharities() {
   // ================= UPDATE =================
   const updateCharity = async (id) => {
     try {
-      setUpdatingId(id); // 🔥 start loading
+      setUpdatingId(id); 
 
       const formData = new FormData();
       formData.append("name", editName);
@@ -147,7 +147,7 @@ function AdminCharities() {
       console.error(err.response?.data || err.message);
       showToast("error", "Update failed", "charity-update-failed");
     } finally {
-      setUpdatingId(null); // 🔥 stop loading
+      setUpdatingId(null); 
     }
   };
 
@@ -216,7 +216,7 @@ function AdminCharities() {
             e.preventDefault();
             e.stopPropagation();
 
-            const files = [...e.dataTransfer.files]; // ✅ CORRECT
+            const files = [...e.dataTransfer.files]; 
 
             const imageFiles = files.filter(file =>
               file.type.startsWith("image/")
@@ -243,12 +243,12 @@ function AdminCharities() {
             onChange={(e) => {
               const files = Array.from(e.target.files);
 
-              console.log("FILES:", files); // ✅ DEBUG
+              console.log("FILES:", files);
               setImages(prev => [
                 ...prev,
                 ...files.filter(f => f instanceof File)
               ]);
-              e.target.value = null; // 🔥 VERY IMPORTANT FIX
+              e.target.value = null; 
             }}
           />
         </div>
@@ -270,9 +270,9 @@ function AdminCharities() {
               <img
                 src={url}
                 alt="preview"
-                onClick={() => setPreview(url)}   // 🔥 ADD CLICK PREVIEW
+                onClick={() => setPreview(url)}   
                 style={{
-                  width: "120px",              // 🔥 bigger
+                  width: "120px",              
                   height: "120px",
                   objectFit: "contain",
                   background: "#fff",
@@ -343,7 +343,7 @@ function AdminCharities() {
                           onClick={() => setPreview(imgObj.image)}
                         />
 
-                        {/* ❌ DELETE BUTTON */}
+                        {/*  DELETE BUTTON */}
                         <button
                           onClick={() => deleteImage(imgObj.id)}
                           style={{
@@ -465,13 +465,13 @@ function AdminCharities() {
                   onClick={() => {
                     const count = c.users_count || 0;
 
-                    // ❌ STOP BEFORE confirm
+                    //  STOP BEFORE confirm
                     if (count > 0) {
                       showToast("error", `Cannot delete: used by ${count} user${count > 1 ? "s" : ""} `, "charity-in-use");
                       return;
                     }
 
-                    // ✅ Only here confirm
+                    //  Only here confirm
                     if (!window.confirm("Delete this charity?")) return;
 
                     deleteCharity(c.id);
@@ -507,7 +507,7 @@ function AdminCharities() {
             src={preview}
             style={previewImage}
             alt="preview"
-            onClick={(e) => e.stopPropagation()}  // 🔥 ADD THIS
+            onClick={(e) => e.stopPropagation()}  
           />
         </div>
       )}
@@ -517,7 +517,7 @@ function AdminCharities() {
 
 export default AdminCharities;
 
-// 🎨 styles
+//  styles
 const card = {
   background: "#1e293b",
   padding: "15px",

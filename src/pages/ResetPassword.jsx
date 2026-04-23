@@ -12,7 +12,7 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
 
-  // 🔥 password strength
+  //  password strength
   const getStrength = () => {
     if (password.length < 6) return "Weak";
     if (password.length < 10) return "Medium";
@@ -125,7 +125,7 @@ function ResetPassword() {
 export default ResetPassword;
 
 //
-// 🎨 PREMIUM STYLES
+//  STYLES
 //
 
 const container = {
