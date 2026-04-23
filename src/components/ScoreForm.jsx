@@ -1,58 +1,34 @@
 import React, { useState, useEffect } from "react";
 import API from "../api/api";
+import { toast } from "react-toastify";
 
 function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
   const [score, setScore] = useState("");
   const [loading, setLoading] = useState(false);
   const [locked, setLocked] = useState(false);
   const [nextMonthDate, setNextMonthDate] = useState("");
+  const isExpired =
+    subscriptionEnd && new Date(subscriptionEnd) < new Date();
+
+  const isSubLocked =
+    subscriptionStatus !== "active" || isExpired;
+
+
+
 
   // ================= DRAW LOCK =================
-  // const checkDraw = async () => {
-  //   try {
-  //     const res = await API.get("/latest-draw");
-
-  //     if (res.data.created_at) {
-  //       const drawDate = new Date(res.data.created_at);
-  //       const now = new Date();
-
-  //       const sameMonth =
-  //         drawDate.getMonth() === now.getMonth() &&
-  //         drawDate.getFullYear() === now.getFullYear();
-
-  //       setLocked(sameMonth);
-
-  //       // ✅ ADD THIS
-  //       const nextMonthStart = new Date(
-  //         drawDate.getFullYear(),
-  //         drawDate.getMonth() + 1,
-  //         1
-  //       );
-
-  //       const formatted = nextMonthStart.toLocaleDateString("en-IN", {
-  //         day: "numeric",
-  //         month: "long",
-  //         year: "numeric"
-  //       });
-
-  //       setNextMonthDate(formatted);
-  //     }
-  //   } catch (err) {
-  //     console.error("Draw check error:", err);
-  //   }
-  // };
   const checkDraw = async () => {
     try {
       const res = await API.get("/latest-draw");
 
-      // ❗ CASE 1: NO DRAW EXISTS
+      //  CASE 1: NO DRAW EXISTS
       if (!res.data || !res.data.created_at) {
-        setLocked(false);              // ✅ unlock
+        setLocked(false);              // unlock
         setNextMonthDate("");          // optional reset
         return;
       }
 
-      // ❗ CASE 2: DRAW EXISTS
+      //  CASE 2: DRAW EXISTS
       const drawDate = new Date(res.data.created_at);
       const now = new Date();
 
@@ -90,24 +66,28 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
   }, [refresh]);
 
 
+
+
   // ================= SUBMIT =================
   const handleSubmit = async () => {
     if (loading) return;
 
     if (locked) {
-      alert(`❌ Score entry closed. Next opens on ${nextMonthDate}`);
+      toast.error(`Score entry closed. Next opens on ${nextMonthDate}`);
       return;
     }
 
     if (!score || isNaN(score)) {
-      alert("Enter valid number");
+      toast.error("Enter valid number");
       return;
     }
 
     const num = Number(score);
 
     if (num < 1 || num > 45) {
-      alert("Score must be between 1 and 45");
+      toast.error("Score must be between 1 and 45", {
+        toastId: "score-error"
+      });
       return;
     }
 
@@ -115,21 +95,20 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
       setLoading(true);
       await addScore(num);
       setScore("");
+
     } catch (err) {
       console.error("Score submit error:", err);
-      alert("❌ Failed to add score");
     } finally {
       setLoading(false);
     }
   };
-
 
   // ================= NORMAL UI =================
 
   return (
     <div style={card}>
       <h3 style={{ color: "white" }}>🎯 Add Score</h3>
-    
+
 
       {
         subscriptionStatus !== "active" ? (
@@ -158,25 +137,57 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
       />
 
       <button
-       
         style={{
-              background: "#2563eb",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-              boxShadow: "none"
-            }}
-             onClick={handleSubmit}
-            onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
-            onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
-        disabled={loading || locked}
+          background: (locked || isSubLocked) ? "#94a3b8" : "#2563eb",
+          color: "white",
+          padding: "8px 16px",
+          borderRadius: "8px",
+          border: "none",
+          cursor: (locked || isSubLocked) ? "not-allowed" : "pointer",
+          fontWeight: "500",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          transition: "all 0.2s ease",
+          boxShadow: "none",
+          opacity: (locked || isSubLocked) ? 0.7 : 1
+        }}
+        onClick={handleSubmit}
+        onMouseEnter={(e) => {
+          if (!(locked || isSubLocked)) {
+            e.target.style.transform = "scale(1.05)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!(locked || isSubLocked)) {
+            e.target.style.transform = "scale(1)";
+          }
+        }}
+        disabled={loading || locked || isSubLocked}
       >
-        {loading ? "Submitting..." : "Submit"}
+        {loading ? (
+          <>
+            <span className="spinner"></span>
+            Submitting...
+          </>
+        ) : (locked || isSubLocked) ? (
+          "🔒 Locked"
+        ) : (
+          "Submit"
+        )}
       </button>
+      {isSubLocked && subscriptionEnd && (
+        <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "6px" }}>
+          Subscription Expired on {new Date(subscriptionEnd).toLocaleDateString("en-IN")}
+        </p>
+      )}
+
+      {isSubLocked && !subscriptionEnd && (
+        <p style={{ color: "#f59e0b", fontSize: "13px", marginTop: "6px" }}>
+          Please subscribe to add score 💳
+        </p>
+      )}
     </div>
   );
 }

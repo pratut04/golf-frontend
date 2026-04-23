@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import API from "../api/api";
 import Navbar from "../components/Navbar";
-
+import { toast } from "react-toastify";
 
 import AdminUsers from "../components/AdminUsers";
 import AdminScores from "../components/AdminScores";
 import AdminCharities from "../components/AdminCharities";
+import KpiCard from "../components/KpiCard";
 
 
 import {
@@ -27,6 +28,17 @@ import {
   Area
 } from "recharts";
 
+
+import {
+  IndianRupee,
+  Wallet,
+  TrendingUp,
+  Users,
+  Clock,
+  Trophy,
+  Heart
+} from "lucide-react";
+
 function Admin() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +47,17 @@ function Admin() {
   const [jackpot, setJackpot] = useState(0);
   const [preview, setPreview] = useState(null);
   const [basePool, setBasePool] = useState(0);
-  const BASE_URL = "https://golf-backend-new.onrender.com";
+  //const BASE_URL = "https://golf-backend-new.onrender.com";
   const [simMsg, setSimMsg] = useState("");
+  const showToast = (type, message, id) => {
+    if (!toast.isActive(id || message)) {
+      toast[type](message, {
+        toastId: id || message,
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
 
   const location = useLocation();
   const [stats, setStats] = useState(null);
@@ -53,11 +74,11 @@ function Admin() {
   const navigate = useNavigate();
 
 
-  const chartData = [
-    { name: "Paid", value: Number(stats?.paid) || 0 },
-    { name: "Pending", value: Number(stats?.pending) || 0 }
-  ];
-
+  const chartData = analytics?.monthly || [];
+  //   const chartData = [
+  //   { name: "Mar 2026", earnings: 300, payouts: 100, profit: 200 },
+  //   { name: "Apr 2026", earnings: 200, payouts: 465, profit: -265 }
+  // ];
   const pieData = [
     { name: "Paid", value: Number(stats?.paid) || 0 },
     { name: "Pending", value: Number(stats?.pending) || 0 }
@@ -99,8 +120,7 @@ function Admin() {
     const loadCharity = async () => {
       const res = await API.get("/charity-breakdown");
 
-      // 🔥 FIX HERE
-      const formatted = res.data.map(item => ({
+      const formatted = res.data.data.map(item => ({
         ...item,
         total: Number(item.total)
       }));
@@ -132,7 +152,7 @@ function Admin() {
   const loadLeaderboard = async () => {
     try {
       const res = await API.get("/leaderboard");
-      setLeaderboard(res.data);
+      setLeaderboard(res.data.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -142,47 +162,80 @@ function Admin() {
 
 
 
+  // const runDraw = async () => {
+  //   try {
+  //     // ✅ CALL BACKEND FIRST (with or without numbers)
+  //     const res = await API.post("/draw", {
+  //       numbers: simulation?.numbers || []   // safe fallback
+  //     });
+
+  //     alert("✅ Draw completed");
+  //     setNumbers(res.data.numbers);
+
+  //   } catch (err) {
+  //     console.error(err);
+
+  //     if (err.response) {
+
+  //       const error = err.response.data.error;
+
+  //       // 🔥 DRAW ALREADY DONE (priority)
+  //       if (error?.includes("already done")) {
+  //         alert(error);
+  //         return;
+  //       }
+
+  //       // 🔥 SIMULATION NOT RUN
+  //       if (!simulation || !simulation.numbers) {
+  //         alert("⚠️ Please run simulation first");
+  //         return;
+  //       }
+
+  //       // 🔥 OTHER ERRORS
+  //       if (error) {
+  //         alert(error);
+  //       } else {
+  //         alert("Something went wrong ❌");
+  //       }
+
+  //     } else {
+  //       alert("Server error");
+  //     }
+  //   }
+  // };
+
   const runDraw = async () => {
     try {
-      // ✅ CALL BACKEND FIRST (with or without numbers)
       const res = await API.post("/draw", {
-        numbers: simulation?.numbers || []   // safe fallback
+        numbers: simulation?.numbers || []
       });
 
-      alert("✅ Draw completed");
+      showToast("success", "Draw completed 🎯");
       setNumbers(res.data.numbers);
 
     } catch (err) {
-      console.error(err);
+      const errData = err.response?.data;
 
-      if (err.response) {
-
-        const error = err.response.data.error;
-
-        // 🔥 DRAW ALREADY DONE (priority)
-        if (error?.includes("already done")) {
-          alert(error);
-          return;
-        }
-
-        // 🔥 SIMULATION NOT RUN
-        if (!simulation || !simulation.numbers) {
-          alert("⚠️ Please run simulation first");
-          return;
-        }
-
-        // 🔥 OTHER ERRORS
-        if (error) {
-          alert(error);
+      if (err.response?.status === 400) {
+        if (errData?.code === "DRAW_ALREADY_DONE") {
+          showToast("warning", errData.message);
+        } else if (errData?.code === "INVALID_COUNT") {
+          showToast("error", "Enter exactly 5 numbers");
+        } else if (errData?.code === "INVALID_RANGE") {
+          showToast("error", "Numbers must be 1–45");
         } else {
-          alert("Something went wrong ❌");
+          showToast("error", errData?.message || "Draw failed");
         }
+
+      } else if (err.response?.status === 403) {
+        showToast("error", "Admin access required");
 
       } else {
-        alert("Server error");
+        showToast("error", "Server error ❌");
       }
     }
   };
+
 
   const loadLatestDraw = async () => {
     try {
@@ -201,7 +254,7 @@ function Admin() {
       const res = await API.get("/admin-stats");
       setStats(res.data);
     } catch (err) {
-      console.error(err);
+      showToast("error", "Failed to load stats");
     }
   };
 
@@ -210,24 +263,20 @@ function Admin() {
       const res = await API.post("/simulate-draw");
 
       setSimulation(res.data);
-
-      setSimMsg("🧪 Simulation complete"); // ✅ message set
-
-      // auto hide after 3 sec
-      setTimeout(() => setSimMsg(""), 3000);
+      showToast("success", "Simulation complete 🧪");
 
     } catch (err) {
-      console.error(err);
-      setSimMsg("❌ Simulation failed");
-
-      setTimeout(() => setSimMsg(""), 3000);
+      showToast(
+        "error",
+        err.response?.data?.message || "Simulation failed "
+      );
     }
   };
 
   const loadWinnings = async () => {
     try {
       const res = await API.get("/all-winnings");
-      setWinnings(res.data);
+      setWinnings(res.data.data);
     } catch (err) {
       console.error(err);
     }
@@ -251,32 +300,59 @@ function Admin() {
   const approveWinning = async (id) => {
     try {
       await API.post("/approve-winning", { winning_id: id });
+
+      showToast("success", "Winning approved ✅");
       loadWinnings();
+
     } catch (err) {
-      console.error(err);
+      const errData = err.response?.data;
+
+      showToast(
+        "error",
+        errData?.message || "Approval failed ❌"
+      );
     }
   };
 
   const rejectWinning = async (id) => {
     try {
       await API.post("/reject-winning", { winning_id: id });
-      loadWinnings(); // refresh list
+
+      showToast("warning", "Winning rejected ❌");
+      loadWinnings();
+
     } catch (err) {
-      console.error(err);
+      const errData = err.response?.data;
+
+      showToast(
+        "error",
+        errData?.message || "Reject failed ❌"
+      );
     }
   };
 
   if (loading) {
-    return <p style={{ color: "white", textAlign: "center" }}>Loading...</p>;
+    return (
+      <div style={{ padding: "40px", textAlign: "center" }}>
+        <div style={{
+          width: "40px",
+          height: "40px",
+          border: "4px solid #e5e7eb",
+          borderTop: "4px solid #6366f1",
+          borderRadius: "50%",
+          margin: "auto",
+          animation: "spin 1s linear infinite"
+        }} />
+      </div>
+    );
   }
 
   const growth =
     analytics?.monthly?.length >= 2
       ? (
-        ((analytics.monthly.at(-1).amount -
-          analytics.monthly.at(-2).amount) /
-          analytics.monthly.at(-2).amount) *
-        100
+        ((analytics.monthly.at(-1).revenue -
+          analytics.monthly.at(-2).revenue) /
+          (analytics.monthly.at(-2).revenue || 1)) * 100
       ).toFixed(1)
       : 0;
 
@@ -359,6 +435,8 @@ function Admin() {
             <>
               <h1 style={title}>Admin Dashboard</h1>
 
+              {/* 
+
 
               {analytics && (
                 <div style={{ display: "flex", gap: "15px", marginBottom: "20px" }}>
@@ -382,110 +460,82 @@ function Admin() {
                   </div>
 
                 </div>
-              )}
-
-
-              {/* Admin Stats */}
-              {stats && (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "15px",
-                    flexWrap: "wrap",
-                    marginBottom: "20px"
-                  }}
-                >
-
-                  {/* USERS */}
-                  <div
-                    style={{
-                      ...statCard,
-                      background: "linear-gradient(135deg, #eff6ff, #dbeafe)"
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "translateY(-5px)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "translateY(0)")
-                    }
-                  >
-                    <div style={statTitle}>👥 Total Users</div>
-                    <div style={statValue}>{stats.users}</div>
-                  </div>
-
-                  {/* PAID */}
-                  <div
-                    style={{
-                      ...statCard,
-                      background: "linear-gradient(135deg, #ecfdf5, #d1fae5)"
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "translateY(-5px)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "translateY(0)")
-                    }
-                  >
-                    <div style={statTitle}>💰 Paid</div>
-                    <div style={statValue}>
-                      ₹{Number(stats.paid).toLocaleString()}
-                    </div>
-                  </div>
-
-                  {/* PENDING */}
-                  <div
-                    style={{
-                      ...statCard,
-                      background: "linear-gradient(135deg, #fef9c3, #fef08a)"
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "translateY(-5px)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "translateY(0)")
-                    }
-                  >
-                    <div style={statTitle}>⏳ Pending</div>
-                    <div style={statValue}>
-                      ₹{Number(stats.pending).toLocaleString()}
-                    </div>
-                  </div>
-
-                  {/* TOTAL WINS */}
-                  <div
-                    style={{
-                      ...statCard,
-                      background: "linear-gradient(135deg, #f5f3ff, #ddd6fe)"
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "translateY(-5px)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "translateY(0)")
-                    }
-                  >
-                    <div style={statTitle}>🎯 Total Wins</div>
-                    <div style={statValue}>{stats.totalWinnings}</div>
-                  </div>
-
-                </div>
-              )}
-              {/* 💖 TOTAL CHARITY */}
+              )} */}
               <div
                 style={{
-                  ...statCard,
-                  background: "linear-gradient(135deg, #fdf2f8, #fce7f3)"
+                  ...kpiGrid,
+                  gridTemplateColumns: "repeat(4, 1fr)" // fixed 4 columns
                 }}
               >
-                <div style={statTitle}>💖 Charity Donations</div>
-                <div style={statValue}>
-                  ₹{Number(stats?.totalCharity || 0).toLocaleString()}
+
+                {/* 🔥 FULL WIDTH CARD */}
+                <div style={{ gridColumn: "span 4" }}>
+                  <KpiCard
+                    title="Total Earnings"
+                    value={analytics?.totalEarnings || 0}
+                    icon={IndianRupee}
+                    highlight
+                    isCurrency
+                  />
                 </div>
+
+                {/* 🔽 NORMAL GRID CARDS */}
+                <KpiCard
+                  title="Total Payout"
+                  value={analytics?.totalPaid || 0}
+                  icon={Wallet}
+                  isCurrency
+                />
+
+                <KpiCard
+                  title="Net Profit"
+                  value={analytics?.profit || 0}
+                  icon={TrendingUp}
+                  positive={analytics?.profit >= 0}
+                  isCurrency
+                />
+
+                <KpiCard
+                  title="Total Users"
+                  value={stats?.users || 0}
+                  icon={Users}
+                />
+
+                <KpiCard
+                  title="Paid"
+                  value={stats?.paid || 0}
+                  icon={IndianRupee}
+                  positive
+                  isCurrency
+                />
+
+                <KpiCard
+                  title="Pending"
+                  value={stats?.pending || 0}
+                  icon={Clock}
+                  warning
+                  isCurrency
+                />
+
+                <KpiCard
+                  title="Total Wins"
+                  value={stats?.totalWinnings || 0}
+                  icon={Trophy}
+                />
+
+                <KpiCard
+                  title="Charity Donations"
+                  value={stats?.totalCharity || 0}
+                  icon={Heart}
+                  isCurrency
+                />
+
               </div>
+
 
               {/* 📊 Analytics Chart */}
 
-              {stats && (
+              {analytics && (
                 <div style={card}>
                   <h3>📊 Revenue Overview</h3>
 
@@ -493,24 +543,26 @@ function Admin() {
                     <ResponsiveContainer>
                       <BarChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+
                         <XAxis dataKey="name" stroke="#64748b" />
                         <YAxis stroke="#64748b" />
+
                         <Tooltip
+                          formatter={(value, name) => {
+                            if (name === "total_pool") return [`₹${value}`, "Total Pool"];
+                            if (name === "paid") return [`₹${value}`, "Paid"];
+                            return [`₹${value}`, name];
+                          }}
                           contentStyle={{
                             background: "#fff",
                             borderRadius: "10px",
-                            border: "1px solid #e2e8f0",
-                            boxShadow: "0 10px 20px rgba(0,0,0,0.1)"
+                            border: "1px solid #e2e8f0"
                           }}
                         />
-                        <Bar dataKey="value" radius={[10, 10, 0, 0]}>
-                          {chartData.map((entry, index) => (
-                            <Cell
-                              key={index}
-                              fill={entry.name === "Paid" ? "#22c55e" : "#facc15"}
-                            />
-                          ))}
-                        </Bar>
+
+                        {/* 🟢 Earnings */}
+                        <Bar dataKey="total_pool" fill="#22c55e" />
+                        <Bar dataKey="paid" fill="#ef4444" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -605,17 +657,18 @@ function Admin() {
                 <div style={card}>
                   <h3>📈 Monthly Growth</h3>
                   <div style={{
-                    display: "inline-block",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
                     background: growth >= 0 ? "#dcfce7" : "#fee2e2",
                     color: growth >= 0 ? "#16a34a" : "#dc2626",
                     padding: "6px 12px",
                     borderRadius: "999px",
                     fontWeight: "600",
-                    fontSize: "13px",
-                    marginBottom: "10px"
+                    fontSize: "13px"
                   }}>
                     {growth >= 0 ? "📈 +" : "📉 "}
-                    {growth}% from last month
+                    {growth}%
                   </div>
 
                   <div style={{ width: "100%", height: 300 }}>
@@ -637,10 +690,9 @@ function Admin() {
                         <YAxis />
 
                         <Tooltip />
-
                         <Area
                           type="monotone"
-                          dataKey="amount"
+                          dataKey="revenue"
                           stroke="#2563eb"
                           fill="url(#colorGrowth)"
                           strokeWidth={3}
@@ -660,7 +712,7 @@ function Admin() {
                 </p>
 
                 <small>
-                  💰 Next Match Pool: ₹{
+                  💰 Estimated Next Jackpot: ₹{
                     Math.floor(Number(jackpot) + (Number(basePool) * 0.4))
                   }
                 </small>
@@ -706,7 +758,11 @@ function Admin() {
 
                     <h4>Results:</h4>
 
-                    <p><b>Pool:</b> ₹{simulation.poolAmount}</p>
+                    <div>
+                      <p><strong>Base Pool:</strong> ₹{simulation.basePool}</p>
+                      <p><strong>Jackpot:</strong> ₹{simulation.jackpot}</p>
+                      <p><strong>Total Pool:</strong> ₹{simulation.totalPool}</p>
+                    </div>
 
                     {simulation.results.map((r, i) => (
                       <div key={i} style={{
@@ -777,9 +833,9 @@ function Admin() {
                         {w.status === "rejected" && "❌ Rejected"}
                       </span>
 
-                      {/* {w.proof && (
+                      {w.proof && (
                         <img
-                          src={`http://localhost:5000/${w.proof}`}
+                          src={w.proof}
                           width="80"
                           alt="proof"
                           style={{
@@ -787,14 +843,12 @@ function Admin() {
                             borderRadius: "6px",
                             cursor: "pointer"
                           }}
-                          onClick={() =>
-                            setPreview(`http://localhost:5000/${w.proof}`)
-                          }
+                          onClick={() => setPreview(w.proof)}
                         />
-                      )} */}
+                      )}
 
 
-                      {w.proof && (
+                      {/* {w.proof && (
                         <img
                           src={`${BASE_URL}/${w.proof}`}
                           width="80"
@@ -808,7 +862,7 @@ function Admin() {
                             setPreview(`${BASE_URL}/${w.proof}`)
                           }
                         />
-                      )} 
+                      )}  */}
 
                       {w.status === "pending" && (
                         <>
@@ -936,7 +990,7 @@ const main = {
 
 const content = {
   padding: "30px",
-  maxWidth: "1200px",
+  maxWidth: "1400px",
   margin: "auto",
 };
 
@@ -1006,4 +1060,61 @@ const statsGrid = {
   gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
   gap: "20px",
   marginBottom: "25px"
+};
+
+const proCard = {
+  padding: "20px",
+  borderRadius: "14px",
+  background: "linear-gradient(135deg, #ffffff, #f8fafc)",
+  border: "1px solid #e5e7eb",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+  transition: "0.25s",
+};
+
+const proLabel = {
+  fontSize: "13px",
+  color: "#64748b",
+  marginBottom: "8px"
+};
+
+const proValue = {
+  fontSize: "26px",
+  fontWeight: "700",
+  color: "#0f172a"
+};
+
+
+const proGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: "20px",
+  marginBottom: "25px"
+};
+
+const highlightCard = {
+  background: "linear-gradient(135deg, #4f46e5, #6366f1)",
+  color: "white",
+  boxShadow: "0 12px 30px rgba(99,102,241,0.3)",
+  transform: "scale(1.02)"
+};
+
+const growthBadge = {
+  marginTop: "8px",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "6px",
+  background: "rgba(255,255,255,0.2)",
+  padding: "4px 10px",
+  borderRadius: "999px",
+  fontSize: "12px"
+};
+
+
+
+const kpiGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: "20px",
+  marginBottom: "30px",
+  alignItems: "stretch"
 };

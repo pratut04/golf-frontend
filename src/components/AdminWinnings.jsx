@@ -5,7 +5,7 @@ import { useOutletContext } from "react-router-dom";
 function AdminWinnings() {
     const { winnings, approveWinning, rejectWinning } = useOutletContext();
     const [preview, setPreview] = React.useState(null);
-    const BASE_URL = "https://golf-backend-new.onrender.com";
+    //const BASE_URL = "https://golf-backend-new.onrender.com";
 
     return (
         <div style={card}>
@@ -50,33 +50,16 @@ function AdminWinnings() {
                             </span>
 
                             {/* PROOF IMAGE */}
-                            {/* {w.proof && (
+                            {w.proof && (
                                 <img
-                                    src={`http://localhost:5000/${w.proof}`}
+                                    src={w.proof}   // ✅ FIXED
                                     width="80"
                                     alt="proof"
                                     style={img}
-                                    onClick={() =>
-                                        setPreview(`http://localhost:5000/${w.proof}`)
-                                    }
-                                />
-                            )} */}
-
-                            {w.proof && (
-                                <img
-                                    src={`${BASE_URL}/${w.proof}`}
-                                    width="80"
-                                    alt="proof"
-                                    style={{
-                                        marginTop: "6px",
-                                        borderRadius: "6px",
-                                        cursor: "pointer"
-                                    }}
-                                    onClick={() =>
-                                        setPreview(`${BASE_URL}/${w.proof}`)
-                                    }
+                                    onClick={() => setPreview(w.proof)}  // ✅ FIXED
                                 />
                             )}
+
 
                             {/* ACTIONS */}
                             {w.status === "pending" && (
@@ -104,7 +87,12 @@ function AdminWinnings() {
             {/*  PREVIEW MODAL (OUTSIDE MAP - IMPORTANT FIX) */}
             {preview && (
                 <div style={overlay} onClick={() => setPreview(null)}>
-                    <img src={preview} alt="preview" style={previewImg} />
+                    <img
+                        src={preview}
+                        alt="preview"
+                        style={previewImg}
+                        onClick={(e) => e.stopPropagation()} // 🔥 ADD THIS
+                    />
                 </div>
             )}
         </div>

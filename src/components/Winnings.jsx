@@ -1,7 +1,12 @@
 import React from "react";
 import API from "../api/api"; // 🔥 ADD THIS AT TOP
+import { toast } from "react-toastify";
+
+
 
 function Winnings({ winnings }) {
+  const [preview, setPreview] = React.useState(null);
+  const [uploadingId, setUploadingId] = React.useState(null);
   const totalEarnings = winnings?.reduce(
     (acc, w) => acc + Number(w.amount || 0),
     0
@@ -9,19 +14,37 @@ function Winnings({ winnings }) {
 
 
   const uploadProof = async (file, winningId) => {
+    // ✅ Validation
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files allowed");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Max size 2MB");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("proof", file);
     formData.append("winningId", winningId);
 
     try {
-      await API.post("/upload-proof", formData);
-      alert("✅ Proof uploaded");
+      setUploadingId(winningId); // 🔥 start loader
 
-      // OPTIONAL: reload page (quick fix)
+      await API.post("/upload-proof", formData);
+
+      toast.success("Proof uploaded ✅");
+
+      // reload to update UI
       window.location.reload();
 
     } catch (err) {
-      alert("❌ Upload failed");
+      toast.error("Upload failed ❌");
+    } finally {
+      setUploadingId(null);
     }
   };
 
@@ -81,7 +104,27 @@ function Winnings({ winnings }) {
                   >
                     {w.status === "paid" ? "✅ Paid" : "⏳ Pending"}
                   </p>
-                  {w.status === "pending" && (
+                  {w.proof && (
+                    <img
+                      src={w.proof}
+                      alt="proof"
+                      style={{
+                        width: "80px",
+                        marginTop: "5px",
+                        borderRadius: "6px",
+                        cursor: "pointer"
+                      }}
+                      onClick={() => setPreview(w.proof)} />
+                  )}
+                  {w.proof ? (
+                    <p style={{ fontSize: "12px", color: "#22c55e", marginTop: "5px" }}>
+                      ✔ Proof uploaded
+                    </p>
+                  ) : uploadingId === w.id ? (
+                    <p style={{ fontSize: "12px", marginTop: "5px" }}>
+                      ⏳ Uploading...
+                    </p>
+                  ) : w.status === "pending" && (
                     <input
                       type="file"
                       onChange={(e) => uploadProof(e.target.files[0], w.id)}
@@ -98,6 +141,35 @@ function Winnings({ winnings }) {
           No winnings yet 😢
         </p>
       )}
+      {preview && (
+        <div
+          onClick={() => setPreview(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.8)", // ✅ FIXED
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999
+          }}
+        >
+          <img
+            src={preview}
+            alt="preview"
+            onClick={(e) => e.stopPropagation()} // 🔥 IMPORTANT
+            style={{
+              maxWidth: "90%",
+              maxHeight: "90%",
+              borderRadius: "10px"
+            }}
+          />
+        </div>
+      )}
+
     </div>
   );
 }

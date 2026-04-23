@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import ScoreForm from "../components/ScoreForm";
 import CharityList from "../components/CharityList";
 import Winnings from "../components/Winnings";
+import { toast } from "react-toastify";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -15,12 +16,28 @@ function Dashboard() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [result, setResult] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState("active");
-  const [subMsg, setSubMsg] = useState("");
-  const [resultMsg, setResultMsg] = useState("");
   const [jackpot, setJackpot] = useState(0);
   const [basePool, setBasePool] = useState(0);
   const [refresh, setRefresh] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
+  useEffect(() => {
+    if (data?.user?.charity_id) {
+      setSelectedId(data.user.charity_id);
+    }
+  }, [data]);
+
+
+
+  const showToast = (type, message, id) => {
+    if (!toast.isActive(id || message)) {
+      toast[type](message, {
+        toastId: id || message,
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
 
   useEffect(() => {
     const checkAndLoad = async () => {
@@ -54,7 +71,10 @@ function Dashboard() {
 
 
       } catch (err) {
-        console.error("Error:", err);
+        showToast(
+          "error",
+          err.response?.data?.message || "Failed to verify subscription"
+        );
       }
     };
 
@@ -110,15 +130,16 @@ function Dashboard() {
       setSubscriptionStatus("inactive");
 
       try {
-        // ✅ Allow read-only data for guest
-        const c = await API.get("/charities");
-        const l = await API.get("/leaderboard");
+        const [c, l] = await Promise.all([
+          API.get("/charities"),
+          API.get("/leaderboard")
+        ]);
 
-        setCharities(c.data);
-        setLeaderboard(l.data);
+        setCharities(c.data.data);
+        setLeaderboard(l.data.data || []);
 
       } catch (err) {
-        console.error("Guest load error:", err);
+        showToast("error", "Failed to load data");
       }
 
       // ✅ Fake user
@@ -137,16 +158,36 @@ function Dashboard() {
     // ✅ NORMAL USER FLOW
     try {
       const d = await API.get("/dashboard");
+
+      // ✅ get all scores from backend
+      const allScores = d.data.scores || [];
+
+      // ✅ sort latest first (important safety)
+      const sortedScores = allScores.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      // ✅ take only latest 5
+      const latestFiveScores = sortedScores.slice(0, 5);
+
+      // ✅ set data with limited scores
+      setData({
+        ...d.data,
+        scores: latestFiveScores
+      });
       const c = await API.get("/charities");
       const l = await API.get("/leaderboard");
 
-      setData(d.data);
-      setCharities(c.data);
-      setLeaderboard(l.data);
+
+      setCharities(c.data.data);
+      setLeaderboard(l.data.data || []);
 
     } catch (err) {
       console.error("LOAD ERROR:", err);
-      setSubMsg("❌ Failed to load dashboard (check backend)");
+      showToast(
+        "error",
+        err.response?.data?.message || "Failed to load dashboard"
+      );
     }
   };
 
@@ -160,7 +201,7 @@ function Dashboard() {
   }
 
   // ✅ ERROR CASE
-  if (data.error) {
+  if (data.success === false) {
     return (
       <p style={{ color: "red", textAlign: "center" }}>
         Failed to load dashboard ❌ (check backend)
@@ -182,152 +223,280 @@ function Dashboard() {
     !localStorage.getItem("token");
 
   //=================addScore Function===============
+  // const addScore = async (score) => {
+  //   setSubMsg("");
+  //   try {
+  //     const isGuest =
+  //       localStorage.getItem("guest") === "true" &&
+  //       !localStorage.getItem("token");
+  //     if (isGuest) {
+  //       setSubMsg("Login required to add score ⚠️");
+  //       return;
+  //     }
+
+
+
+  //     const subRes = await API.post("/check-subscription");
+
+  //     const status = subRes.data.status;
+  //     const end = subRes.data.subscription_end;
+
+  //     // ❌ NOT SUBSCRIBED
+  //     if (status === "not_subscribed") {
+  //       setSubMsg("⚠️ Please subscribe to use this feature");
+
+
+
+  //       return;
+  //     }
+
+  //     // ❌ EXPIRED
+  //     if (status === "expired") {
+  //       setSubMsg(` Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
+  //         day: "2-digit",
+  //         month: "short",
+  //         year: "numeric"
+  //       })}`);
+
+
+
+  //       return;
+  //     }
+
+  //     await API.post("/scores", {
+
+  //       score: Number(score),
+  //     });
+
+  //     setSubMsg("✅ Score added");
+  //     loadData();
+
+  //   } catch (err) {
+  //     console.error("FULL ERROR:", err);
+
+  //     if (err.response && err.response.data && err.response.data.error) {
+  //       setSubMsg(err.response.data.error);   // ✅ THIS LINE FIXES EVERYTHING
+  //     } else {
+  //       setSubMsg("Error adding score ❌");
+  //     }
+  //   }
+  // };
   const addScore = async (score) => {
-    setSubMsg("");
     try {
       const isGuest =
         localStorage.getItem("guest") === "true" &&
         !localStorage.getItem("token");
+
       if (isGuest) {
-        setSubMsg("Login required to add score ⚠️");
+        showToast("warning", "Login required to add score");
         return;
       }
 
+      await API.post("/scores", { score: Number(score) });
 
+      showToast("success", "Score added successfully 🎯");
 
-      const subRes = await API.post("/check-subscription");
-
-      const status = subRes.data.status;
-      const end = subRes.data.subscription_end;
-
-      // ❌ NOT SUBSCRIBED
-      if (status === "not_subscribed") {
-        setSubMsg("⚠️ Please subscribe to use this feature");
-
-
-
-        return;
-      }
-
-      // ❌ EXPIRED
-      if (status === "expired") {
-        setSubMsg(` Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric"
-        })}`);
-
-
-
-        return;
-      }
-
-      await API.post("/scores", {
-
-        score: Number(score),
-      });
-
-      setSubMsg("✅ Score added");
       loadData();
 
     } catch (err) {
-      console.error("FULL ERROR:", err);
+      const errData = err.response?.data;
 
-      if (err.response && err.response.data && err.response.data.error) {
-        setSubMsg(err.response.data.error);   // ✅ THIS LINE FIXES EVERYTHING
+      if (err.response?.status === 403) {
+        if (errData?.code === "NOT_SUBSCRIBED") {
+          showToast("warning", "Please subscribe first 💳");
+        } else if (errData?.code === "SUBSCRIPTION_EXPIRED") {
+          showToast("error", "Subscription expired");
+        } else {
+          showToast("error", "Access denied");
+        }
       } else {
-        setSubMsg("Error adding score ❌");
+        showToast("error", errData?.message || "Something went wrong");
       }
     }
   };
   //================selectCharitiey function==================
+  // const selectCharity = async (id) => {
+  //   try {
+  //     const isGuest =
+  //       localStorage.getItem("guest") === "true" &&
+  //       !localStorage.getItem("token");
+
+  //     if (isGuest) {
+  //       showToast("warning", "Login required to select charity");
+  //       return;
+  //     }
+
+  //     // ✅ Update UI instantly
+  //     setSelectedId(Number(id));
+
+  //     await API.post("/select-charity", {
+  //       charity_id: id
+  //     });
+
+  //     showToast("success", "Charity selected ❤️");
+
+  //     const selected = charities.find(c => Number(c.id) === Number(id));
+
+  //     setData(prev => ({
+  //       ...prev,
+  //       user: {
+  //         ...prev.user,
+  //         charity_id: Number(id),
+  //         charity_name: selected?.name || prev.user.charity_name
+  //       }
+  //     }));
+
+  //   } catch (err) {
+  //     const errData = err.response?.data;
+
+  //     if (err.response?.status === 403) {
+  //       if (errData?.code === "NOT_SUBSCRIBED") {
+  //         showToast("warning", "Please subscribe first 💳");
+  //       } else if (errData?.code === "SUBSCRIPTION_EXPIRED") {
+  //         showToast(
+  //           "error",
+  //           `Expired on ${new Date(errData.expiry).toLocaleDateString("en-IN")}`
+  //         );
+  //       } else {
+  //         showToast("error", "Access denied");
+  //       }
+  //     } else {
+  //       showToast("error", errData?.message || "Something went wrong");
+  //     }
+  //   }
+  // };
+
+  // const selectCharity = async (id) => {
+  //   try {
+  //     await API.post("/select-charity", {
+  //       charity_id: id // ✅ string 그대로
+  //     });
+
+  //     const selected = charities.find(c => c.id === id);
+
+  //     setData(prev => ({
+  //       ...prev,
+  //       user: {
+  //         ...prev.user,
+  //         charity_id: id,
+  //         charity_name: selected?.name
+  //       }
+  //     }));
+
+  //     showToast("success", "Charity selected ❤️");
+
+  //   } catch (err) {
+  //     const errData = err.response?.data;
+
+  //     if (errData?.code === "ALREADY_SELECTED") {
+  //       setData(prev => ({
+  //         ...prev,
+  //         user: {
+  //           ...prev.user,
+  //           charity_id: id
+  //         }
+  //       }));
+  //     }
+
+  //     showToast("error", errData?.message || "Something went wrong");
+  //   }
+  // };
+
+
   const selectCharity = async (id) => {
-    setSubMsg("");
-    try {
+  try {
+    const isGuest =
+      localStorage.getItem("guest") === "true" &&
+      !localStorage.getItem("token");
 
-      const isGuest =
-        localStorage.getItem("guest") === "true" &&
-        !localStorage.getItem("token");
-      if (isGuest) {
-        setSubMsg("Login required to select charity ⚠️");
-        return;
-      }
-
-      await API.post("/select-charity", {
-        // user_id: userId,
-        charity_id: id
-      });
-
-      setSubMsg("Charity selected ✅"); // success message
-      await loadData();
-
-    } catch (err) {
-      console.error("CHARITY ERROR:", err);
-
-      const error = err.response?.data?.error;
-
-      if (error) {
-        setSubMsg(error);   // ✅ always show backend message
-      } else {
-        setSubMsg("Something went wrong ❌");
-      }
+    // 🔒 GUEST MODE
+    if (isGuest) {
+      showToast("warning", "Login required to select charity");
+      return;
     }
-  };
+
+    // ✅ Optimistic UI update (instant selection)
+    setSelectedId(id);
+
+    await API.post("/select-charity", {
+      charity_id: id   // ✅ KEEP STRING (UUID)
+    });
+
+    showToast("success", "Charity selected ❤️");
+
+    const selected = charities.find(c => c.id === id);
+
+    setData(prev => ({
+      ...prev,
+      user: {
+        ...prev.user,
+        charity_id: id,
+        charity_name: selected?.name || prev.user.charity_name
+      }
+    }));
+
+  } catch (err) {
+    const errData = err.response?.data;
+
+    // 🔁 rollback UI if API fails
+    setSelectedId(data?.user?.charity_id || null);
+
+    if (err.response?.status === 403) {
+      if (errData?.code === "NOT_SUBSCRIBED") {
+        showToast("warning", "Please subscribe first 💳");
+      } else if (errData?.code === "SUBSCRIPTION_EXPIRED") {
+        showToast(
+          "error",
+          `Subscription Expired on ${new Date(errData.expiry).toLocaleDateString("en-IN")}`
+        );
+      } else {
+        showToast("error", "Access denied");
+      }
+
+    } else if (errData?.code === "ALREADY_SELECTED") {
+      // ✅ Handle already selected properly
+      setSelectedId(id);
+      showToast("info", "Already selected ✅");
+
+    } else {
+      showToast("error", errData?.message || "Something went wrong");
+    }
+  }
+};
 
   //================check result===================
   const checkResult = async () => {
-    setResultMsg("");
-
     try {
-
       const subRes = await API.post("/check-subscription");
+      const { status, subscription_end } = subRes.data;
 
-      const status = subRes.data.status;
-      const end = subRes.data.subscription_end;
-
-      // NOT SUBSCRIBED
-      if (status === "not_subscribed") {
-        setResultMsg("⚠️ Please subscribe to check results");
-        setResult(null);
+      if (status === "inactive") {
+        if (subscription_end) {
+          showToast(
+            "error",
+            `Expired on ${new Date(subscription_end).toLocaleDateString("en-IN")}`
+          );
+        } else {
+          showToast("warning", "Please subscribe to check results");
+        }
         return;
       }
 
-      // EXPIRED
-      if (status === "expired") {
-        setResultMsg(
-          `Subscription expired on ${new Date(end).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-          })}`
-        );
-        setResult(null);
-        return;
-      }
-
-      // ✅ CALL RESULT API
+      // ✅ CALL API
       const res = await API.post("/check-result");
 
-      setResult(res.data);
-      setResultMsg("");
+      console.log("RESULT:", res.data);
 
-      await loadData();
+      setResult(res.data); // ✅ FIX ADDED HERE
+
+      showToast("success", "Result loaded 🎯");
 
     } catch (err) {
-      console.error(err);
-
-      const error = err.response?.data?.error;
-
-      if (error) {
-        setResultMsg(error);   // ✅ show real backend message
-      } else {
-        setResultMsg("Something went wrong ❌");
-      }
+      showToast("error", err.response?.data?.message || "Something went wrong");
 
       setResult(null);
     }
   };
-
 
   return (
     <div style={container}>
@@ -471,7 +640,7 @@ function Dashboard() {
                   const isGuest = localStorage.getItem("guest") === "true";
 
                   if (isGuest) {
-                    alert("🔒 Please sign in to continue with subscription");
+                    showToast("warning", "Please sign in to continue");
 
 
                     setTimeout(() => {
@@ -580,17 +749,7 @@ function Dashboard() {
         <div style={cardHover}>
           <h3>❤️ Charity Selection</h3>
 
-          {subMsg && (
-            <div style={{
-              background: "#ffe6e6",
-              color: "red",
-              padding: "10px",
-              borderRadius: "8px",
-              marginBottom: "10px"
-            }}>
-              {subMsg}
-            </div>
-          )}
+
 
           <p style={{ color: "#334155" }}>
             Selected:{" "}
@@ -608,7 +767,7 @@ function Dashboard() {
               <CharityList
                 charities={charities}
                 selectCharity={selectCharity}
-                selectedId={data.user.charity_id}
+                selectedId={data.user?.charity_id}
               />
             </div>
 
@@ -663,25 +822,13 @@ function Dashboard() {
             🏆 Estimated Next Jackpot: ₹{Math.floor(Number(jackpot) + (Number(basePool) * 0.4))}
           </p>
         </div>
-        
+
         {/* Draw & Result */}
         <div style={cardHover}>
           <h3>🎲 Draw & Result</h3>
 
           {/* MESSAGE */}
-          {resultMsg && (
-            <div
-              style={{
-                background: "#ffe6e6",
-                color: "red",
-                padding: "10px",
-                borderRadius: "8px",
-                marginBottom: "10px"
-              }}
-            >
-              {resultMsg}
-            </div>
-          )}
+
 
           <div style={{ position: "relative" }}>
             {/* ACTUAL CONTENT */}
@@ -711,7 +858,7 @@ function Dashboard() {
               </button>
 
               {/* RESULT */}
-              {result && !resultMsg && subscriptionStatus === "active" && (
+              {result && subscriptionStatus === "active" && (
                 <div style={{ marginTop: "10px" }}>
                   <p>Result: {result.result}</p>
                   <p>Numbers: {result.numbers?.join(", ")}</p>

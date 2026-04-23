@@ -15,7 +15,7 @@ function AdminUsers() {
   const loadUsers = async () => {
     try {
       const res = await API.get("/users");
-      setUsers(res.data);
+      setUsers(res.data.data);
     } catch (err) {
       console.error("USERS ERROR:", err);
     } finally {

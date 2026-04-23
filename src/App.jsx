@@ -9,6 +9,10 @@ import Subscription from "./pages/Subscription";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyOtp from "./pages/VerifyOtp";
+import Signup from "./pages/Signup";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 // 🔥 ADMIN PAGES
 import AdminUsers from "./components/AdminUsers";
@@ -16,6 +20,9 @@ import AdminScores from "./components/AdminScores";
 import AdminCharities from "./components/AdminCharities";
 import AdminWinnings from "./components/AdminWinnings";
 import AdminLeaderboard from "./components/AdminLeaderboard";
+import {Slide, Zoom, Bounce} from "react-toastify";
+
+
 // ================= ROUTES =================
 
 // 🔐 Protected Route
@@ -47,11 +54,20 @@ const PublicRoute = ({ children }) => {
 function App() {
   return (
     <BrowserRouter>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        pauseOnHover={false}
+        newestOnTop
+        theme="dark"
+        transition={Slide}   // ✅ use this instead of CSS animation
+      />
       <Routes>
 
         {/* ================= PUBLIC ================= */}
         <Route path="/login" element={<Login />} />
-        
+
         <Route
           path="/"
           element={
@@ -60,7 +76,7 @@ function App() {
             </PublicRoute>
           }
         />
-
+        <Route path="/signup" element={<Signup />} />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
@@ -68,6 +84,7 @@ function App() {
 
 
         <Route path="/verify-otp" element={<VerifyOtp />} />
+
 
         {/* ================= USER ================= */}
         <Route

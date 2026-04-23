@@ -34,10 +34,9 @@ API.interceptors.response.use(
     return res;
   },
   (err) => {
-    const error = err.response?.data?.error || err.message;
+    console.log("❌ API ERROR:", err.response?.data || err.message);
 
-    console.log("❌ API ERROR:", error);
-
+    // ✅ ONLY handle 401 globally
     if (err.response?.status === 401) {
       const isGuest = localStorage.getItem("guest") === "true";
 
@@ -47,9 +46,7 @@ API.interceptors.response.use(
       }
     }
 
-    if (err.response?.status === 403) {
-      alert(error || "Access denied ❌");
-    }
+    // ❌ REMOVE 403 handling from here
 
     if (!err.response) {
       alert("Server not responding 🚨");

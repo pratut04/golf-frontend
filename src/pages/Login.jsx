@@ -6,10 +6,9 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSignup, setIsSignup] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const navigate = useNavigate(); //  important
+  const navigate = useNavigate();
 
   const login = async () => {
     if (loading) return;
@@ -20,15 +19,12 @@ function Login() {
     }
 
     setLoading(true);
+    setMsg("");
 
     try {
-      // 🔥 STEP 1: Wake server
-
+      // 🔥 Wake server (Render fix)
       await fetch("https://golf-backend-new.onrender.com");
 
-
-
-      // 🔥 STEP 2: Try login (1st attempt)
       let res;
 
       try {
@@ -37,7 +33,6 @@ function Login() {
           password: password.trim()
         });
       } catch (err) {
-        // ⏳ WAIT + RETRY (THIS IS THE MAGIC FIX)
         console.log("Retrying login...");
         await new Promise(r => setTimeout(r, 5000));
 
@@ -47,67 +42,37 @@ function Login() {
         });
       }
 
-      // ✅ STORE DATA
+      // ✅ Store data
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.user.id);
       localStorage.setItem("email", res.data.user.email);
       localStorage.setItem("role", res.data.user.role);
       localStorage.removeItem("guest");
 
-      // ✅ REDIRECT
-      // ✅ REDIRECT
+      // ✅ Redirect
       if (res.data.user.role === "admin") {
         navigate("/admin");
       } else {
         const redirect = localStorage.getItem("redirectAfterLogin");
 
         if (redirect) {
-          localStorage.removeItem("redirectAfterLogin"); // 🔥 VERY IMPORTANT
+          localStorage.removeItem("redirectAfterLogin");
           navigate(redirect);
         } else {
           navigate("/dashboard");
         }
       }
+
     } catch (err) {
       console.error("LOGIN ERROR:", err);
 
       if (err.response) {
-        alert(err.response.data.error);
+        setMsg(err.response.data.message || "Login failed");
       } else {
-        alert("❌ Server not responding. Try again.");
+        setMsg("Server not responding. Try again.");
       }
 
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const signup = async () => {
-    if (loading) return; // 🛑 prevent double click
-
-    if (!email || !password) {
-      setMsg("Enter email & password");
-      return;
-    }
-
-    setLoading(true);
-    setMsg("");
-
-    try {
-      await API.post("/users", {
-        email: email.trim(),
-        password: password.trim()
-      });
-
-      // 🔥 store email for OTP page
-      localStorage.setItem("otpEmail", email);
-
-      navigate("/verify-otp", {
-        state: { email }
-      });
-
-    } catch (err) {
-      setMsg(err.response?.data?.error || "Signup failed!");
     } finally {
       setLoading(false);
     }
@@ -119,12 +84,10 @@ function Login() {
     navigate("/dashboard");
   };
 
-
-
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>Login</h2>
+        <h2>Welcome Back 👋</h2>
 
         <input
           type="email"
@@ -140,7 +103,6 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* ✅ ADD THIS */}
         <p
           onClick={() => navigate("/forgot-password")}
           style={{
@@ -154,8 +116,9 @@ function Login() {
         >
           Forgot Password?
         </p>
+
         <button
-          onClick={isSignup ? signup : login}
+          onClick={login}
           disabled={loading}
           style={{
             display: "flex",
@@ -167,22 +130,15 @@ function Login() {
           }}
         >
           {loading && <span className="spinner"></span>}
-
-          {loading
-            ? isSignup
-              ? "Sending OTP..."
-              : "Logging in..."
-            : isSignup
-              ? "Signup"
-              : "Login"}
+          {loading ? "Logging in..." : "Login"}
         </button>
 
-        <p style={{ marginTop: "10px", cursor: "pointer", color: "#2563eb" }}
-          onClick={() => {
-            setIsSignup(!isSignup);
-            setMsg("");
-          }}>
-          {isSignup ? "Already have account? Login" : "Create new account"}
+        {/* 🔥 GO TO SIGNUP PAGE */}
+        <p
+          style={{ marginTop: "12px", cursor: "pointer", color: "#2563eb" }}
+          onClick={() => navigate("/signup")}
+        >
+          Create new account
         </p>
 
         <button
@@ -191,6 +147,7 @@ function Login() {
             background: "#64748b"
           }}
           onClick={skipLogin}
+
         >
           Skip as Guest
         </button>
@@ -206,5 +163,3 @@ function Login() {
 }
 
 export default Login;
-
-

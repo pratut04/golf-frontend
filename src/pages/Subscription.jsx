@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Subscription() {
   const navigate = useNavigate();
@@ -50,15 +52,15 @@ function Subscription() {
       // ✅ STEP 1: CREATE ORDER FROM BACKEND
       const orderRes = await API.post("/create-order", { amount });
 
-      const order = orderRes.data;
+      const order = orderRes.data.data;
 
       if (!window.Razorpay) {
-        alert("Razorpay not loaded ❌");
+        toast.error("Razorpay not loaded ❌");
         return;
       }
 
       const options = {
-        key:  "rzp_test_SXQLt37SiX7Arq", // public key
+        key:  "rzp_test_SXQLt37SiX7Arq", 
         amount: order.amount,
         currency: order.currency,
         order_id: order.id, // 🔥 IMPORTANT
@@ -75,11 +77,11 @@ function Subscription() {
               type: type
             });
 
-            alert("✅ Payment successful");
+            toast.success("✅ Congratulations! Payment successful");
             navigate("/dashboard");
 
           } catch (err) {
-            alert("❌ Verification failed");
+            toast.error("❌ Verification failed");
           }
         },
 
@@ -93,7 +95,7 @@ function Subscription() {
 
     } catch (err) {
       console.error("PAYMENT ERROR:", err);
-      alert("❌ Payment failed");
+      toast.error("❌ Payment failed");
     } finally {
       setLoading(false);
     }

@@ -15,8 +15,8 @@ function AdminScores() {
       const scoresRes = await API.get("/scores");
       const usersRes = await API.get("/users");
 
-      setScores(scoresRes.data);
-      setUsers(usersRes.data);
+      setScores(scoresRes.data.data || []);
+      setUsers(usersRes.data.data || []);
 
     } catch (err) {
       console.error("SCORES ERROR:", err);
