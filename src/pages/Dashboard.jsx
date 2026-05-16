@@ -780,8 +780,60 @@ function Dashboard() {
             <p>No leaderboard data</p>
           )}
         </div>
-      </div>
-    </div>
+      {/* FOOTER */}
+        <div style={footer}>
+          <div style={footerTop}>
+            
+            {/* LEFT */}
+            <div>
+              <h2 style={footerLogo}>
+                ⛳ Golf Performance Hub
+              </h2>
+        
+              <p style={footerText}>
+                Track scores, compete in draws, support charities,
+                and win exciting rewards while improving your game.
+              </p>
+            </div>
+        
+            {/* CENTER */}
+            <div>
+              <h3 style={footerHeading}>Quick Links</h3>
+        
+              <div style={footerLinks}>
+                <span style={footerLink}>🏌️ Scores</span>
+                <span style={footerLink}>🎲 Draw Results</span>
+                <span style={footerLink}>💰 Winnings</span>
+                <span style={footerLink}>❤️ Charity</span>
+              </div>
+            </div>
+        
+            {/* RIGHT */}
+            <div>
+              <h3 style={footerHeading}>Platform Status</h3>
+        
+              <div style={statusBox}>
+                <span style={statusDot}></span>
+                All systems operational
+              </div>
+        
+              <p style={footerMini}>
+                Live jackpot updates every 10 seconds 🚀
+              </p>
+            </div>
+        
+          </div>
+        
+          {/* BOTTOM */}
+          <div style={footerBottom}>
+            <p style={{ margin: 0 }}>
+              © 2026 Golf Performance Hub • Built with ❤️ using React, Node.js & PostgreSQL
+            </p>
+          </div>
+       </div>
+
+  </div>
+</div>
   );
 }
 
@@ -876,4 +928,88 @@ const jackpotAmount = {
   fontWeight: "bold",
   color: "#facc15",
   marginTop: "10px"
+};
+
+const footer = {
+  marginTop: "40px",
+  background: "linear-gradient(135deg, #020617, #0f172a)",
+  borderRadius: "22px",
+  overflow: "hidden",
+  color: "white",
+  boxShadow: "0 10px 40px rgba(0,0,0,0.25)"
+};
+
+const footerTop = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: "30px",
+  padding: "35px"
+};
+
+const footerLogo = {
+  fontSize: "24px",
+  fontWeight: "800",
+  marginBottom: "10px",
+  background: "linear-gradient(90deg, #22c55e, #38bdf8)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent"
+};
+
+const footerText = {
+  color: "#cbd5e1",
+  lineHeight: "1.7",
+  fontSize: "14px"
+};
+
+const footerHeading = {
+  marginBottom: "14px",
+  fontSize: "16px",
+  fontWeight: "700",
+  color: "#f8fafc"
+};
+
+const footerLinks = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px"
+};
+
+const footerLink = {
+  color: "#cbd5e1",
+  fontSize: "14px",
+  cursor: "pointer",
+  transition: "0.2s"
+};
+
+const statusBox = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  background: "rgba(255,255,255,0.08)",
+  padding: "10px 14px",
+  borderRadius: "12px",
+  width: "fit-content",
+  fontSize: "14px"
+};
+
+const statusDot = {
+  width: "10px",
+  height: "10px",
+  borderRadius: "50%",
+  background: "#22c55e",
+  boxShadow: "0 0 12px #22c55e"
+};
+
+const footerMini = {
+  marginTop: "12px",
+  color: "#94a3b8",
+  fontSize: "13px"
+};
+
+const footerBottom = {
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+  padding: "18px",
+  textAlign: "center",
+  color: "#94a3b8",
+  fontSize: "13px"
 };
