@@ -846,22 +846,33 @@ export default Dashboard;
 const theme = {
   bg: "#0b1120",
   card: "#111827",
-  border: "#1f2937",
+  border: "#e2e8f0",
   text: "#e5e7eb",
-  subText: "#9ca3af",
+  subText: "#64748b",
   primary: "#22c55e"
 };
 
 const container = {
   background: "#f8fafc",
   minHeight: "100vh",
-  color: "#0f172a"
+  color: "#0f172a",
+  overflowX: "hidden"
 };
 
 const content = {
-  padding: "30px 20px",
-  maxWidth: "900px",
-  margin: "auto"
+  padding: "30px",
+  width: "100%",
+  maxWidth: "1600px",
+  margin: "0 auto",
+  boxSizing: "border-box"
+};
+
+const dashboardGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+  gap: "20px",
+  marginBottom: "20px",
+  alignItems: "start"
 };
 
 const title = {
@@ -871,13 +882,14 @@ const title = {
 };
 
 const card = {
-  background: "white", 
-  backdropFilter: "blur(12px)",
-  padding: "20px",
-  borderRadius: "16px",
+  background: "white",
+  padding: "22px",
+  borderRadius: "20px",
   marginBottom: "20px",
-  border: "1px solid rgba(255,255,255,0.06)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+  border: "1px solid #e2e8f0",
+  boxShadow: "0 8px 30px rgba(15,23,42,0.06)",
+  transition: "all 0.25s ease",
+  overflow: "hidden"
 };
 
 const cardHover = {
@@ -885,8 +897,13 @@ const cardHover = {
 };
 
 const item = {
-  padding: "10px 0",
-  borderBottom: `1px solid ${theme.border}`
+  padding: "12px 0",
+  borderBottom: `1px solid ${theme.border}`,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "10px",
+  flexWrap: "wrap"
 };
 
 const subText = {
@@ -898,10 +915,10 @@ const btn = {
   background: theme.primary,
   color: "white",
   border: "none",
-  borderRadius: "8px",
+  borderRadius: "10px",
   cursor: "pointer",
   fontWeight: "600",
-  boxShadow: "0 4px 14px rgba(34,197,94,0.4)",
+  boxShadow: "0 4px 14px rgba(34,197,94,0.25)",
   transition: "0.2s"
 };
 
@@ -915,25 +932,28 @@ const textSecondary = {
 };
 
 const jackpotCard = {
-  background: "linear-gradient(135deg, #1e293b, #0f172a)",
-  padding: "20px",
-  borderRadius: "10px",
-  marginTop: "15px",
+  background: "linear-gradient(135deg, #020617, #1e293b)",
+  padding: "24px",
+  borderRadius: "20px",
+  marginBottom: "20px",
   color: "white",
-  boxShadow: "0 0 20px rgba(255,215,0,0.2)"
+  boxShadow: "0 10px 35px rgba(15,23,42,0.25)",
+  overflow: "hidden"
 };
 
 const jackpotAmount = {
-  fontSize: "28px",
-  fontWeight: "bold",
+  fontSize: "38px",
+  fontWeight: "800",
   color: "#facc15",
-  marginTop: "10px"
+  marginTop: "12px",
+  marginBottom: "8px",
+  letterSpacing: "1px"
 };
 
 const footer = {
-  marginTop: "40px",
+  marginTop: "50px",
   background: "linear-gradient(135deg, #020617, #0f172a)",
-  borderRadius: "22px",
+  borderRadius: "24px",
   overflow: "hidden",
   color: "white",
   boxShadow: "0 10px 40px rgba(0,0,0,0.25)"
@@ -941,15 +961,15 @@ const footer = {
 
 const footerTop = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: "30px",
-  padding: "35px"
+  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+  gap: "35px",
+  padding: "35px 25px"
 };
 
 const footerLogo = {
-  fontSize: "24px",
+  fontSize: "26px",
   fontWeight: "800",
-  marginBottom: "10px",
+  marginBottom: "12px",
   background: "linear-gradient(90deg, #22c55e, #38bdf8)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent"
@@ -957,12 +977,12 @@ const footerLogo = {
 
 const footerText = {
   color: "#cbd5e1",
-  lineHeight: "1.7",
+  lineHeight: "1.8",
   fontSize: "14px"
 };
 
 const footerHeading = {
-  marginBottom: "14px",
+  marginBottom: "16px",
   fontSize: "16px",
   fontWeight: "700",
   color: "#f8fafc"
@@ -971,7 +991,7 @@ const footerHeading = {
 const footerLinks = {
   display: "flex",
   flexDirection: "column",
-  gap: "10px"
+  gap: "12px"
 };
 
 const footerLink = {
@@ -986,10 +1006,11 @@ const statusBox = {
   alignItems: "center",
   gap: "10px",
   background: "rgba(255,255,255,0.08)",
-  padding: "10px 14px",
-  borderRadius: "12px",
+  padding: "12px 16px",
+  borderRadius: "14px",
   width: "fit-content",
-  fontSize: "14px"
+  fontSize: "14px",
+  backdropFilter: "blur(10px)"
 };
 
 const statusDot = {
@@ -1001,14 +1022,15 @@ const statusDot = {
 };
 
 const footerMini = {
-  marginTop: "12px",
+  marginTop: "14px",
   color: "#94a3b8",
-  fontSize: "13px"
+  fontSize: "13px",
+  lineHeight: "1.6"
 };
 
 const footerBottom = {
   borderTop: "1px solid rgba(255,255,255,0.08)",
-  padding: "18px",
+  padding: "20px",
   textAlign: "center",
   color: "#94a3b8",
   fontSize: "13px"
