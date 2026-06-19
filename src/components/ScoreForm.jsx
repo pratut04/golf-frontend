@@ -127,70 +127,70 @@ function ScoreForm({ addScore, subscriptionStatus, subscriptionEnd, refresh }) {
       }
 
 
-      <input
-        type="number"
-        value={score}
-        onChange={(e) => setScore(e.target.value)}
-        placeholder="Enter score (1-45)"
-        style={input}
-        disabled={locked}
-      />
 
-      <button
-        style={{
-          background: (locked || isSubLocked) ? "#94a3b8" : "#2563eb",
-          color: "white",
-          padding: "8px 16px",
-          borderRadius: "8px",
-          border: "none",
-          cursor: (locked || isSubLocked) ? "not-allowed" : "pointer",
-          fontWeight: "500",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-          transition: "all 0.2s ease",
-          boxShadow: "none",
-          opacity: (locked || isSubLocked) ? 0.7 : 1
-        }}
-        onClick={handleSubmit}
-        onMouseEnter={(e) => {
-          if (!(locked || isSubLocked)) {
-            e.target.style.transform = "scale(1.05)";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!(locked || isSubLocked)) {
-            e.target.style.transform = "scale(1)";
-          }
-        }}
-        disabled={loading || locked || isSubLocked}
-      >
-        {loading ? (
-          <>
-            <span className="spinner"></span>
-            Submitting...
-          </>
-        ) : (locked || isSubLocked) ? (
-          "🔒 Locked"
-        ) : (
-          "Submit"
-        )}
-      </button>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center", marginTop: "10px" }}>
+        <input
+          type="number"
+          value={score}
+          onChange={(e) => setScore(e.target.value)}
+          placeholder="Enter score (1-45)"
+          style={{
+            ...input,
+            flex: "1",
+            minWidth: "140px",
+            margin: 0,
+          }}
+          disabled={locked}
+        />
+
+        <button
+          style={{
+            background: (locked || isSubLocked) ? "#94a3b8" : "#2563eb",
+            color: "white",
+            padding: "10px 18px",
+            borderRadius: "8px",
+            border: "none",
+            cursor: (locked || isSubLocked) ? "not-allowed" : "pointer",
+            fontWeight: "600",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            transition: "all 0.2s ease",
+            opacity: (locked || isSubLocked) ? 0.7 : 1,
+            whiteSpace: "nowrap",
+          }}
+          onClick={handleSubmit}
+          disabled={loading || locked || isSubLocked}
+        >
+          {loading ? (
+            <>
+              <span className="spinner"></span>
+              Submitting…
+            </>
+          ) : (locked || isSubLocked) ? (
+            "🔒 Locked"
+          ) : (
+            "Submit"
+          )}
+        </button>
+      </div>
+
       {isSubLocked && subscriptionEnd && (
-        <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "6px" }}>
+        <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "8px" }}>
           Subscription Expired on {new Date(subscriptionEnd).toLocaleDateString("en-IN")}
         </p>
       )}
 
       {isSubLocked && !subscriptionEnd && (
-        <p style={{ color: "#f59e0b", fontSize: "13px", marginTop: "6px" }}>
+        <p style={{ color: "#f59e0b", fontSize: "13px", marginTop: "8px" }}>
           Please subscribe to add score 💳
         </p>
       )}
     </div>
   );
 }
+
 
 export default ScoreForm;
 

@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 
 function Admin() {
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [winnings, setWinnings] = useState([]);
@@ -313,83 +314,74 @@ function Admin() {
       : 0;
 
 
-  return (
-    <div style={layout}>
-      {/* SIDEBAR */}
-      <div style={sidebar}>
-        <h2 style={{ marginBottom: "20px" }}>⚙️ Admin</h2>
+  const navTo = (path) => {
+    navigate(path);
+    setSidebarOpen(false);
+  };
 
-        <p
+  return (
+    <div className="admin-layout">
+      {/* Mobile sidebar toggle */}
+      <button
+        className="admin-sidebar-toggle"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle sidebar"
+      >
+        {sidebarOpen ? "✕" : "☰"} Admin
+      </button>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
           style={{
-            ...navItem,
-            background: location.pathname === "/admin" ? "#1e293b" : "",
-            color: location.pathname === "/admin" ? "white" : ""
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 140,
           }}
-          onClick={() => navigate("/admin")}
-        >
+        />
+      )}
+
+      {/* SIDEBAR */}
+      <div className={`admin-sidebar${sidebarOpen ? " open" : ""}`}>
+        <h2>⚙️ Admin</h2>
+
+        <p className={`admin-nav-item${location.pathname === "/admin" ? " active" : ""}`}
+          onClick={() => navTo("/admin")}>
           📊 Dashboard
         </p>
-
-        <p
-          style={{
-            ...navItem,
-            background: location.pathname === "/admin/users" ? "#1e293b" : ""
-          }}
-          onClick={() => navigate("/admin/users")}
-        >
+        <p className={`admin-nav-item${location.pathname === "/admin/users" ? " active" : ""}`}
+          onClick={() => navTo("/admin/users")}>
           👥 Users
         </p>
-
-        <p
-          style={{
-            ...navItem,
-            background: location.pathname === "/admin/scores" ? "#1e293b" : ""
-          }}
-          onClick={() => navigate("/admin/scores")}
-        >
+        <p className={`admin-nav-item${location.pathname === "/admin/scores" ? " active" : ""}`}
+          onClick={() => navTo("/admin/scores")}>
           🎯 Scores
         </p>
-
-        <p
-          style={{
-            ...navItem,
-            background: location.pathname === "/admin/charities" ? "#1e293b" : ""
-          }}
-          onClick={() => navigate("/admin/charities")}
-        >
+        <p className={`admin-nav-item${location.pathname === "/admin/charities" ? " active" : ""}`}
+          onClick={() => navTo("/admin/charities")}>
           💖 Charities
         </p>
-
-        <p
-          style={{
-            ...navItem,
-            background: location.pathname === "/admin/winnings" ? "#1e293b" : ""
-          }}
-          onClick={() => navigate("/admin/winnings")}
-        >
+        <p className={`admin-nav-item${location.pathname === "/admin/winnings" ? " active" : ""}`}
+          onClick={() => navTo("/admin/winnings")}>
           💰 Winnings
         </p>
-
-        <p
-          style={{
-            ...navItem,
-            background: location.pathname === "/admin/leaderboard" ? "#1e293b" : ""
-          }}
-          onClick={() => navigate("/admin/leaderboard")}
-        >
+        <p className={`admin-nav-item${location.pathname === "/admin/leaderboard" ? " active" : ""}`}
+          onClick={() => navTo("/admin/leaderboard")}>
           🏆 Leaderboard
         </p>
       </div>
 
       {/* MAIN */}
-      <div style={main}>
+      <div className="admin-main">
         <Navbar />
 
-        <div style={content}>
+        <div className="admin-content">
 
           {location.pathname === "/admin" && (
             <>
-              <h1 style={title}>Admin Dashboard</h1>
+              <h1 className="admin-title">Admin Dashboard</h1>
 
               {/* 
 
@@ -417,15 +409,10 @@ function Admin() {
 
                 </div>
               )} */}
-              <div
-                style={{
-                  ...kpiGrid,
-                  gridTemplateColumns: "repeat(4, 1fr)" // fixed 4 columns
-                }}
-              >
+              <div className="admin-kpi-grid">
 
                 {/*  FULL WIDTH CARD */}
-                <div style={{ gridColumn: "span 4" }}>
+                <div className="admin-kpi-full">
                   <KpiCard
                     title="Total Earnings"
                     value={analytics?.totalEarnings || 0}
@@ -492,7 +479,7 @@ function Admin() {
               {/*  Analytics Chart */}
 
               {analytics && (
-                <div style={card}>
+                <div className="admin-card">
                   <h3>📊 Revenue Overview</h3>
 
                   <div style={{ width: "100%", height: "300px" }}>
@@ -525,7 +512,7 @@ function Admin() {
                 </div>
               )}
 
-              <div style={card}>
+              <div className="admin-card">
                 <h3>💖 Charity Breakdown</h3>
 
                 <div style={{ width: "100%", height: 320 }}>
@@ -575,7 +562,7 @@ function Admin() {
               
               {/* Payment Distribution */}
               {stats && (
-                <div style={card}>
+                <div className="admin-card">
                   <h3>💳 Payment Breakdown</h3>
 
                   <div style={{ width: "100%", height: "350px" }}>
@@ -610,7 +597,7 @@ function Admin() {
 
               {/*  Monthly Growth */}
               {analytics && (
-                <div style={card}>
+                <div className="admin-card">
                   <h3>📈 Monthly Growth</h3>
                   <div style={{
                     display: "inline-flex",
@@ -660,7 +647,7 @@ function Admin() {
                 </div>
               )}
 
-              <div style={card}>
+              <div className="admin-card">
                 <h3>💰 Jackpot</h3>
 
                 <p style={{ fontSize: "22px", fontWeight: "bold" }}>
@@ -675,7 +662,7 @@ function Admin() {
               </div>
 
               {/* DRAW */}
-              <div style={card}>
+              <div className="admin-card">
                 <h3>🎲 Draw Management</h3>
                 <button className="admin-btn" onClick={runDraw}>
                   Run Draw
@@ -688,7 +675,7 @@ function Admin() {
                 )}
               </div>
               {/*  SIMULATION */}
-              <div style={card}>
+              <div className="admin-card">
                 <h3>🧪 Simulation</h3>
                 {simMsg && (
                   <div style={{
@@ -748,7 +735,7 @@ function Admin() {
               </div>
 
               {/* MANAGEMENT */}
-              <div style={card}>
+              <div className="admin-card">
                 <h3>📊 Management</h3>
                 <AdminUsers />
                 <AdminScores />
@@ -756,11 +743,11 @@ function Admin() {
               </div>
 
               {/* WINNINGS */}
-              <div style={card}>
+              <div className="admin-card">
                 <h3>💰 Winnings</h3>
 
                 {winnings.map((w) => (
-                  <div key={w.id} style={row}>
+                  <div key={w.id} className="admin-winning-row">
                     <div>
                       <div>{w.email}</div>
 
@@ -844,11 +831,11 @@ function Admin() {
               </div>
 
               {/* LEADERBOARD */}
-              <div style={card}>
+              <div className="admin-card">
                 <h3>🏆 Leaderboard</h3>
 
                 {leaderboard.map((l, i) => (
-                  <div key={i} style={row}>
+                  <div key={i} className="admin-lb-row">
                     <span>
                       {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
                     </span>

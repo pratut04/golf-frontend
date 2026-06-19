@@ -2,17 +2,24 @@ import React from "react";
 import API from "../api/api";
 import { toast } from "react-toastify";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Navigation } from "swiper/modules";
+import { Pagination } from "swiper/modules";
+import "./CharityList.css";
 
 import "swiper/css";
 import "swiper/css/pagination";
-import "swiper/css/navigation";
 
 function CharityList({ charities, selectCharity, selectedId }) {
 
 
-  
+
   const [preview, setPreview] = React.useState(null);
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+
+  React.useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleDonate = async (charity) => {
     try {
@@ -151,7 +158,14 @@ function CharityList({ charities, selectCharity, selectedId }) {
       {charities.length === 0 ? (
         <p style={{ opacity: 0.7 }}>No charities available 😢</p>
       ) : (
-        <div style={grid}>
+        <div
+          className="charity-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: windowWidth >= 640 ? "1fr 1fr" : "1fr",
+            gap: "20px",
+          }}
+        >
           {charities.map((c, index) => {
             const isSelected = selectedId === c.id;
             return (
@@ -169,8 +183,12 @@ function CharityList({ charities, selectCharity, selectedId }) {
                 <div
                   style={{
                     width: "100%",
-                    height: "140px",
-                    position: "relative"
+                    height: "160px",
+                    overflow: "hidden",
+                    borderRadius: "8px",
+                    background: "#cbd5e1",
+                    position: "relative",
+                    flexShrink: 0,
                   }}
                 >
                   {c.images?.length > 0 ? (
@@ -178,30 +196,42 @@ function CharityList({ charities, selectCharity, selectedId }) {
                       spaceBetween={0}
                       slidesPerView={1}
                       pagination={{ clickable: true }}
-                      navigation={true}
-                      modules={[Pagination, Navigation]}
-                      style={{ width: "100%", height: "100%" }}
+                      modules={[Pagination]}
+                      style={{
+                        width: "100%",
+                        height: "160px",
+                      }}
                     >
                       {c.images.map((imgObj, i) => (
-                        <SwiperSlide key={imgObj.id}>
+                        <SwiperSlide key={imgObj.id || i}>
                           <img
-                            src={imgObj.image}   
+                            src={imgObj.image}
+                            alt={`${c.name} ${i + 1}`}
                             style={{
                               width: "100%",
-                              height: "140px",
+                              height: "160px",
                               objectFit: "cover",
-                              borderRadius: "8px"
+                              display: "block",
                             }}
-                            onClick={() => setPreview(imgObj.image)} 
+                            onError={(e) => { e.target.style.display = "none"; }}
+                            onClick={() => setPreview(imgObj.image)}
                           />
                         </SwiperSlide>
                       ))}
                     </Swiper>
                   ) : (
-                    <img
-                      src="https://dummyimage.com/80x80/cccccc/000000"
-                      style={image}
-                    />
+                    <div style={{
+                      width: "100%",
+                      height: "160px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#e2e8f0",
+                      color: "#94a3b8",
+                      fontSize: "14px"
+                    }}>
+                      📷 No Image
+                    </div>
                   )}
                 </div>
                 {/* NAME */}
@@ -264,7 +294,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
           <img
             src={preview}
             alt="preview"
-            onClick={(e) => e.stopPropagation()} 
+            onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: "80%",
               maxHeight: "80%",

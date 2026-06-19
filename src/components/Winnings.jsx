@@ -49,16 +49,16 @@ function Winnings({ winnings }) {
   };
 
   return (
-    <div style={card}>
+    <div className="win-card db-card" style={{ color: "white", background: "#1e293b" }}>
       <h3>🏆 Winnings</h3>
 
       {winnings?.length > 0 ? (
         <>
-          <div style={box}>
+          <div className="win-stat-box">
             🎯 Total Wins: <b>{winnings.length}</b>
           </div>
 
-          <div style={box}>
+          <div className="win-stat-box">
             💰 Total Earnings:{" "}
             <b>₹{totalEarnings.toLocaleString()}</b>
           </div>
@@ -68,17 +68,17 @@ function Winnings({ winnings }) {
             <h4>📜 History</h4>
 
             {winnings.map((w, i) => (
-              <div key={i} style={historyCard}>
+              <div key={i} className="win-history-card">
 
                 {/* LEFT */}
                 <div>
-                  <p style={matchText}>
+                  <p className="win-match-text">
                     {w.match_type === "5 Match 🏆" && "🏆 Jackpot Winner"}
                     {w.match_type === "4 Match 🔥" && "🔥 4 Match Winner"}
                     {w.match_type === "3 Match 🎉" && "🎉 3 Match Winner"}
                   </p>
 
-                  <p style={dateText}>
+                  <p className="win-date-text">
                     {new Date(w.created_at).toLocaleString("en-IN", {
 
                       dateStyle: "medium",
@@ -89,13 +89,13 @@ function Winnings({ winnings }) {
 
                 {/* RIGHT */}
                 <div style={{ textAlign: "right" }}>
-                  <p style={amountText}>
+                  <p className="win-amount">
                     ₹{Number(w.amount || 0)}
                   </p>
 
                   <p
+                    className="win-status"
                     style={{
-                      ...statusText,
                       color:
                         w.status === "paid"
                           ? "#22c55e"

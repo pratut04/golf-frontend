@@ -5,7 +5,7 @@ import { useOutletContext } from "react-router-dom";
 function AdminWinnings() {
     const { winnings, approveWinning, rejectWinning } = useOutletContext();
     const [preview, setPreview] = React.useState(null);
-    //const BASE_URL = "https://golf-backend-new.onrender.com";
+    const BASE_URL = "https://golf-backend-new.onrender.com";
 
     return (
         <div style={card}>
@@ -52,11 +52,11 @@ function AdminWinnings() {
                             {/* PROOF IMAGE */}
                             {w.proof && (
                                 <img
-                                    src={w.proof} 
+                                    src={w.proof}
                                     width="80"
                                     alt="proof"
                                     style={img}
-                                    onClick={() => setPreview(w.proof)}  
+                                    onClick={() => setPreview(w.proof)}
                                 />
                             )}
 
@@ -91,7 +91,7 @@ function AdminWinnings() {
                         src={preview}
                         alt="preview"
                         style={previewImg}
-                        onClick={(e) => e.stopPropagation()} 
+                        onClick={(e) => e.stopPropagation()}
                     />
                 </div>
             )}

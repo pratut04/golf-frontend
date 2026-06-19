@@ -1,0 +1,17 @@
+/* =====================================================
+   CharityList.css – Charity grid layout
+   ===================================================== */
+
+.charity-grid {
+  display: grid;
+  grid-template-columns: 1fr;   /* 1 column on mobile */
+  gap: 20px;
+  width: 100%;
+}
+
+/* 2 columns on tablet and desktop (≥ 640px viewport) */
+@media (min-width: 640px) {
+  .charity-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

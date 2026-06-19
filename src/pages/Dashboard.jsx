@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 import Navbar from "../components/Navbar";
-
 import ScoreForm from "../components/ScoreForm";
 import CharityList from "../components/CharityList";
 import Winnings from "../components/Winnings";
 import { toast } from "react-toastify";
+import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [data, setData] = useState(null); 
+  const [data, setData] = useState(null);
   const [charities, setCharities] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [result, setResult] = useState(null);
@@ -27,8 +27,6 @@ function Dashboard() {
     }
   }, [data]);
 
-
-
   const showToast = (type, message, id) => {
     if (!toast.isActive(id || message)) {
       toast[type](message, {
@@ -41,11 +39,7 @@ function Dashboard() {
 
   useEffect(() => {
     const checkAndLoad = async () => {
-
-
-
       const token = localStorage.getItem("token");
-
       const isGuest =
         localStorage.getItem("guest") === "true" &&
         !localStorage.getItem("token");
@@ -55,7 +49,6 @@ function Dashboard() {
         return;
       }
 
-      //  GUEST MODE
       if (isGuest) {
         setSubscriptionStatus("inactive");
         loadData();
@@ -64,12 +57,8 @@ function Dashboard() {
 
       try {
         const res = await API.post("/check-subscription");
-
         setSubscriptionStatus(res.data.status);
-
         loadData();
-
-
       } catch (err) {
         showToast(
           "error",
@@ -78,29 +67,25 @@ function Dashboard() {
       }
     };
 
-    //  first load
     checkAndLoad();
 
-    //  AUTO REFRESH
     const interval = setInterval(() => {
       const isGuest =
         localStorage.getItem("guest") === "true" &&
         !localStorage.getItem("token");
 
       if (isGuest) {
-        loadData();   
+        loadData();
       } else {
         const userId = localStorage.getItem("userId");
         if (userId) {
           loadData();
-          setRefresh(prev => !prev);
+          setRefresh((prev) => !prev);
         }
       }
     }, 15000);
 
-    //  cleanup
     return () => clearInterval(interval);
-
   }, []);
 
   useEffect(() => {
@@ -113,10 +98,8 @@ function Dashboard() {
         console.error(err);
       }
     };
-    fetchJackpot(); // first load
-
-    const interval = setInterval(fetchJackpot, 10000); // every 10 sec
-
+    fetchJackpot();
+    const interval = setInterval(fetchJackpot, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -125,63 +108,40 @@ function Dashboard() {
       localStorage.getItem("guest") === "true" &&
       !localStorage.getItem("token");
 
-    //  STOP API CALLS FOR GUEST
     if (isGuest) {
       setSubscriptionStatus("inactive");
-
       try {
         const [c, l] = await Promise.all([
           API.get("/charities"),
-          API.get("/leaderboard")
+          API.get("/leaderboard"),
         ]);
-
         setCharities(c.data.data);
         setLeaderboard(l.data.data || []);
-
       } catch (err) {
         showToast("error", "Failed to load data");
       }
 
-      // Fake user
       setData({
-        user: {
-          email: "Guest User",
-          charity_name: null
-        },
+        user: { email: "Guest User", charity_name: null },
         scores: [],
-        winnings: []
+        winnings: [],
       });
-
       return;
     }
 
-    //  NORMAL USER FLOW
     try {
       const d = await API.get("/dashboard");
-
-      //  get all scores from backend
       const allScores = d.data.scores || [];
-
-      //  sort latest first 
       const sortedScores = allScores.sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
-
-      //  take only latest 5
       const latestFiveScores = sortedScores.slice(0, 5);
+      setData({ ...d.data, scores: latestFiveScores });
 
-      // set data with limited scores
-      setData({
-        ...d.data,
-        scores: latestFiveScores
-      });
       const c = await API.get("/charities");
       const l = await API.get("/leaderboard");
-
-
       setCharities(c.data.data);
       setLeaderboard(l.data.data || []);
-
     } catch (err) {
       console.error("LOAD ERROR:", err);
       showToast(
@@ -191,30 +151,40 @@ function Dashboard() {
     }
   };
 
-  // LOADING CONDITION
+  // ---------- Loading ----------
   if (!data) {
     return (
-      <p style={{ color: "white", textAlign: "center" }}>
-        Loading...
-      </p>
+      <div className="db-container">
+        <Navbar />
+        <div className="db-loading">
+          <div className="db-spinner" />
+          <p style={{ color: "#64748b", fontFamily: "Inter, sans-serif" }}>
+            Loading your dashboard…
+          </p>
+        </div>
+      </div>
     );
   }
 
-  //  ERROR CASE
   if (data.success === false) {
     return (
-      <p style={{ color: "red", textAlign: "center" }}>
-        Failed to load dashboard ❌ (check backend)
-      </p>
+      <div className="db-container">
+        <Navbar />
+        <p style={{ color: "red", textAlign: "center", padding: "40px" }}>
+          Failed to load dashboard ❌ (check backend)
+        </p>
+      </div>
     );
   }
 
-  //  SAFETY CHECK
   if (!data.user) {
     return (
-      <p style={{ color: "white", textAlign: "center" }}>
-        No user data found ❌
-      </p>
+      <div className="db-container">
+        <Navbar />
+        <p style={{ color: "#64748b", textAlign: "center", padding: "40px" }}>
+          No user data found ❌
+        </p>
+      </div>
     );
   }
 
@@ -222,28 +192,18 @@ function Dashboard() {
     localStorage.getItem("guest") === "true" &&
     !localStorage.getItem("token");
 
-  //=================addScore Function===============
-  
+  // ---------- addScore ----------
   const addScore = async (score) => {
     try {
-      const isGuest =
-        localStorage.getItem("guest") === "true" &&
-        !localStorage.getItem("token");
-
       if (isGuest) {
         showToast("warning", "Login required to add score");
         return;
       }
-
       await API.post("/scores", { score: Number(score) });
-
       showToast("success", "Score added successfully 🎯");
-
       loadData();
-
     } catch (err) {
       const errData = err.response?.data;
-
       if (err.response?.status === 403) {
         if (errData?.code === "NOT_SUBSCRIBED") {
           showToast("warning", "Please subscribe first 💳");
@@ -257,69 +217,52 @@ function Dashboard() {
       }
     }
   };
-  //================selectCharitiey function==================
- const selectCharity = async (id) => {
-  try {
-    const isGuest =
-      localStorage.getItem("guest") === "true" &&
-      !localStorage.getItem("token");
 
-    //  GUEST MODE
-    if (isGuest) {
-      showToast("warning", "Login required to select charity");
-      return;
-    }
-
-    // (instant selection)
-    setSelectedId(id);
-
-    await API.post("/select-charity", {
-      charity_id: id   
-    });
-
-    showToast("success", "Charity selected ❤️");
-
-    const selected = charities.find(c => c.id === id);
-
-    setData(prev => ({
-      ...prev,
-      user: {
-        ...prev.user,
-        charity_id: id,
-        charity_name: selected?.name || prev.user.charity_name
+  // ---------- selectCharity ----------
+  const selectCharity = async (id) => {
+    try {
+      if (isGuest) {
+        showToast("warning", "Login required to select charity");
+        return;
       }
-    }));
-
-  } catch (err) {
-    const errData = err.response?.data;
-
-    
-    setSelectedId(data?.user?.charity_id || null);
-
-    if (err.response?.status === 403) {
-      if (errData?.code === "NOT_SUBSCRIBED") {
-        showToast("warning", "Please subscribe first 💳");
-      } else if (errData?.code === "SUBSCRIPTION_EXPIRED") {
-        showToast(
-          "error",
-          `Subscription Expired on ${new Date(errData.expiry).toLocaleDateString("en-IN")}`
-        );
-      } else {
-        showToast("error", "Access denied");
-      }
-
-    } else if (errData?.code === "ALREADY_SELECTED") {
-      
       setSelectedId(id);
-      showToast("info", "Already selected ✅");
+      await API.post("/select-charity", { charity_id: id });
+      showToast("success", "Charity selected ❤️");
 
-    } else {
-      showToast("error", errData?.message || "Something went wrong");
+      const selected = charities.find((c) => c.id === id);
+      setData((prev) => ({
+        ...prev,
+        user: {
+          ...prev.user,
+          charity_id: id,
+          charity_name: selected?.name || prev.user.charity_name,
+        },
+      }));
+    } catch (err) {
+      const errData = err.response?.data;
+      setSelectedId(data?.user?.charity_id || null);
+
+      if (err.response?.status === 403) {
+        if (errData?.code === "NOT_SUBSCRIBED") {
+          showToast("warning", "Please subscribe first 💳");
+        } else if (errData?.code === "SUBSCRIPTION_EXPIRED") {
+          showToast(
+            "error",
+            `Subscription Expired on ${new Date(errData.expiry).toLocaleDateString("en-IN")}`
+          );
+        } else {
+          showToast("error", "Access denied");
+        }
+      } else if (errData?.code === "ALREADY_SELECTED") {
+        setSelectedId(id);
+        showToast("info", "Already selected ✅");
+      } else {
+        showToast("error", errData?.message || "Something went wrong");
+      }
     }
-  }
-};
+  };
 
-  //================check result===================
+  // ---------- checkResult ----------
   const checkResult = async () => {
     try {
       const subRes = await API.post("/check-subscription");
@@ -337,469 +280,311 @@ function Dashboard() {
         return;
       }
 
-      //  CALL API
       const res = await API.post("/check-result");
-
-      console.log("RESULT:", res.data);
-
-      setResult(res.data); 
-
+      setResult(res.data);
       showToast("success", "Result loaded 🎯");
-
     } catch (err) {
       showToast("error", err.response?.data?.message || "Something went wrong");
-
       setResult(null);
     }
   };
 
+  // =====================================================
+  //  RENDER
+  // =====================================================
   return (
-    <div style={container}>
+    <div className="db-container">
       <Navbar />
 
-      <div style={content}>
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "22px 24px",
-            borderRadius: "18px",
-            background: "linear-gradient(135deg, #020617, #0f172a)",
-            color: "white",
-            //boxShadow: "0 15px 40px rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            transition: "0.3s ease"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.01)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-          }}
-        >
-          {/* LEFT SIDE */}
+      <div className="db-content">
+
+        {/* ---- HERO BANNER ---- */}
+        <div className="db-hero">
           <div>
-            <h1
-              style={{
-                fontSize: "32px",
-                fontWeight: "800",
-                background: "linear-gradient(90deg, #22c55e, #38bdf8)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                textShadow: "0 2px 12px rgba(34,197,94,0.25)",
-                marginBottom: "6px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px"
-              }}
-            >
-              Golf Performance Hub
-            </h1>
-
-            {/*  TAGLINE */}
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#e2e8f0",
-                opacity: 0.9
-              }}
-            >
-              Play smarter. Track better. Win bigger.
-            </p>
+            <h1 className="db-hero-title">Golf Performance Hub</h1>
+            <p className="db-hero-tagline">Play smarter. Track better. Win bigger.</p>
           </div>
-
-          {/* RIGHT SIDE BADGE */}
-          <div
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              padding: "8px 14px",
-              borderRadius: "999px",
-              fontSize: "13px",
-              fontWeight: "500",
-              backdropFilter: "blur(10px)"
-            }}
-          >
-            🚀 Live Dashboard
-          </div>
+          <div className="db-hero-badge">🚀 Live Dashboard</div>
         </div>
 
+        {/* ---- GUEST BANNER ---- */}
         {isGuest && (
-          <div style={{
-            background: "rgba(251, 191, 36, 0.15)",
-            border: "1px solid rgba(251, 191, 36, 0.3)",
-            color: "#92400e",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "15px",
-            textAlign: "center"
-          }}>
-            <p style={{ marginBottom: "8px" }}>
-              🔒 You are in Guest Mode — limited access
-            </p>
-
-            <button
-              onClick={() => navigate("/")}
-              style={{
-                padding: "8px 16px",
-                background: "#2563eb",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer"
-              }}
-            >
-              Login to Unlock Features
-            </button>
+          <div className="db-guest-banner">
+            <p>🔒 You are in Guest Mode — limited access</p>
+            <button onClick={() => navigate("/")}>Login to Unlock Features</button>
           </div>
         )}
 
-        {/* Subscription */}
-        <div
-          style={card}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-4px)";
-            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.08)";
-          }}
-        >
-          <h3 style={{ marginBottom: "10px" }}>📌 Subscription</h3>
+        {/* ---- TOP ROW: Subscription + Score ---- */}
+        <div className="db-grid-2">
 
-          {/*  SHOW EMAIL */}
-          <p style={textSecondary}>
-            Email: <span style={textPrimary}>{data.user.email}</span>
-          </p>
+          {/* Subscription Card */}
+          <div className="db-card">
+            <h3>📌 Subscription</h3>
+            <p className="db-label">
+              Email: <span className="db-value">{data.user.email}</span>
+            </p>
 
-          {subscriptionStatus !== "active" ? (
-            <>
-              <p style={textSecondary}>
-                Status: <span style={{ color: "#ef4444" }}>Not Subscribed</span>
-              </p>
-
-              {/* EXPIRED DATE */}
-              {data.user.subscription_end && (
-                <p style={textSecondary}>
-                  Last expiry:{" "}
-                  <span style={textPrimary}>
-                    {new Date(data.user.subscription_end).toLocaleDateString()}
-                  </span>
-                </p>
-              )}
-
-              <button
-                style={btn}
-                onClick={() => {
-                  const isGuest = localStorage.getItem("guest") === "true";
-
-                  if (isGuest) {
-                    showToast("warning", "Please sign in to continue");
-
-
-                    setTimeout(() => {
-                      navigate("/");
-                    }, 200);
-                  } else {
-                    navigate("/subscription");
-                  }
-                }}
-              >
-                💳 Subscribe Now
-              </button>
-            </>
-          ) : (
-            <>
-              <div style={{ lineHeight: "1.8" }}>
-                <p style={textSecondary}>
+            {subscriptionStatus !== "active" ? (
+              <>
+                <p className="db-label">
                   Status:{" "}
-                  <span style={{ ...textPrimary, color: "#22c55e" }}>
-                    Active
-                  </span>
+                  <span className="db-status-inactive">Not Subscribed</span>
                 </p>
 
-                <p style={textSecondary}>
+                {data.user.subscription_end && (
+                  <p className="db-label">
+                    Last expiry:{" "}
+                    <span className="db-value">
+                      {new Date(data.user.subscription_end).toLocaleDateString()}
+                    </span>
+                  </p>
+                )}
+
+                <button
+                  className="db-btn-primary"
+                  style={{ marginTop: "12px" }}
+                  onClick={() => {
+                    if (isGuest) {
+                      showToast("warning", "Please sign in to continue");
+                      setTimeout(() => navigate("/"), 200);
+                    } else {
+                      navigate("/subscription");
+                    }
+                  }}
+                >
+                  💳 Subscribe Now
+                </button>
+              </>
+            ) : (
+              <div style={{ lineHeight: "1.9" }}>
+                <p className="db-label">
+                  Status: <span className="db-status-active">Active ✅</span>
+                </p>
+                <p className="db-label">
                   Plan:{" "}
-                  <span style={textPrimary}>
+                  <span className="db-value">
                     {data.user.subscription_type === "yearly"
                       ? "Yearly Plan 🏆"
                       : "Monthly Plan 📅"}
                   </span>
                 </p>
-
-                <p style={textSecondary}>
+                <p className="db-label">
                   Expiry:{" "}
-                  <span style={textPrimary}>
+                  <span className="db-value">
                     {new Date(data.user.subscription_end).toLocaleDateString()}
                   </span>
                 </p>
               </div>
-            </>
-          )}
-        </div>
-        {/* Score */}
-        <div style={cardHover}>
-          <h3>🏌️ Enter Score</h3>
-          <div style={{ position: "relative" }}>
-            {/*  content */}
-            <div style={{
-              opacity: isGuest ? 0.6 : 1,
-              filter: isGuest ? "blur(1.5px)" : "none"
-            }}>
-              <ScoreForm
-                addScore={addScore}
-                subscriptionStatus={subscriptionStatus}
-                subscriptionEnd={data.user.subscription_end}
-                refresh={refresh}
-              />
-            </div>
-
-            {/* Overlay for guest */}
-            {isGuest && (
-              <div
-                onClick={() => navigate("/")}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  background: "rgba(255,255,255,0.65)",
-                  backdropFilter: "blur(3px)",
-                  borderRadius: "10px",
-                  fontWeight: "600",
-                  cursor: "pointer"
-                }}
-              >
-                🔒 Sign in to record your score
-              </div>
             )}
           </div>
 
-        </div>
-
-        {/* Scores */}
-        <div style={cardHover}>
-          <h3>📊 Last 5 Scores</h3>
-          {data.scores?.length > 0 ? (
-            data.scores.map((s) => (
-              <div key={s.id} style={item}>
-                {s.score} |{" "}
-                {s.created_at
-                  ? new Date(s.created_at).toLocaleDateString()
-                  : "Invalid Date"}
+          {/* Score Entry Card */}
+          <div className="db-card">
+            <h3>🏌️ Enter Score</h3>
+            <div style={{ position: "relative" }}>
+              <div
+                style={{
+                  opacity: isGuest ? 0.6 : 1,
+                  filter: isGuest ? "blur(1.5px)" : "none",
+                }}
+              >
+                <ScoreForm
+                  addScore={addScore}
+                  subscriptionStatus={subscriptionStatus}
+                  subscriptionEnd={data.user.subscription_end}
+                  refresh={refresh}
+                />
               </div>
-            ))
-          ) : (
-            <p>No scores yet</p>
-          )}
+              {isGuest && (
+                <div className="db-overlay" onClick={() => navigate("/")}>
+                  🔒 Sign in to record your score
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Charity */}
+        {/* ---- JACKPOT CARD ---- */}
+        <div className="db-jackpot-card">
+          <h3>💰 Jackpot</h3>
+          <div className="db-jackpot-amount">
+            ₹{Number(jackpot).toLocaleString()}
+          </div>
+          <p className="db-jackpot-sub">5 match prize = jackpot + 40% of pool</p>
+          <p className="db-jackpot-next">
+            🏆 Estimated Next Jackpot: ₹
+            {Math.floor(Number(jackpot) + Number(basePool) * 0.4).toLocaleString()}
+          </p>
+        </div>
 
-        <div style={cardHover}>
+        {/* ---- MIDDLE ROW: Scores + Participation ---- */}
+        <div className="db-grid-2">
+
+          {/* Last 5 Scores */}
+          <div className="db-card">
+            <h3>📊 Last 5 Scores</h3>
+            {data.scores?.length > 0 ? (
+              data.scores.map((s) => (
+                <div key={s.id} className="db-score-item">
+                  <span style={{ fontWeight: 600 }}>🎯 {s.score}</span>
+                  <span style={{ color: "#64748b", fontSize: "13px" }}>
+                    {s.created_at
+                      ? new Date(s.created_at).toLocaleDateString()
+                      : "Invalid Date"}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p style={{ color: "#94a3b8", fontSize: "14px" }}>
+                No scores recorded yet
+              </p>
+            )}
+          </div>
+
+          {/* Participation */}
+          <div className="db-card">
+            <h3>📈 Participation</h3>
+            <p className="db-label">
+              Total Scores Entered:{" "}
+              <span className="db-value" style={{ fontSize: "24px" }}>
+                {data.scores?.length || 0}
+              </span>
+            </p>
+
+            {/* Draw & Result */}
+            <div style={{ marginTop: "16px" }}>
+              <h3 style={{ marginBottom: "10px" }}>🎲 Draw & Result</h3>
+              <div style={{ position: "relative" }}>
+                <div
+                  style={{
+                    opacity: isGuest ? 0.6 : 1,
+                    filter: isGuest ? "blur(1.5px)" : "none",
+                  }}
+                >
+                  <button className="db-btn-secondary" onClick={checkResult}>
+                    Check Result
+                  </button>
+
+                  {result && subscriptionStatus === "active" && (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        lineHeight: "1.7",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <p className="db-label">
+                        Result:{" "}
+                        <span className="db-value">{result.result}</span>
+                      </p>
+                      <p className="db-label">
+                        Numbers:{" "}
+                        <span className="db-value">
+                          {result.numbers?.join(", ")}
+                        </span>
+                      </p>
+                      <p className="db-label">
+                        Draw Date:{" "}
+                        <span className="db-value">
+                          {new Date(result.created_at).toLocaleString("en-IN", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {isGuest && (
+                  <div className="db-overlay" onClick={() => navigate("/")}>
+                    🔒 Sign in to continue
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ---- CHARITY SELECTION ---- */}
+        <div className="db-card">
           <h3>❤️ Charity Selection</h3>
-
-
-
-          <p style={{ color: "#334155" }}>
+          <p className="db-label">
             Selected:{" "}
-            <span style={{ color: "#16a34a", fontWeight: "600" }}>
+            <span style={{ color: "#16a34a", fontWeight: 600 }}>
               {data.user.charity_name || "Not selected"}
             </span>
           </p>
-
           <div style={{ position: "relative" }}>
-            {/* Actual Charity List */}
-            <div style={{
-              opacity: isGuest ? 0.6 : 1,
-              filter: isGuest ? "blur(1.5px)" : "none"
-            }}>
+            <div
+              style={{
+                opacity: isGuest ? 0.6 : 1,
+                filter: isGuest ? "blur(1.5px)" : "none",
+              }}
+            >
               <CharityList
                 charities={charities}
                 selectCharity={selectCharity}
                 selectedId={data.user?.charity_id}
               />
             </div>
-
-            {/* Overlay */}
             {isGuest && (
-              <div
-                onClick={() => navigate("/")}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  background: "rgba(255,255,255,0.65)",
-                  backdropFilter: "blur(3px)",
-                  borderRadius: "10px",
-                  fontWeight: "600",
-                  cursor: "pointer"
-                }}
-              >
+              <div className="db-overlay" onClick={() => navigate("/")}>
                 🔒 Sign in to choose a charity
               </div>
             )}
           </div>
         </div>
 
-
-        {/* Participation */}
-        <div style={cardHover}>
-          <h3>📊 Participation</h3>
-          <p style={{ color: "#334155", fontWeight: "500" }}>
-            Total Scores Entered:
-            <span style={{ color: "#0f172a", fontWeight: "600" }}>
-              {" "} {data.scores?.length || 0}
-            </span>
-          </p>
-        </div>
-        <div style={jackpotCard}>
-          <h3>💰 Jackpot</h3>
-
-          <div style={jackpotAmount}>
-            ₹{Number(jackpot).toLocaleString()}
-          </div>
-
-          <p style={{ opacity: 0.7 }}>
-            5 match prize = jackpot + 40% of pool
-          </p>
-          <p style={{ marginTop: "5px", fontSize: "14px" }}>
-            🏆 Estimated Next Jackpot: ₹{Math.floor(Number(jackpot) + (Number(basePool) * 0.4))}
-          </p>
-        </div>
-
-        {/* Draw & Result */}
-        <div style={cardHover}>
-          <h3>🎲 Draw & Result</h3>
-
-          {/* MESSAGE */}
-
-
-          <div style={{ position: "relative" }}>
-           
-            <div
-              style={{
-                opacity: isGuest ? 0.6 : 1,
-                filter: isGuest ? "blur(1.5px)" : "none"
-              }}
-            >
-              <button
-                style={{
-                  background: "#2563eb",
-                  color: "white",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: "500",
-                  transition: "all 0.2s ease",
-                  boxShadow: "0 4px 10px rgba(37, 99, 235, 0.4)"
-                }}
-                onClick={checkResult}
-                onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
-                onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
-              >
-                Check Result
-              </button>
-
-              {/* RESULT */}
-              {result && subscriptionStatus === "active" && (
-                <div style={{ marginTop: "10px" }}>
-                  <p>Result: {result.result}</p>
-                  <p>Numbers: {result.numbers?.join(", ")}</p>
-
-                  <p>
-                    Draw Date:{" "}
-                    {new Date(result.created_at).toLocaleString("en-IN", {
-                      dateStyle: "medium",
-                      timeStyle: "short"
-                    })}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/*  OVERLAY */}
-            {isGuest && (
-              <div
-                onClick={() => navigate("/")}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  background: "rgba(255,255,255,0.6)",
-                  borderRadius: "10px",
-                  fontWeight: "600",
-                  cursor: "pointer"
-                }}
-              >
-                🔒 Sign in to continue
-              </div>
-            )}
-          </div>
-        </div>
-
+        {/* ---- WINNINGS ---- */}
         <Winnings winnings={data.winnings || []} />
 
-        {/* Leaderboard */}
-        <div style={cardHover}>
+        {/* ---- LEADERBOARD ---- */}
+        <div className="db-card">
           <h3>🥇 Leaderboard</h3>
-
           {leaderboard.length > 0 ? (
             leaderboard.map((l, i) => (
-              <div key={i} style={item}>
+              <div key={i} className="db-lb-row">
                 <span>
-                  {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
+                  {i === 0
+                    ? "🥇"
+                    : i === 1
+                      ? "🥈"
+                      : i === 2
+                        ? "🥉"
+                        : `#${i + 1}`}
                 </span>
-
-                <span style={{ flex: 1, marginLeft: "10px" }}>
-                  {l.email}
-                </span>
-
-                <span style={{ fontWeight: "600" }}>
-                  🎯 {l.best_score}
-                </span>
+                <span className="db-lb-email">{l.email}</span>
+                <span className="db-lb-score">🎯 {l.best_score}</span>
               </div>
             ))
           ) : (
-            <p>No leaderboard data</p>
+            <p style={{ color: "#94a3b8", fontSize: "14px" }}>
+              No leaderboard data yet
+            </p>
           )}
         </div>
-      {/* FOOTER */}
+        {/* FOOTER */}
         <div style={footer}>
           <div style={footerTop}>
-            
+
             {/* LEFT */}
             <div>
               <h2 style={footerLogo}>
                 ⛳ Golf Performance Hub
               </h2>
-        
+
               <p style={footerText}>
                 Track scores, compete in draws, support charities,
                 and win exciting rewards while improving your game.
               </p>
             </div>
-        
+
             {/* CENTER */}
             <div>
               <h3 style={footerHeading}>Quick Links</h3>
-        
+
               <div style={footerLinks}>
                 <span style={footerLink}>🏌️ Scores</span>
                 <span style={footerLink}>🎲 Draw Results</span>
@@ -807,33 +592,33 @@ function Dashboard() {
                 <span style={footerLink}>❤️ Charity</span>
               </div>
             </div>
-        
+
             {/* RIGHT */}
             <div>
               <h3 style={footerHeading}>Platform Status</h3>
-        
+
               <div style={statusBox}>
                 <span style={statusDot}></span>
                 All systems operational
               </div>
-        
+
               <p style={footerMini}>
                 Live jackpot updates every 10 seconds 🚀
               </p>
             </div>
-        
+
           </div>
-        
+
           {/* BOTTOM */}
           <div style={footerBottom}>
             <p style={{ margin: 0 }}>
               © 2026 Golf Performance Hub • Built with ❤️ using React, Node.js & PostgreSQL
             </p>
           </div>
-       </div>
+        </div>
 
-  </div>
-</div>
+      </div>
+    </div>
   );
 }
 

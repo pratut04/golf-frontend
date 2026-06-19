@@ -1,25 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Navbar.css";
 
 function Navbar() {
   const navigate = useNavigate();
   const email = localStorage.getItem("email");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
 
   const logout = () => {
     localStorage.clear();
-
+    closeMenu();
     navigate("/");
   };
 
   const goToSubscription = () => {
     const token = localStorage.getItem("token");
+    const isGuest = localStorage.getItem("guest") === "true" && !token;
 
-    const isGuest =
-      localStorage.getItem("guest") === "true" &&
-      !token;
+    closeMenu();
 
     if (isGuest) {
-      localStorage.setItem("redirectAfterLogin", "/subscription"); 
+      localStorage.setItem("redirectAfterLogin", "/subscription");
       alert("🔒 Please sign in to continue with subscription");
       navigate("/");
       return;
@@ -29,112 +32,50 @@ function Navbar() {
   };
 
   return (
-    <div style={nav}>
-      <h2>🏌️ Golf App</h2>
+    <nav className="navbar">
+      {/* Brand */}
+      <div className="navbar-brand">🏌️ Golf App</div>
 
-      <div style={links}>
+      {/* Hamburger — visible on mobile */}
+      <button
+        className={`navbar-hamburger${menuOpen ? " open" : ""}`}
+        onClick={() => setMenuOpen((prev) => !prev)}
+        aria-label="Toggle navigation menu"
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      {/* Links */}
+      <div className={`navbar-links${menuOpen ? " open" : ""}`}>
         <button
-          style={navBtn}
-          onClick={() => navigate("/dashboard")}
-          onMouseEnter={(e) => {
-            e.target.style.background = "#1e293b";
-            e.target.style.boxShadow = "none";   
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = "transparent";
-          }}
+          className="nav-btn"
+          onClick={() => { navigate("/dashboard"); closeMenu(); }}
         >
           Dashboard
         </button>
 
-        {/* NEW SUBSCRIPTION BUTTON */}
-        <button
-          style={navBtn}
-          onClick={goToSubscription}
-          onMouseEnter={(e) => {
-            e.target.style.background = "#1e293b";
-            e.target.style.boxShadow = "none";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = "transparent";
-          }}
-        >
+        <button className="nav-btn" onClick={goToSubscription}>
           Subscription
         </button>
 
-        {/*  ADMIN ONLY */}
+        {/* Admin only */}
         {email === "secure@gmail.com" && (
           <button
-            style={navBtn}
-            onClick={() => navigate("/admin")}
-            onMouseEnter={(e) => {
-              e.target.style.background = "#1e293b";
-              e.target.style.boxShadow = "none";   
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = "transparent";
-            }}
+            className="nav-btn"
+            onClick={() => { navigate("/admin"); closeMenu(); }}
           >
             Admin
           </button>
         )}
 
-        <button style={logoutBtn} onClick={logout}>
+        <button className="nav-btn-logout" onClick={logout}>
           Logout
         </button>
       </div>
-    </div>
+    </nav>
   );
 }
 
 export default Navbar;
-
-
-const nav = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "14px 24px",
-  background: "rgba(2,6,23,0.8)",
-  backdropFilter: "blur(10px)",
-  borderBottom: "1px solid rgba(255,255,255,0.08)",
-  color: "#e5e7eb",
-  outline: "none"
-};
-
-const links = {
-  display: "flex",
-  gap: "10px"
-};
-
-const btn = {
-  background: "transparent",
-  color: "#cbd5e1",
-  border: "1px solid rgba(255,255,255,0.1)",
-  padding: "8px 14px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  transition: "all 0.25s ease"
-};
-
-const logoutBtn = {
-  background: "#ef4444",
-  color: "white",
-  border: "none",
-  padding: "8px 14px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "600",
-  boxShadow: "0 4px 14px rgba(239,68,68,0.5)"
-};
-
-const navBtn = {
-  background: "transparent",
-  color: "#e2e8f0",
-  border: "1px solid rgba(255,255,255,0.1)",
-  padding: "8px 14px",
-  borderRadius: "8px",
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  boxShadow: "none"  
-};
