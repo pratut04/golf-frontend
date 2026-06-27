@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import API from "../api/api";
 
 export default function VerifyOtp() {
   const navigate = useNavigate();
@@ -56,20 +57,15 @@ export default function VerifyOtp() {
     const finalOtp = otp.join("");
 
     try {
-      const res = await fetch("https://golf-backend.onrender.com/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: finalOtp }),
-      });
-      const data = await res.json();
-      if (res.ok) {
+      const res = await API.post("/verify-otp", { email, otp: finalOtp });
+      if (res.data.success) {
         alert("Verified ✅");
         navigate("/login");
       } else {
-        setError(data.error || "Invalid OTP");
+        setError(res.data.message || "Invalid OTP");
       }
-    } catch {
-      setError("Server error");
+    } catch (err) {
+      setError(err.response?.data?.message || "Server error");
     }
     setLoading(false);
   };
@@ -79,16 +75,12 @@ export default function VerifyOtp() {
     setResendLoading(true);
     setError("");
     try {
-      await fetch("https://golf-backend.onrender.com/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      await API.post("/resend-otp", { email });
       setTimer(30);
       setMessage("New OTP sent ✅");
       setError("");
-    } catch {
-      setError("Failed to resend");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to resend");
       setMessage("");
     }
     setResendLoading(false);
