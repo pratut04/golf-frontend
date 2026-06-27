@@ -1,46 +1,19 @@
 /* =========================================================
    Dashboard.css – Responsive styles for Golf Performance Hub
-   Breakpoints:  Mobile  < 480px
-                 Tablet  480px – 768px
-                 Desktop > 768px
+   All colors use CSS variables from global.css for
+   automatic dark/light mode switching.
    ========================================================= */
 
 /* ---------- Google Font ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ---------- Root / Design Tokens ---------- */
-:root {
-  --bg:          #f0f4f8;
-  --card-bg:     #ffffff;
-  --card-border: #e2e8f0;
-  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
-  --card-hover-shadow: 0 12px 36px rgba(0, 0, 0, 0.13);
-  --text-primary:   #0f172a;
-  --text-secondary: #64748b;
-  --green:   #22c55e;
-  --blue:    #2563eb;
-  --red:     #ef4444;
-  --yellow:  #facc15;
-  --radius:  16px;
-  --transition: 0.25s ease;
-}
-
-/* ---------- Base reset ---------- */
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  background: var(--bg);
-  color: var(--text-primary);
-}
-
 /* =====================================================
    LAYOUT WRAPPER
    ===================================================== */
 .db-container {
-  background: var(--bg);
+  background: var(--theme-dash-bg);
   min-height: 100vh;
+  color: var(--theme-dash-text);
 }
 
 .db-content {
@@ -50,7 +23,7 @@ body {
 }
 
 /* =====================================================
-   HERO BANNER (title block at top)
+   HERO BANNER
    ===================================================== */
 .db-hero {
   display: flex;
@@ -59,12 +32,14 @@ body {
   gap: 12px;
   margin-bottom: 24px;
   padding: 22px 24px;
-  border-radius: var(--radius);
+  border-radius: 16px;
   background: linear-gradient(135deg, #020617, #0f172a);
   color: white;
-  transition: transform var(--transition);
+  transition: transform 0.25s ease;
 }
-
+html.light-mode .db-hero {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+}
 .db-hero:hover { transform: scale(1.01); }
 
 .db-hero-title {
@@ -76,23 +51,13 @@ body {
   margin: 0 0 4px;
   line-height: 1.2;
 }
-
-.db-hero-tagline {
-  font-size: 13px;
-  color: #e2e8f0;
-  opacity: 0.9;
-  margin: 0;
-}
-
+.db-hero-tagline { font-size: 13px; color: #e2e8f0; opacity: 0.9; margin: 0; }
 .db-hero-badge {
   flex-shrink: 0;
   background: rgba(255,255,255,0.1);
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
-  backdrop-filter: blur(10px);
-  white-space: nowrap;
+  padding: 8px 14px; border-radius: 999px;
+  font-size: 13px; font-weight: 500;
+  backdrop-filter: blur(10px); white-space: nowrap;
 }
 
 /* =====================================================
@@ -101,294 +66,168 @@ body {
 .db-guest-banner {
   background: rgba(251, 191, 36, 0.12);
   border: 1px solid rgba(251, 191, 36, 0.35);
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  text-align: center;
+  border-radius: 10px; padding: 14px 16px;
+  margin-bottom: 16px; text-align: center;
 }
-
-.db-guest-banner p { margin: 0 0 10px; color: #92400e; }
-
+.db-guest-banner p { margin: 0 0 10px; color: #fbbf24; }
+html.light-mode .db-guest-banner p { color: #92400e; }
 .db-guest-banner button {
-  padding: 8px 18px;
-  background: var(--blue);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: opacity var(--transition);
+  padding: 8px 18px; background: #2563eb;
+  color: white; border: none; border-radius: 8px;
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  transition: opacity 0.25s ease;
 }
-
 .db-guest-banner button:hover { opacity: 0.85; }
 
 /* =====================================================
    CARD BASE
    ===================================================== */
 .db-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
+  background: var(--theme-dash-card-bg);
+  border: 1px solid var(--theme-dash-border);
+  border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: var(--card-shadow);
-  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: var(--theme-card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+              background-color 0.3s ease, border-color 0.3s ease;
 }
-
-.db-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--card-hover-shadow);
-}
-
-.db-card h3 {
-  margin: 0 0 14px;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
+.db-card:hover { transform: translateY(-4px); box-shadow: var(--theme-card-hover-shadow); }
+.db-card h3 { margin: 0 0 14px; font-size: 17px; font-weight: 700; color: var(--theme-dash-text); }
 
 /* =====================================================
-   TWO-COLUMN GRID – stacks on mobile
+   TWO-COLUMN GRID
    ===================================================== */
-.db-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr;   /* stack on mobile by default */
-  gap: 20px;
-}
-
-/* Go 2-col only when there's enough space */
-@media (min-width: 640px) {
-  .db-grid-2 {
-    grid-template-columns: 1fr 1fr;
-  }
-}
+.db-grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 640px) { .db-grid-2 { grid-template-columns: 1fr 1fr; } }
 
 /* =====================================================
-   STATUS BADGES / PILLS
+   STATUS BADGES
    ===================================================== */
-.db-status-active {
-  color: var(--green);
-  font-weight: 600;
-}
-
-.db-status-inactive {
-  color: var(--red);
-  font-weight: 600;
-}
+.db-status-active   { color: #22c55e; font-weight: 600; }
+.db-status-inactive { color: #ef4444; font-weight: 600; }
 
 /* =====================================================
    BUTTONS
    ===================================================== */
 .db-btn-primary {
-  display: inline-block;
-  padding: 10px 18px;
-  background: var(--green);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
+  display: inline-block; padding: 10px 18px;
+  background: #22c55e; color: white; border: none;
+  border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;
   box-shadow: 0 4px 14px rgba(34,197,94,0.4);
-  transition: transform var(--transition), opacity var(--transition);
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
-
 .db-btn-primary:hover { transform: scale(1.04); }
 
 .db-btn-secondary {
-  display: inline-block;
-  padding: 9px 16px;
-  background: var(--blue);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
+  display: inline-block; padding: 9px 16px;
+  background: #2563eb; color: white; border: none;
+  border-radius: 10px; cursor: pointer; font-weight: 500; font-size: 14px;
   box-shadow: 0 4px 10px rgba(37,99,235,0.35);
-  transition: transform var(--transition);
+  transition: transform 0.25s ease;
 }
-
 .db-btn-secondary:hover { transform: scale(1.04); }
 
 /* =====================================================
    TEXT HELPERS
    ===================================================== */
-.db-label { color: var(--text-secondary); font-size: 14px; margin: 6px 0; }
-.db-value { color: var(--text-primary); font-weight: 600; }
+.db-label { color: var(--theme-dash-sub); font-size: 14px; margin: 6px 0; }
+.db-value { color: var(--theme-dash-text); font-weight: 600; }
 
 /* =====================================================
    SCORE ITEM ROW
    ===================================================== */
 .db-score-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--card-border);
-  font-size: 14px;
-  color: var(--text-primary);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--theme-dash-border);
+  font-size: 14px; color: var(--theme-dash-text);
 }
-
 .db-score-item:last-child { border-bottom: none; }
 
 /* =====================================================
    LEADERBOARD ROW
    ===================================================== */
 .db-lb-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--card-border);
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--theme-dash-border);
   font-size: 14px;
 }
-
 .db-lb-row:last-child { border-bottom: none; }
-.db-lb-email { flex: 1; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.db-lb-score { font-weight: 600; color: var(--text-primary); }
+.db-lb-email { flex: 1; color: var(--theme-dash-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.db-lb-score { font-weight: 600; color: var(--theme-dash-text); }
 
 /* =====================================================
    JACKPOT CARD
    ===================================================== */
 .db-jackpot-card {
   background: linear-gradient(135deg, #1e293b, #0f172a);
-  border-radius: var(--radius);
-  padding: 24px;
-  margin-bottom: 20px;
-  color: white;
-  box-shadow: 0 0 28px rgba(250,204,21,0.18);
-  text-align: center;
+  border-radius: 16px; padding: 24px; margin-bottom: 20px;
+  color: white; box-shadow: 0 0 28px rgba(250,204,21,0.18); text-align: center;
 }
-
-.db-jackpot-card h3 { margin: 0 0 8px; font-size: 18px; }
-
+html.light-mode .db-jackpot-card {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+}
+.db-jackpot-card h3 { margin: 0 0 8px; font-size: 18px; color: white !important; }
 .db-jackpot-amount {
-  font-size: clamp(28px, 6vw, 44px);
-  font-weight: 800;
-  color: var(--yellow);
-  margin: 8px 0;
-  letter-spacing: -1px;
+  font-size: clamp(28px, 6vw, 44px); font-weight: 800;
+  color: #facc15; margin: 8px 0; letter-spacing: -1px;
 }
-
-.db-jackpot-sub {
-  font-size: 13px;
-  opacity: 0.75;
-  margin: 4px 0;
-}
-
-.db-jackpot-next {
-  margin-top: 6px;
-  font-size: 14px;
-  color: #a3e635;
-}
+.db-jackpot-sub  { font-size: 13px; opacity: 0.75; margin: 4px 0; }
+.db-jackpot-next { margin-top: 6px; font-size: 14px; color: #a3e635; }
 
 /* =====================================================
    OVERLAY (guest lock)
    ===================================================== */
 .db-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255,255,255,0.65);
-  backdrop-filter: blur(3px);
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 15px;
-  color: #0f172a;
+  position: absolute; inset: 0;
+  display: flex; justify-content: center; align-items: center;
+  background: var(--theme-overlay-bg);
+  backdrop-filter: blur(3px); border-radius: 10px;
+  font-weight: 600; cursor: pointer; font-size: 15px;
+  color: var(--theme-overlay-text);
 }
 
 /* =====================================================
    LOADING SPINNER
    ===================================================== */
 .db-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  gap: 16px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 80vh; gap: 16px;
 }
-
 .db-spinner {
-  width: 48px;
-  height: 48px;
+  width: 48px; height: 48px;
   border: 4px solid rgba(34,197,94,0.2);
-  border-top-color: #22c55e;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  border-top-color: #22c55e; border-radius: 50%;
+  animation: db-spin 0.8s linear infinite;
 }
+@keyframes db-spin { to { transform: rotate(360deg); } }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* =====================================================
+   CHARITY GRID
+   ===================================================== */
+.charity-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 640px) { .charity-grid { grid-template-columns: 1fr 1fr; } }
 
 /* =====================================================
    MEDIA QUERIES
    ===================================================== */
-
-/* ---------- Tablet (481px – 768px) ---------- */
 @media (min-width: 481px) and (max-width: 768px) {
-  .db-content { padding: 20px 20px; }
-
+  .db-content { padding: 20px; }
   .db-hero { padding: 18px 20px; }
-
   .db-grid-2 { grid-template-columns: 1fr; }
 }
-
-/* ---------- Mobile (≤ 480px) ---------- */
 @media (max-width: 480px) {
   .db-content { padding: 14px 12px; }
-
-  .db-hero {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-  }
-
+  .db-hero { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; }
   .db-hero-badge { align-self: flex-start; }
-
   .db-grid-2 { grid-template-columns: 1fr; }
-
   .db-card { padding: 16px 14px; border-radius: 12px; }
-
   .db-jackpot-card { padding: 18px 14px; }
-
   .db-lb-email { font-size: 12px; }
-
-  .db-btn-primary,
-  .db-btn-secondary {
-    width: 100%;
-    text-align: center;
-  }
+  .db-btn-primary, .db-btn-secondary { width: 100%; text-align: center; }
 }
-
-/* =====================================================
-   CHARITY GRID – 2 cols desktop, 1 col mobile
-   ===================================================== */
-.charity-grid {
-  display: grid;
-  grid-template-columns: 1fr;   /* 1 column on mobile */
-  gap: 20px;
-}
-
-@media (min-width: 640px) {
-  .charity-grid {
-    grid-template-columns: 1fr 1fr;  /* 2 columns on desktop */
-  }
-}
-
-/* ---------- Large Desktop (> 1024px) ---------- */
 @media (min-width: 1024px) {
-  .db-content {
-    max-width: 1100px;
-    padding: 32px 40px;
-  }
-
+  .db-content { max-width: 1100px; padding: 32px 40px; }
   .db-grid-2 { grid-template-columns: 1fr 1fr; }
-
-  .charity-grid { grid-template-columns: 1fr 1fr; }  /* keep 2 cols */
+  .charity-grid { grid-template-columns: 1fr 1fr; }
 }

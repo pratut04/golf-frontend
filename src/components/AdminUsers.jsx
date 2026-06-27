@@ -25,11 +25,11 @@ function AdminUsers() {
 
   return (
     <div style={card}>
-      <h3>👥 User Management</h3>
+      <h3 style={{ color: "#f1f5f9" }}>👥 User Management</h3>
 
       {!loading && (
-        <p style={{ marginBottom: "10px" }}>
-          Total Users: <b>{users.length}</b>
+        <p style={{ marginBottom: "10px", color: "#e5e7eb" }}>
+          Total Users: <b style={{ color: "white" }}>{users.length}</b>
         </p>
       )}
 
@@ -74,14 +74,15 @@ const card = {
   padding: "15px",
   borderRadius: "10px",
   marginBottom: "20px",
-  color: "white"
+  color: "#e5e7eb"
 };
 
 const item = {
   padding: "6px 0",
-  borderBottom: "1px solid #333",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
   display: "flex",
-  alignItems: "center"
+  alignItems: "center",
+  color: "#e5e7eb"
 };
 
 

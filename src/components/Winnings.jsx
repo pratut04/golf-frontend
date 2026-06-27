@@ -49,38 +49,70 @@ function Winnings({ winnings }) {
   };
 
   return (
-    <div className="win-card db-card" style={{ color: "white", background: "#1e293b" }}>
-      <h3>🏆 Winnings</h3>
+    <div style={{
+      background: "#1e293b",
+      color: "#e5e7eb",
+      border: "1px solid rgba(255,255,255,0.1)",
+      padding: "20px",
+      borderRadius: "16px",
+      marginBottom: "20px"
+    }}>
+      <h3 style={{ margin: "0 0 14px 0", color: "#f1f5f9", fontSize: "18px", fontWeight: 700 }}>🏆 Winnings</h3>
 
       {winnings?.length > 0 ? (
         <>
-          <div className="win-stat-box">
+          <div style={{
+            background: "#334155",
+            color: "#e5e7eb",
+            border: "1px solid rgba(255,255,255,0.08)",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            marginTop: "10px",
+            fontSize: "14px"
+          }}>
             🎯 Total Wins: <b>{winnings.length}</b>
           </div>
 
-          <div className="win-stat-box">
+          <div style={{
+            background: "#334155",
+            color: "#e5e7eb",
+            border: "1px solid rgba(255,255,255,0.08)",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            marginTop: "10px",
+            fontSize: "14px"
+          }}>
             💰 Total Earnings:{" "}
             <b>₹{totalEarnings.toLocaleString()}</b>
           </div>
 
-          {/*  IMPROVED HISTORY */}
+          {/* HISTORY */}
           <div style={{ marginTop: "15px" }}>
-            <h4>📜 History</h4>
+            <h4 style={{ margin: "0 0 10px 0", color: "#f1f5f9", fontSize: "15px", fontWeight: 600 }}>📜 History</h4>
 
             {winnings.map((w, i) => (
-              <div key={i} className="win-history-card">
+              <div key={i} style={{
+                background: "#0f172a",
+                color: "#e5e7eb",
+                border: "1px solid rgba(255,255,255,0.08)",
+                padding: "12px 16px",
+                borderRadius: "8px",
+                marginTop: "10px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "12px"
+              }}>
 
                 {/* LEFT */}
                 <div>
-                  <p className="win-match-text">
+                  <p style={{ margin: 0, fontWeight: 700, color: "#f1f5f9", fontSize: "14px" }}>
                     {w.match_type === "5 Match 🏆" && "🏆 Jackpot Winner"}
                     {w.match_type === "4 Match 🔥" && "🔥 4 Match Winner"}
                     {w.match_type === "3 Match 🎉" && "🎉 3 Match Winner"}
                   </p>
-
-                  <p className="win-date-text">
+                  <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#94a3b8" }}>
                     {new Date(w.created_at).toLocaleString("en-IN", {
-
                       dateStyle: "medium",
                       timeStyle: "short"
                     })}
@@ -89,46 +121,26 @@ function Winnings({ winnings }) {
 
                 {/* RIGHT */}
                 <div style={{ textAlign: "right" }}>
-                  <p className="win-amount">
+                  <p style={{ margin: 0, fontWeight: 700, color: "#22c55e", fontSize: "15px" }}>
                     ₹{Number(w.amount || 0)}
                   </p>
-
-                  <p
-                    className="win-status"
-                    style={{
-                      color:
-                        w.status === "paid"
-                          ? "#22c55e"
-                          : "#facc15"
-                    }}
-                  >
+                  <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: w.status === "paid" ? "#22c55e" : "#facc15" }}>
                     {w.status === "paid" ? "✅ Paid" : "⏳ Pending"}
                   </p>
                   {w.proof && (
                     <img
                       src={w.proof}
                       alt="proof"
-                      style={{
-                        width: "80px",
-                        marginTop: "5px",
-                        borderRadius: "6px",
-                        cursor: "pointer"
-                      }}
-                      onClick={() => setPreview(w.proof)} />
+                      style={{ width: "80px", marginTop: "5px", borderRadius: "6px", cursor: "pointer" }}
+                      onClick={() => setPreview(w.proof)}
+                    />
                   )}
                   {w.proof ? (
-                    <p style={{ fontSize: "12px", color: "#22c55e", marginTop: "5px" }}>
-                      ✔ Proof uploaded
-                    </p>
+                    <p style={{ fontSize: "12px", color: "#22c55e", marginTop: "5px" }}>✔ Proof uploaded</p>
                   ) : uploadingId === w.id ? (
-                    <p style={{ fontSize: "12px", marginTop: "5px" }}>
-                      ⏳ Uploading...
-                    </p>
+                    <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "5px" }}>⏳ Uploading...</p>
                   ) : w.status === "pending" && (
-                    <input
-                      type="file"
-                      onChange={(e) => uploadProof(e.target.files[0], w.id)}
-                    />
+                    <input type="file" onChange={(e) => uploadProof(e.target.files[0], w.id)} />
                   )}
                 </div>
 
@@ -137,7 +149,7 @@ function Winnings({ winnings }) {
           </div>
         </>
       ) : (
-        <p style={{ opacity: 0.7 }}>
+        <p style={{ opacity: 0.7, color: "#e5e7eb", fontSize: "14px" }}>
           No winnings yet 😢
         </p>
       )}
@@ -150,7 +162,7 @@ function Winnings({ winnings }) {
             left: 0,
             width: "100%",
             height: "100%",
-            background: "rgba(0,0,0,0.8)", 
+            background: "rgba(0,0,0,0.8)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -160,7 +172,7 @@ function Winnings({ winnings }) {
           <img
             src={preview}
             alt="preview"
-            onClick={(e) => e.stopPropagation()} 
+            onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: "90%",
               maxHeight: "90%",

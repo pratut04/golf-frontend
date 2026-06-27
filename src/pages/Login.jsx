@@ -2,6 +2,27 @@ import React, { useState } from "react";
 import API from "../api/api";
 import { useNavigate } from "react-router-dom";
 
+const DEMO_ACCOUNTS = [
+  {
+    role: "Admin",
+    email: "secure@gmail.com",
+    password: "123456",
+    icon: "🛡️",
+    color: "#6366f1",
+    bg: "rgba(99, 102, 241, 0.10)",
+    border: "rgba(99, 102, 241, 0.30)",
+  },
+  {
+    role: "User",
+    email: "user2@gmail.com",
+    password: "123456",
+    icon: "👤",
+    color: "#22c55e",
+    bg: "rgba(34, 197, 94, 0.10)",
+    border: "rgba(34, 197, 94, 0.30)",
+  },
+];
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,11 +76,17 @@ function Login() {
 
   const handleKey = (e) => { if (e.key === "Enter") login(); };
 
+  const fillDemo = (account) => {
+    setEmail(account.email);
+    setPassword(account.password);
+    setMsg("");
+  };
+
   return (
     <div className="auth-page">
       <div className="auth-card">
         {/* Logo */}
-        <div style={{ fontSize: "36px", marginBottom: "8px" }}>🏌️</div>
+        <div className="auth-logo-wrap">🏌️</div>
         <h2>Welcome Back</h2>
         <p className="auth-subtitle">Sign in to your Golf account</p>
 
@@ -97,6 +124,35 @@ function Login() {
         </p>
 
         {msg && <p className={`auth-msg error`}>{msg}</p>}
+
+        {/* ── Demo Credentials ── */}
+        <div className="demo-creds-section">
+          <div className="demo-creds-label">
+            <span className="demo-creds-line" />
+            <span className="demo-creds-text">🎯 Demo Credentials</span>
+            <span className="demo-creds-line" />
+          </div>
+          <p className="demo-creds-hint">Click a card to auto-fill login</p>
+          <div className="demo-creds-grid">
+            {DEMO_ACCOUNTS.map((acc) => (
+              <button
+                key={acc.role}
+                className="demo-cred-card"
+                onClick={() => fillDemo(acc)}
+                style={{
+                  "--demo-color": acc.color,
+                  "--demo-bg": acc.bg,
+                  "--demo-border": acc.border,
+                }}
+              >
+                <span className="demo-cred-icon">{acc.icon}</span>
+                <span className="demo-cred-role">{acc.role}</span>
+                <span className="demo-cred-email">{acc.email}</span>
+                <span className="demo-cred-pw">🔑 {acc.password}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

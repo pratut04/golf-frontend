@@ -87,7 +87,7 @@ function CharityList({ charities, selectCharity, selectedId }) {
 
 
   return (
-    <div style={card}>
+    <div className="charity-section-card">
       {/*  Main Message */}
       <div
         style={{
@@ -171,11 +171,11 @@ function CharityList({ charities, selectCharity, selectedId }) {
             return (
               <div
                 key={c.id}
+                className="charity-item-card"
                 style={{
-                  ...item,
                   border: isSelected
                     ? "2px solid #22c55e"
-                    : "1px solid #e2e8f0",
+                    : "1px solid var(--theme-card-border)",
                   transform: isSelected ? "scale(1.02)" : "scale(1)"
                 }}
               >
@@ -235,12 +235,12 @@ function CharityList({ charities, selectCharity, selectedId }) {
                   )}
                 </div>
                 {/* NAME */}
-                <h4 style={title}>
+                <h4 style={{ marginBottom: "5px", fontSize: "16px", fontWeight: "600", color: "var(--theme-text)" }}>
                   #{index + 1} {c.name}
                 </h4>
 
                 {/* DESCRIPTION */}
-                <p style={desc}>
+                <p style={{ fontSize: "13px", color: "var(--theme-text-muted)", marginBottom: "10px", minHeight: "35px" }}>
                   {c.description || "Helping people in need ❤️"}
                 </p>
 
@@ -314,26 +314,11 @@ export default CharityList;
 //  STYLES
 //
 
-const card = {
-  background: "#1e293b",
-  padding: "20px",
-  borderRadius: "12px",
-  marginBottom: "20px"
-};
-
+// Style objects (layout/sizing only – colors handled by CSS)
 const grid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
   gap: "15px"
-};
-
-const item = {
-  background: "white",
-  padding: "15px",
-  borderRadius: "12px",
-  textAlign: "center",
-  transition: "0.2s",
-  boxShadow: "0 6px 15px rgba(0,0,0,0.08)"
 };
 
 const image = {
@@ -342,20 +327,6 @@ const image = {
   borderRadius: "10px",
   objectFit: "cover",
   marginBottom: "10px"
-};
-
-const title = {
-  marginBottom: "5px",
-  fontSize: "16px",
-  fontWeight: "600",
-  color: "#0f172a"
-};
-
-const desc = {
-  fontSize: "13px",
-  color: "#64748b",
-  marginBottom: "10px",
-  minHeight: "35px"
 };
 
 const btn = {

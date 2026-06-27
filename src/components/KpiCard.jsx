@@ -75,7 +75,7 @@ function KpiCard({
               warning ? "#d97706" :
                 title === "Charity Donations" ? "#ec4899" :  
                   highlight ? "#fff" :
-                    "#0f172a"
+                    "var(--theme-admin-text, #0f172a)"
         }}
       >
         {isCurrency ? "₹" : ""}
@@ -91,19 +91,21 @@ export default KpiCard;
 //  STYLES
 //
 
+// Style objects
 const card = {
   position: "relative",
   width: "100%",
   padding: "20px",
   borderRadius: "16px",
-  background: "#ffffff",
-  border: "1px solid #e5e7eb",
+  background: "var(--theme-admin-card, #ffffff)",
+  border: "1px solid var(--theme-admin-border, #e5e7eb)",
   boxShadow: "0 6px 16px rgba(0,0,0,0.04)",
   transition: "all 0.25s ease",
 };
 const highlightCard = {
   background: "linear-gradient(135deg, #6366f1, #4f46e5)",
   color: "white",
+  border: "none",
 };
 
 const iconWrap = {

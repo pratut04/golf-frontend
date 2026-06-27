@@ -9,7 +9,7 @@ function AdminWinnings() {
 
     return (
         <div style={card}>
-            <h3>💰 Winnings</h3>
+            <h3 style={{ color: "#f1f5f9" }}>💰 Winnings</h3>
 
             {winnings?.length > 0 ? (
                 winnings.map((w) => (
@@ -22,11 +22,11 @@ function AdminWinnings() {
                                 {w.match_type}
                             </small>
 
-                            <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                            <div style={{ fontSize: "12px", color: "#94a3b8" }}>
                                 📅 {new Date(w.draw_date).toLocaleDateString("en-IN")}
                             </div>
 
-                            <div style={{ fontWeight: "600" }}>
+                            <div style={{ fontWeight: "600", color: "#e5e7eb" }}>
                                 ₹{Number(w.amount).toLocaleString()}
                             </div>
                         </div>
@@ -103,17 +103,19 @@ export default AdminWinnings;
 
 //  STYLES
 const card = {
-    background: "#ffffff",
+    background: "#1e293b",
     padding: "22px",
     borderRadius: "16px",
-    border: "1px solid #e2e8f0",
+    border: "1px solid rgba(255,255,255,0.08)",
+    color: "#e5e7eb",
 };
 
 const row = {
     display: "flex",
     justifyContent: "space-between",
     padding: "12px 0",
-    borderBottom: "1px solid #e2e8f0",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    color: "#e5e7eb",
 };
 
 const btn = {

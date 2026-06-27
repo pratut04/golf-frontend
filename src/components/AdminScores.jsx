@@ -33,7 +33,7 @@ function AdminScores() {
 
   return (
     <div style={card}>
-      <h3>🏆 Score Management</h3>
+      <h3 style={{ color: "#f1f5f9" }}>🏆 Score Management</h3>
 
       {loading ? (
         <p>Loading scores...</p>
@@ -47,7 +47,7 @@ function AdminScores() {
             <div key={s.id} style={item}>
               #{index + 1} {userMap[s.user_id] || "Unknown"} → {s.score}
               <br />
-              <small>
+              <small style={{ color: "#94a3b8" }}>
                 {s.created_at
                   ? new Date(s.created_at).toLocaleDateString()
                   : "No date"}
@@ -67,10 +67,11 @@ const card = {
   padding: "15px",
   borderRadius: "10px",
   marginBottom: "20px",
-  color: "white"
+  color: "#e5e7eb"
 };
 
 const item = {
   padding: "6px 0",
-  borderBottom: "1px solid #333"
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  color: "#e5e7eb"
 };

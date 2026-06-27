@@ -75,7 +75,7 @@ function Subscription() {
   const yearlyActive  = subscriptionStatus === "active" && subscriptionType === "yearly";
 
   return (
-    <div style={{ background: "linear-gradient(135deg, #0f172a, #020617)", minHeight: "100vh" }}>
+    <div className="sub-wrapper">
       <Navbar />
 
       <div className="sub-page" style={{ background: "transparent" }}>

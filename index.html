@@ -4,6 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Golf App</title>
+  <!-- Unregister any stale service workers (leftover from CRA) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (var registration of registrations) {
+          registration.unregister();
+          console.log('[SW] Unregistered stale service worker:', registration.scope);
+        }
+      });
+    }
+  </script>
+
+  <!-- Prevent flash of wrong theme: apply saved theme class before paint -->
+  <script>
+    (function() {
+      var saved = localStorage.getItem('theme');
+      var isDark = saved ? saved === 'dark' : true;
+      document.documentElement.classList.add(isDark ? 'dark-mode' : 'light-mode');
+    })();
+  </script>
 </head>
 
 <body>

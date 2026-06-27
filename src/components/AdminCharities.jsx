@@ -183,7 +183,7 @@ function AdminCharities() {
   //console.log("Is File", images[0] instanceof File);
   return (
     <div style={card}>
-      <h3>❤️ Charity Management</h3>
+      <h3 style={{ color: "#f1f5f9" }}>❤️ Charity Management</h3>
 
       {/* ADD FORM */}
       <div style={{ marginBottom: "15px" }}>
@@ -522,7 +522,7 @@ const card = {
   background: "#1e293b",
   padding: "15px",
   borderRadius: "10px",
-  color: "white"
+  color: "#e5e7eb"
 };
 
 const input = {
@@ -547,7 +547,8 @@ const item = {
   justifyContent: "space-between",
   alignItems: "center",
   padding: "12px",
-  borderBottom: "1px solid #333"
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  color: "#e5e7eb"
 };
 
 const leftBox = {
@@ -571,7 +572,8 @@ const imageStyle = {
 
 const descText = {
   fontSize: "12px",
-  opacity: 0.7
+  opacity: 0.7,
+  color: "#e5e7eb"
 };
 
 const countBadge = {

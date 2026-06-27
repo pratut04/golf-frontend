@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 import "./Navbar.css";
 
 function Navbar() {
   const navigate = useNavigate();
   const email = localStorage.getItem("email");
   const [menuOpen, setMenuOpen] = useState(false);
+  const { dark, toggle } = useTheme();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -69,6 +71,16 @@ function Navbar() {
             Admin
           </button>
         )}
+
+        {/* Night Mode Toggle */}
+        <button
+          className="nav-btn theme-toggle-btn"
+          onClick={() => { toggle(); closeMenu(); }}
+          aria-label="Toggle night mode"
+          title={dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {dark ? "☀️ Light" : "🌙 Dark"}
+        </button>
 
         <button className="nav-btn-logout" onClick={logout}>
           Logout

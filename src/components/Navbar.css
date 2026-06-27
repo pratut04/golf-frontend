@@ -1,5 +1,6 @@
 /* =========================================================
-   Navbar.css – Responsive Navbar with hamburger for mobile
+   Navbar.css – Theme-aware navbar (dark + light mode)
+   All colors use CSS variables from global.css
    ========================================================= */
 
 .navbar {
@@ -7,20 +8,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 24px;
-  background: rgba(2, 6, 23, 0.92);
+  background: var(--theme-navbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: #e5e7eb;
+  border-bottom: 1px solid var(--theme-navbar-border);
+  color: var(--theme-navbar-text);
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .navbar-brand {
   font-size: 20px;
   font-weight: 800;
-  color: #22c55e;
+  color: var(--green);
   letter-spacing: -0.5px;
   user-select: none;
 }
@@ -34,20 +36,19 @@
 
 .nav-btn {
   background: transparent;
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--theme-navbar-text);
+  border: 1px solid var(--theme-navbar-border);
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
   font-family: 'Inter', sans-serif;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
-
-.nav-btn:hover {
-  background: #1e293b;
-}
+html.dark-mode .nav-btn:hover,
+:root .nav-btn:hover { background: #1e293b; color: #f1f5f9; }
+html.light-mode .nav-btn:hover  { background: #e2e8f0; color: #0f172a; }
 
 .nav-btn-logout {
   background: #ef4444;
@@ -62,10 +63,9 @@
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
   transition: opacity 0.2s ease;
 }
-
 .nav-btn-logout:hover { opacity: 0.85; }
 
-/* ---------- Hamburger button (hidden on desktop) ---------- */
+/* ---------- Hamburger button ---------- */
 .navbar-hamburger {
   display: none;
   flex-direction: column;
@@ -77,54 +77,50 @@
   border: none;
   padding: 0;
 }
-
 .navbar-hamburger span {
   display: block;
   height: 3px;
-  background: #e2e8f0;
+  background: var(--theme-navbar-text);
   border-radius: 2px;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
-
-/* Animate hamburger → X */
-.navbar-hamburger.open span:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-}
-.navbar-hamburger.open span:nth-child(2) {
-  opacity: 0;
-}
-.navbar-hamburger.open span:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
-}
+.navbar-hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.navbar-hamburger.open span:nth-child(2) { opacity: 0; }
+.navbar-hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
 /* ---------- Mobile drawer ---------- */
 @media (max-width: 640px) {
-  .navbar {
-    flex-wrap: wrap;
-    padding: 12px 16px;
-  }
+  .navbar { flex-wrap: wrap; padding: 12px 16px; }
+  .navbar-hamburger { display: flex; }
+  .navbar-links { display: none; flex-direction: column; align-items: stretch; gap: 8px; width: 100%; padding-top: 12px; }
+  .navbar-links.open { display: flex; }
+  .nav-btn, .nav-btn-logout { width: 100%; text-align: center; padding: 11px 16px; }
+}
 
-  .navbar-hamburger {
-    display: flex;
-  }
-
-  .navbar-links {
-    display: none;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    width: 100%;
-    padding-top: 12px;
-  }
-
-  .navbar-links.open {
-    display: flex;
-  }
-
-  .nav-btn,
-  .nav-btn-logout {
-    width: 100%;
-    text-align: center;
-    padding: 11px 16px;
-  }
+/* ---------- Theme toggle button ---------- */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  color: #fbbf24;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.theme-toggle-btn:hover {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: #fbbf24;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.25);
+  transform: translateY(-1px);
+}
+html.light-mode .theme-toggle-btn {
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #6366f1;
+}
+html.light-mode .theme-toggle-btn:hover {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
 }
