@@ -28,6 +28,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+  const [waking, setWaking] = useState(false);
 
   const navigate = useNavigate();
 
@@ -36,17 +37,17 @@ function Login() {
     if (!email || !password) { setMsg("Enter email and password"); return; }
 
     setLoading(true);
+    setWaking(false);
     setMsg("");
 
+    // Show "waking up" message after 2s if still waiting (Render cold start)
+    const wakingTimer = setTimeout(() => setWaking(true), 2000);
+
     try {
-      await fetch("https://golf-backend-new.onrender.com");
-      let res;
-      try {
-        res = await API.post("/login", { email: email.trim(), password: password.trim() });
-      } catch (err) {
-        await new Promise(r => setTimeout(r, 5000));
-        res = await API.post("/login", { email: email.trim(), password: password.trim() });
-      }
+      const res = await API.post("/login", { email: email.trim(), password: password.trim() });
+
+      clearTimeout(wakingTimer);
+      setWaking(false);
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.user.id);
@@ -62,7 +63,9 @@ function Login() {
         else { navigate("/dashboard"); }
       }
     } catch (err) {
-      setMsg(err.response?.data?.message || "Server not responding. Try again.");
+      clearTimeout(wakingTimer);
+      setWaking(false);
+      setMsg(err.response?.data?.message || "Server not responding. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -114,6 +117,12 @@ function Login() {
           {loading && <span className="spinner" />}
           {loading ? "Logging in…" : "Login"}
         </button>
+
+        {waking && (
+          <p className="auth-msg" style={{ color: "#f59e0b", fontSize: "13px", textAlign: "center", marginTop: "8px" }}>
+            ⏳ Waking up server… this may take up to 30 seconds on first load.
+          </p>
+        )}
 
         <button className="auth-btn-secondary" onClick={skipLogin}>
           👁 Continue as Guest

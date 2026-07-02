@@ -20,6 +20,7 @@ function Dashboard() {
   const [basePool, setBasePool] = useState(0);
   const [refresh, setRefresh] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [serverWaking, setServerWaking] = useState(false);
 
   useEffect(() => {
     if (data?.user?.charity_id) {
@@ -49,17 +50,26 @@ function Dashboard() {
         return;
       }
 
+      // Show "waking up" hint after 2s if still loading
+      const wakingTimer = setTimeout(() => setServerWaking(true), 2000);
+
       if (isGuest) {
         setSubscriptionStatus("inactive");
-        loadData();
+        await loadData();
+        clearTimeout(wakingTimer);
+        setServerWaking(false);
         return;
       }
 
       try {
         const res = await API.post("/check-subscription");
         setSubscriptionStatus(res.data.status);
-        loadData();
+        await loadData();
+        clearTimeout(wakingTimer);
+        setServerWaking(false);
       } catch (err) {
+        clearTimeout(wakingTimer);
+        setServerWaking(false);
         showToast(
           "error",
           err.response?.data?.message || "Failed to verify subscription"
@@ -161,6 +171,11 @@ function Dashboard() {
           <p style={{ color: "#64748b", fontFamily: "Inter, sans-serif" }}>
             Loading your dashboard…
           </p>
+          {serverWaking && (
+            <p style={{ color: "#f59e0b", fontSize: "13px", marginTop: "8px", fontFamily: "Inter, sans-serif" }}>
+              ⏳ Waking up server… may take up to 30s on first load
+            </p>
+          )}
         </div>
       </div>
     );
